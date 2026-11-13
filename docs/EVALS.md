@@ -25,9 +25,19 @@ been run.
 
 Routes come from `docs/SPEC.md`. Viewports: 390, 768, 1440 px.
 
+Each cell is checked against the acceptance list for that route in
+`docs/SPEC.md`, section 4. Formatting rules FMT-01 to FMT-09 become unit tests.
+
 | Route | Structure | Function | Data | Layout 390 | Layout 768 | Layout 1440 | Robustness | A11y |
 |---|---|---|---|---|---|---|---|---|
-| (filled in from the spec) | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/polymarket` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/kalshi` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/account/[id]` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/battle` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/api-docs` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/submit` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/terms` | not run | not run | not run | not run | not run | not run | not run | not run |
 
 ## Rerun commands
 

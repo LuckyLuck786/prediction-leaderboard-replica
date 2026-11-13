@@ -76,6 +76,22 @@ their owners. Every page carries a disclaimer.
 repository is published for evaluation only. Template-derived portions stay
 under MIT; the text is in `THIRD_PARTY_NOTICES.md`.
 
+### D-009 Observe politely, and only what a visitor sees
+
+`robots.txt` and the terms were read before any page visit. Each route was
+loaded once. Response shapes were read by repeating, once each, the requests
+the pages themselves make, well inside the stated rate limit. A few of those
+requests go to endpoints outside the public API reference; they were read to
+understand the pages, and whether the replica may depend on them is an open
+question for the owner (spec Q-02). Raw captures are kept out of the
+repository.
+
+### D-010 The spec describes, it does not copy
+
+`docs/SPEC.md` records structure, measurements and behavior in our own words.
+It contains no markup, styles or copy text from the source, because the
+source's terms protect its design, code and original content.
+
 ## Open items
 
 - `next.config.ts` still sets `output: "standalone"`, which existed for the
@@ -86,3 +102,6 @@ under MIT; the text is in `THIRD_PARTY_NOTICES.md`.
 - Template files still present, pending the owner's decision: `CHANGELOG.md`,
   `CONTRIBUTING.md`, `SECURITY.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
   `.github/copilot-setup-steps.yml`.
+- Open questions from the observation step are in `docs/SPEC.md`, section 8
+  (data source, undocumented endpoints, avatars, source-specific features,
+  privacy page).
