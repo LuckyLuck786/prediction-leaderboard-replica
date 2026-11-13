@@ -47,3 +47,15 @@ next-env.d.ts
 
 # Local temp files
 temp/
+
+# Raw captures of the source site: research notes, screenshots, extracted assets.
+# They stay on the local machine and are never pushed (see CLAUDE.md, hard rules).
+docs/research/
+docs/design-references/
+public/sites/
+
+# Private planning notes
+MASTER_PROMPT.md
+
+# Knowledge graph output (graphify)
+graphify-out/
