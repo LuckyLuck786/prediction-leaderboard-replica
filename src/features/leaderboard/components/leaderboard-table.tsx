@@ -19,6 +19,7 @@ import {
   formatWinRate,
 } from "../format";
 import {
+  EXTRA_COLUMN_LABELS,
   PLATFORM_NAMES,
   SHARPE_HEADINGS,
   type ExtraColumn,
@@ -40,9 +41,19 @@ const EXTRA_COLUMN_DEFS: Record<
     heading: (period) => SHARPE_HEADINGS[period],
     cell: (trader) => formatSharpe(trader.sharpe),
   },
-  winRate: { heading: () => "Win%", cell: (trader) => formatWinRate(trader.winRate) },
-  roi: { heading: () => "ROI", cell: (trader) => formatRoi(trader.roi) },
+  winRate: {
+    heading: () => EXTRA_COLUMN_LABELS.winRate,
+    cell: (trader) => formatWinRate(trader.winRate),
+  },
+  roi: { heading: () => EXTRA_COLUMN_LABELS.roi, cell: (trader) => formatRoi(trader.roi) },
 };
+
+/**
+ * HOME-10. Optional columns are a desktop feature: their toggles are hidden
+ * below 640 px, so the columns are too. Otherwise a column switched on at
+ * desktop width would be stuck on a narrow screen with no way to remove it.
+ */
+const EXTRA_COLUMN_VISIBILITY = "hidden sm:table-cell";
 
 const SORT_ARROWS = { asc: "↓", desc: "↑" } as const;
 const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
@@ -136,15 +147,19 @@ function DayMoverLine({ trader }: { trader: Trader }) {
       className="flex items-center justify-end gap-1 text-[10px] leading-5 font-normal text-muted-foreground sm:text-xs sm:leading-4"
     >
       {mover.iconUrl ? (
-        // eslint-disable-next-line @next/next/no-img-element -- plain image on purpose: docs/DECISIONS.md, D-013
-        <img
-          src={mover.iconUrl}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
-          className="h-4 w-4 rounded-full object-cover"
-        />
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- plain image on purpose: docs/DECISIONS.md, D-013 */}
+          <img
+            src={mover.iconUrl}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            referrerPolicy="no-referrer"
+            className="h-4 w-4 rounded-full object-cover"
+          />
+          {/* The picture replaces the label on screen; keep the label for screen readers. */}
+          <span className="sr-only">{mover.label}</span>
+        </>
       ) : (
         <span className="max-w-[80px] truncate sm:max-w-[120px]">{mover.label}</span>
       )}
@@ -208,7 +223,7 @@ export function LeaderboardTable({
               sortKey={column}
               sort={sort}
               onSort={onSort}
-              className="text-center text-sm sm:text-lg"
+              className={cn("text-center text-sm sm:text-lg", EXTRA_COLUMN_VISIBILITY)}
             >
               {EXTRA_COLUMN_DEFS[column].heading(period)}
             </SortableHeader>
@@ -283,7 +298,10 @@ export function LeaderboardTable({
                 </span>
               </td>
               {extraColumns.map((column) => (
-                <td key={column} className="p-1 text-center text-sm sm:p-2 sm:text-lg">
+                <td
+                  key={column}
+                  className={cn("p-1 text-center text-sm sm:p-2 sm:text-lg", EXTRA_COLUMN_VISIBILITY)}
+                >
                   {EXTRA_COLUMN_DEFS[column].cell(trader)}
                 </td>
               ))}

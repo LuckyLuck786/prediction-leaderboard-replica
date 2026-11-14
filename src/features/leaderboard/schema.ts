@@ -143,10 +143,15 @@ export function parseLeaderboard(
   }
 
   const traders: Trader[] = [];
+  // The id is the profile route and the row key, so it must be unique. A
+  // second entry with an id already seen is dropped and counted.
+  const seenIds = new Set<string>();
   for (const candidate of envelope.data.traders) {
     const raw = rawTraderSchema.safeParse(candidate);
     const trader = raw.success ? toTrader(raw.data, period) : null;
-    if (trader) traders.push(trader);
+    if (!trader || seenIds.has(trader.id)) continue;
+    seenIds.add(trader.id);
+    traders.push(trader);
   }
 
   const rejectedCount = envelope.data.traders.length - traders.length;

@@ -73,6 +73,8 @@ describe("formatMoverAmount (FMT-03)", () => {
     [999.6, "+$1K"],
     [1250000, "+$1.3M"],
     [0, "+$0"],
+    [-0.3, "+$0"], // a loss that rounds to nothing is not "-$0"
+    [-0.5, "-$1"],
   ])("%d -> %s", (value, expected) => {
     expect(formatMoverAmount(value)).toBe(expected);
   });
@@ -151,6 +153,9 @@ describe("initialsOf", () => {
     ["Kenobi", "KE"],
     ["0xcf19c420814435ffb1c459588208ed23a7ee6402", "CF"],
     ["...", "?"],
+    ["𝔐ax Power", "𝔐P"], // a letter outside the basic plane is not cut in half
+    ["𝔐ax", "𝔐A"],
+    ["Z", "Z"],
   ])("%s -> %s", (name, expected) => {
     expect(initialsOf(name)).toBe(expected);
   });

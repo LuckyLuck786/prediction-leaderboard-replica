@@ -17,7 +17,7 @@ export function LeaderboardView({
   description,
   boards,
   dailyProfit,
-  snapshotCapturedAt,
+  snapshot,
   initialPlatform = "all",
 }: {
   heading: string;
@@ -26,7 +26,11 @@ export function LeaderboardView({
   /** Combined profit of all tracked traders today, in dollars. */
   dailyProfit: number;
   /** Set when the page shows the saved snapshot rather than live data. */
-  snapshotCapturedAt: string | null;
+  snapshot: {
+    capturedAt: string;
+    /** Traders upstream listed per period; the snapshot holds fewer. */
+    upstreamTotals: Record<LeaderboardPeriod, number>;
+  } | null;
   initialPlatform?: PlatformFilter;
 }) {
   const [state, dispatch] = useReducer(reduceLeaderboard, initialPlatform, createInitialState);
@@ -65,9 +69,11 @@ export function LeaderboardView({
         </div>
       </header>
 
-      {snapshotCapturedAt ? (
+      {snapshot ? (
         <p role="status" className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm">
-          Saved snapshot from {formatStamp(snapshotCapturedAt, "UTC")} UTC. This is not live data.
+          Saved snapshot from {formatStamp(snapshot.capturedAt, "UTC")} UTC. It holds{" "}
+          {board.traders.length} of the {snapshot.upstreamTotals[state.period]} traders listed
+          for this period: the best and the worst by P&amp;L. This is not live data.
         </p>
       ) : null}
 

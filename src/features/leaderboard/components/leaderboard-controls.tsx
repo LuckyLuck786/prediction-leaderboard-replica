@@ -7,23 +7,27 @@ import { cn } from "@/lib/utils";
 
 import {
   EXTRA_COLUMNS,
+  EXTRA_COLUMN_LABELS,
   FILTERABLE_PLATFORMS,
   MIN_DAILY_MOVE_USD,
   PERIOD_BUTTONS,
   PLATFORM_NAMES,
+  SCORE_WEIGHTS,
   type ExtraColumn,
 } from "../model";
 import type { LeaderboardAction, LeaderboardState } from "../state";
 import { PlatformBadge } from "./platform-badge";
 
-const EXTRA_COLUMN_BUTTONS: Record<ExtraColumn, { label: string; title: string }> = {
-  sharpe: { label: "Sharpe", title: "Sharpe ratio for the selected period" },
-  winRate: { label: "Win%", title: "Share of days that ended in profit" },
-  roi: {
-    label: "ROI",
-    title: "All-time Polymarket profit divided by everything staked. Deposits do not affect it.",
-  },
+/** Tooltips. The ROI definition is the one given in the upstream API reference. */
+const EXTRA_COLUMN_TITLES: Record<ExtraColumn, string> = {
+  sharpe: "Sharpe ratio for the selected period",
+  winRate: "Share of days that ended in profit",
+  roi: "Polymarket traders only: all-time profit divided by everything staked. Deposits do not affect it.",
 };
+
+const SCORE_LEGEND = `Score blends ${new Intl.ListFormat("en-GB", {
+  type: "conjunction",
+}).format(SCORE_WEIGHTS.map((weight) => `${weight.part} ${weight.percent}%`))}.`;
 
 // The source draws no border on its chips, so sizes match only without one.
 const CHIP_ON = "bg-primary text-primary-foreground";
@@ -85,7 +89,7 @@ export function LeaderboardControls({
           aria-label="Find a trader by name or wallet"
           className="h-[30px] w-full border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-ring sm:w-48"
         />
-        <p aria-live="polite" className="text-sm">
+        <p className="text-sm">
           {shownCount} of {totalCount} traders
         </p>
         <div className="sm:ml-auto">
@@ -200,14 +204,14 @@ export function LeaderboardControls({
               <Chip
                 key={column}
                 active={extraColumns.includes(column)}
-                title={EXTRA_COLUMN_BUTTONS[column].title}
+                title={EXTRA_COLUMN_TITLES[column]}
                 onClick={() => dispatch({ type: "toggleColumn", column })}
                 className={cn(
                   "h-6 text-xs sm:h-6 sm:text-xs",
                   !extraColumns.includes(column) && "text-muted-foreground",
                 )}
               >
-                {EXTRA_COLUMN_BUTTONS[column].label}
+                {EXTRA_COLUMN_LABELS[column]}
               </Chip>
             ))}
           </div>
@@ -215,8 +219,7 @@ export function LeaderboardControls({
       </div>
 
       <p className="mt-3.5 text-[10px] text-muted-foreground sm:text-xs">
-        Score blends consistency 25%, returns 25%, win rate 20%, worst loss 15% and profit
-        factor 15%. Sharpe is return divided by volatility.
+        {SCORE_LEGEND} Sharpe is return divided by volatility.
       </p>
     </div>
   );

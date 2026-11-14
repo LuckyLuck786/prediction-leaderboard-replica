@@ -72,7 +72,9 @@ export function formatMoverAmount(value: number): string {
   if (amount >= ROUNDS_TO_MILLION) short = millions(amount);
   else if (amount >= ROUNDS_TO_THOUSAND) short = `${Math.round(amount / THOUSAND)}K`;
   else short = String(Math.round(amount));
-  return `${value < 0 ? "-" : "+"}$${short}`;
+  // A loss that rounds to nothing is shown as "+$0", never "-$0".
+  const isLoss = value < 0 && short !== "0";
+  return `${isLoss ? "-" : "+"}$${short}`;
 }
 
 /** FMT-06. Whole days between joining and the data timestamp: `755d`. */
@@ -120,8 +122,10 @@ export function formatRoi(roi: number | null): string {
 /** Up to two initials for the avatar fallback. */
 export function initialsOf(name: string): string {
   const cleaned = name.replace(/^0x/i, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
-  const words = cleaned.split(" ").filter(Boolean);
+  // Array.from splits by character, not by UTF-16 unit, so a letter outside
+  // the basic plane is never cut in half.
+  const words = cleaned.split(" ").filter(Boolean).map((word) => Array.from(word));
   const letters =
-    words.length > 1 ? words[0][0] + words[1][0] : cleaned.slice(0, 2);
-  return letters.toUpperCase() || "?";
+    words.length > 1 ? [words[0][0], words[1][0]] : (words[0] ?? []).slice(0, 2);
+  return letters.join("").toUpperCase() || "?";
 }

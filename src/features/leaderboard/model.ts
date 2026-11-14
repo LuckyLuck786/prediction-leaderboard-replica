@@ -84,6 +84,22 @@ export const SHARPE_HEADINGS: Record<LeaderboardPeriod, string> = {
 export const EXTRA_COLUMNS = ["sharpe", "winRate", "roi"] as const;
 export type ExtraColumn = (typeof EXTRA_COLUMNS)[number];
 
+/** Labels of the optional columns: the toggle chips and, for two of them, the headings. */
+export const EXTRA_COLUMN_LABELS: Record<ExtraColumn, string> = {
+  sharpe: "Sharpe",
+  winRate: "Win%",
+  roi: "ROI",
+};
+
+/** How the score is weighted, as published in the upstream API reference. */
+export const SCORE_WEIGHTS = [
+  { part: "consistency", percent: 25 },
+  { part: "returns", percent: 25 },
+  { part: "win rate", percent: 20 },
+  { part: "worst loss", percent: 15 },
+  { part: "profit factor", percent: 15 },
+] as const;
+
 export const SORT_KEYS = ["joined", "score", "sharpe", "winRate", "roi", "pnl"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 export type SortDirection = "asc" | "desc";

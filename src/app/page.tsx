@@ -14,7 +14,10 @@ export default function HomePage() {
           description="Who is ahead on Polymarket, Kalshi and Hyperliquid, ranked by profit and loss."
           boards={snapshot.boards}
           dailyProfit={snapshot.dailyProfit}
-          snapshotCapturedAt={snapshot.capturedAt}
+          snapshot={{
+            capturedAt: snapshot.capturedAt,
+            upstreamTotals: snapshot.upstreamTotals,
+          }}
         />
         <SiteFooter />
       </main>

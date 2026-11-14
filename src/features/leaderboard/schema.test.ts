@@ -4,7 +4,7 @@ import source from "@/upstream/source.json";
 
 import { LEADERBOARD_PERIODS } from "./model";
 import { parseLeaderboard } from "./schema";
-import { loadSnapshot } from "./snapshot";
+import { loadSnapshot, parseSnapshot } from "./snapshot";
 
 const validTrader = {
   rank: 1,
@@ -119,6 +119,14 @@ describe("parseLeaderboard", () => {
     expect(result.leaderboard.rejectedCount).toBe(4);
   });
 
+  it("keeps one row per trader id, dropping and counting repeats", () => {
+    const repeat = { ...validTrader, name: "Same wallet again", stats: { pnl: 1 } };
+    const result = parseLeaderboard(response([validTrader, repeat]), "1d");
+    if (!result.ok) throw new Error(result.error);
+    expect(result.leaderboard.traders.map((trader) => trader.name)).toEqual(["Someone"]);
+    expect(result.leaderboard.rejectedCount).toBe(1);
+  });
+
   it("fails when no trader survives", () => {
     const result = parseLeaderboard(response([{ nope: true }]), "1d");
     expect(result.ok).toBe(false);
@@ -165,6 +173,46 @@ describe("saved snapshot", () => {
 
   it("includes losses, so negative formatting is exercised", () => {
     expect(snapshot.boards["1d"].traders.some((trader) => trader.pnl < 0)).toBe(true);
+  });
+
+  it("has unique trader ids in every period", () => {
+    for (const period of LEADERBOARD_PERIODS) {
+      const ids = snapshot.boards[period].traders.map((trader) => trader.id);
+      expect(new Set(ids).size, period).toBe(ids.length);
+    }
+  });
+
+  it("records how many traders upstream listed, which is more than it keeps", () => {
+    for (const period of LEADERBOARD_PERIODS) {
+      expect(snapshot.upstreamTotals[period], period).toBeGreaterThanOrEqual(
+        snapshot.boards[period].traders.length,
+      );
+    }
+  });
+});
+
+describe("parseSnapshot", () => {
+  const period = { upstreamTotal: 1, ...response([validTrader]) };
+  const periods = Object.fromEntries(LEADERBOARD_PERIODS.map((name) => [name, period]));
+  const file = {
+    capturedAt: "2026-11-14T12:19:35.677Z",
+    dailyProfit: { raw: 371386 },
+    periods,
+  };
+
+  it("accepts a well-formed file", () => {
+    const parsed = parseSnapshot(file);
+    expect(parsed.dailyProfit).toBe(371386);
+    expect(parsed.upstreamTotals.all).toBe(1);
+  });
+
+  it.each([
+    ["no daily profit", { ...file, dailyProfit: {} }],
+    ["a bad capture date", { ...file, capturedAt: "recently" }],
+    ["a missing period", { ...file, periods: { ...periods, ytd: undefined } }],
+    ["a period without its upstream total", { ...file, periods: { ...periods, all: response([]) } }],
+  ])("refuses a file with %s", (_label, broken) => {
+    expect(() => parseSnapshot(broken)).toThrow(/Saved snapshot/);
   });
 });
 

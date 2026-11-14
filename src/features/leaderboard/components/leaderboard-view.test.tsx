@@ -50,7 +50,7 @@ function renderView(props: Partial<ComponentProps<typeof LeaderboardView>> = {})
       description="A board for tests."
       boards={makeBoards(traders)}
       dailyProfit={403821}
-      snapshotCapturedAt={null}
+      snapshot={null}
       {...props}
     />,
   );
@@ -177,9 +177,54 @@ describe("LeaderboardView", () => {
     expect(screen.queryByRole("status")).toBeNull();
     unmount();
 
-    renderView({ snapshotCapturedAt: "2026-11-14T12:19:35.677Z" });
+    renderView({
+      snapshot: {
+        capturedAt: "2026-11-14T12:19:35.677Z",
+        upstreamTotals: { "1d": 581, "30d": 652, ytd: 772, all: 788 },
+      },
+    });
     expect(screen.getByRole("status").textContent).toBe(
-      "Saved snapshot from 14 Nov, 12:19 UTC. This is not live data.",
+      `Saved snapshot from 14 Nov, 12:19 UTC. It holds ${TOTAL} of the 581 traders listed for this period: the best and the worst by P&L. This is not live data.`,
     );
+
+    // The disclosed total follows the selected period.
+    click("ALL");
+    expect(screen.getByRole("status").textContent).toContain(`${TOTAL} of the 788 traders`);
+  });
+
+  it("keeps optional columns off narrow screens, where their toggles are hidden (HOME-10)", () => {
+    renderView();
+    click("Win%");
+    // jsdom has no layout, so assert the responsive rule itself.
+    const heading = screen.getByRole("columnheader", { name: "Win%" });
+    expect(heading.className).toContain("hidden");
+    expect(heading.className).toContain("sm:table-cell");
+    const winRateCell = cellsOf(bodyRows()[0]).at(-2);
+    expect(winRateCell?.textContent).toBe("50%");
+    expect(winRateCell?.className).toContain("hidden");
+  });
+
+  it("shows the day's biggest mover in 1D only (HOME-17)", () => {
+    const moved = [
+      makeTrader({ id: "labelled", pnl: 3, dayMover: { label: "Politics", change: -11962, iconUrl: null } }),
+      makeTrader({
+        id: "pictured",
+        pnl: 2,
+        dayMover: { label: "Will it rain?", change: 8813.3, iconUrl: "https://example.com/i.png" },
+      }),
+    ];
+    renderView({ boards: makeBoards(moved) });
+    click("$5+");
+
+    const [labelled, pictured] = bodyRows().map((row) => cellsOf(row).at(-1));
+    expect(labelled?.textContent).toContain("Politics");
+    expect(labelled?.textContent).toContain("-$12K");
+    // With a picture, the label is still there for screen readers.
+    expect(pictured?.querySelector("img")?.getAttribute("src")).toBe("https://example.com/i.png");
+    expect(pictured?.querySelector(".sr-only")?.textContent).toBe("Will it rain?");
+    expect(pictured?.textContent).toContain("+$9K");
+
+    click("ALL");
+    expect(cellsOf(bodyRows()[0]).at(-1)?.textContent).not.toContain("Politics");
   });
 });
