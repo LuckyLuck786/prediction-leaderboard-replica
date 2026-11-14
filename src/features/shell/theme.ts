@@ -19,6 +19,22 @@ export const THEME_INIT_SCRIPT = `try {
 }`;
 
 /**
+ * Applies the saved theme to <html>. The head script does this before the
+ * first paint; this repeats it after React has mounted, because when React
+ * renders the root layout in the browser (it does on a 404 page) it resets
+ * the class on <html> to the server's dark default.
+ */
+export function applySavedTheme(): void {
+  let saved: string | null = null;
+  try {
+    saved = localStorage.getItem(THEME_STORAGE_KEY);
+  } catch (error) {
+    console.error("Could not read the saved theme; using the default.", error);
+  }
+  document.documentElement.classList.toggle(DARK_CLASS, saved !== "light");
+}
+
+/**
  * Switches the theme for this page view and tries to remember it. A browser
  * may block storage; the switch still works and the failure is reported.
  */

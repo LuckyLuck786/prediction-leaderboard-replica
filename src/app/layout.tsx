@@ -5,7 +5,8 @@ import {
   PRODUCT_DESCRIPTION,
   PRODUCT_NAME,
 } from "@/features/shell/brand";
-import { DARK_CLASS, THEME_INIT_SCRIPT } from "@/features/shell/theme";
+import { DARK_CLASS } from "@/features/shell/theme";
+import { ThemeScript } from "@/features/shell/theme-script";
 
 import "./globals.css";
 
@@ -32,13 +33,10 @@ export default function RootLayout({
     <html lang="en" className={`${DARK_CLASS} h-full antialiased`} suppressHydrationWarning>
       <head>
         {/*
-          A plain inline script in <head> runs while the HTML is parsed, before
-          the body exists, so a saved light theme never flashes dark.
-          next/script's beforeInteractive was tried and rejected: in the
-          production HTML it sits at the end of <body> and runs only after the
-          app's own scripts load (docs/DECISIONS.md, D-028).
+          An inline script in <head> runs while the HTML is parsed, before the
+          body exists, so a saved light theme never flashes dark (D-028).
         */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <ThemeScript />
       </head>
       <body className="min-h-full">{children}</body>
     </html>

@@ -2,7 +2,13 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DARK_CLASS, THEME_INIT_SCRIPT, THEME_STORAGE_KEY, toggleTheme } from "./theme";
+import {
+  DARK_CLASS,
+  THEME_INIT_SCRIPT,
+  THEME_STORAGE_KEY,
+  applySavedTheme,
+  toggleTheme,
+} from "./theme";
 
 const root = document.documentElement;
 const runInitScript = () => new Function(THEME_INIT_SCRIPT)();
@@ -37,6 +43,28 @@ describe("toggleTheme (TOK-04)", () => {
     expect(toggleTheme()).toBe("light");
     expect(root.classList.contains(DARK_CLASS)).toBe(false);
     expect(report).toHaveBeenCalledExactlyOnceWith(expect.stringContaining("theme"), blocked);
+  });
+});
+
+describe("applySavedTheme", () => {
+  it("restores a saved light theme after <html> was reset to dark", () => {
+    localStorage.setItem(THEME_STORAGE_KEY, "light");
+    root.className = DARK_CLASS;
+    applySavedTheme();
+    expect(root.classList.contains(DARK_CLASS)).toBe(false);
+  });
+
+  it("keeps dark when nothing is saved, and when storage is blocked", () => {
+    root.className = "";
+    applySavedTheme();
+    expect(root.classList.contains(DARK_CLASS)).toBe(true);
+
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("blocked");
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    applySavedTheme();
+    expect(root.classList.contains(DARK_CLASS)).toBe(true);
   });
 });
 
