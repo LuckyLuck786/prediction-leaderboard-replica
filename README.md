@@ -11,8 +11,9 @@ trader profiles and a platform comparison. The assignment was to replicate
 https://predicting.top/ using AI coding tools and to show how the result was
 verified.
 
-**Status: setup complete, no application code yet.** This section is updated
-as pages are built.
+**Status: the home page is built and runs on a saved snapshot of the data.**
+Live data, the platform pages and trader profiles come next. This section is
+updated as pages are built.
 
 ## What is deliberately different
 
@@ -40,12 +41,17 @@ Then open http://localhost:3000.
 ## Check it
 
 ```bash
-npm run check          # lint, typecheck, production build
+npm run check          # lint, typecheck, tests, asset check, production build
+npm run test           # unit and component tests only
+npm run check:assets   # no source-site files or names where they do not belong
 npm audit --omit=dev   # must report 0 vulnerabilities
 ```
 
-Test and eval commands are listed in [docs/EVALS.md](docs/EVALS.md) as they
-are added.
+Results and the measured comparison with the source are in
+[docs/EVALS.md](docs/EVALS.md).
+
+`npm run snapshot` refreshes the saved data snapshot from the upstream public
+API (five spaced requests).
 
 ## How it was built and verified
 

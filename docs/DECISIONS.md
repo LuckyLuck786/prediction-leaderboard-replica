@@ -130,9 +130,57 @@ page.
 Each phase is built on its own branch and fast-forwarded into `main` at the
 gate, after the owner's go.
 
+### D-017 System font, no web font
+
+The source uses the operating system's UI font and loads no font files. So do
+we: text metrics match the source exactly, and there is nothing to license or
+ship. The template's Geist font is gone.
+
+### D-018 Letter badges instead of platform logos
+
+The source shows the Polymarket, Kalshi, Hyperliquid and X logos. Those are
+other companies' trademarks and the hard rules forbid extracted icons, so each
+platform gets a small letter badge in our own colors.
+
+### D-019 Palette
+
+Warm neutrals in place of the source's pure greys: near-black `#141311` in the
+dark theme (the default, as on the source) and off-white `#f3f1ec` in the
+light theme. Gain, loss, score bands and platform accents keep their meaning
+but use our own shades. Every text color was checked for contrast against its
+background when chosen: at least 6:1 in the dark theme and at least 4.6:1 in
+the light theme. Automated checks follow in the evals phase.
+
+### D-020 Pages are marked noindex
+
+A look-alike demo should not compete with the original in search results.
+
+### D-021 The snapshot stores upstream objects as received
+
+`npm run snapshot` keeps the 50 best and 10 worst traders of each period,
+untouched. Live responses and the snapshot therefore go through the same
+schema, and a test fails if the committed snapshot stops matching it. The
+losers are kept on purpose so negative amounts are always on screen to check.
+
+### D-022 "Joined" is counted to the data timestamp
+
+The source counts days up to the visitor's clock. We count up to the
+timestamp of the data. For live data the two agree; for a snapshot ours is the
+honest number; and the server and the browser always render the same text.
+
+### D-023 Mirror what is rendered, not what the class names suggest
+
+The source's chips carry a border class but render no border. The replica
+follows the measured result. See BUG-001.
+
+### D-024 End-to-end tests wait for the data layer
+
+Playwright is added in the next phase, together with live data and error
+states, which are the flows worth driving end to end. Until then the layout is
+checked with a browser probe (see `docs/EVALS.md`) and behavior with component
+tests.
+
 ## Open items
 
 - `next.config.ts` still sets `output: "standalone"`, which existed for the
   removed Docker setup. Decide when the deployment is configured.
-- The CI workflow triggers on `master`; this repository uses `main`. Fix when
-  CI is extended.

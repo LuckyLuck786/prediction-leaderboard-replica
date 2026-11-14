@@ -387,6 +387,14 @@ and viewport, and each FMT rule into unit tests.
 - **DEV-06** Submit form is disabled (SUB-02).
 - **DEV-07** Footer credits the data source and links back, as its API terms
   ask.
+- **DEV-08** Letter badges in our own colors replace the platform and X logos,
+  which are trademarks (D-018).
+- **DEV-09** No "our traders" filter (D-014).
+- **DEV-10** Pages are marked noindex (D-020).
+- **DEV-11** "Joined" is counted to the data timestamp, not the visitor's
+  clock (D-022).
+- **DEV-12** Sortable headers are real buttons, so sorting works from the
+  keyboard. The source's headers respond to the mouse only.
 
 ## 8. Questions resolved by the owner (2026-11-14)
 

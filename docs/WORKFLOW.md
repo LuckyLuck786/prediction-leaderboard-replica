@@ -69,6 +69,32 @@ work happens. It describes what was done, not what was planned.
    promotion, not a comparison tool; profiles show no positions or trades.
    Open questions for the owner are listed at the end of the spec.
 
+### Phase 2: home page shell (2026-11-14)
+
+1. **Gate decisions applied first.** The owner answered the seven open
+   questions; they were written into `docs/DECISIONS.md` and the spec before
+   any code, the leftover template files were removed, and the setup branch
+   was fast-forwarded into `main`. Phase 2 got its own branch.
+2. **Framework docs before code.** The template warns that this Next.js
+   version differs from older ones, so the bundled upgrade guide and the
+   guides for metadata, icons and client components were read first. Current
+   Vitest configuration was looked up through the Context7 documentation
+   server rather than recalled.
+3. **Data before UI.** A script fetched a small snapshot from the documented
+   API. A Zod schema became the only door upstream data can come through.
+4. **Logic as pure functions with tests alongside:** formatters, filtering,
+   search, sorting and the view state. Formatter tests use the exact strings
+   seen on the source next to the raw API numbers they came from.
+5. **UI built from the spec IDs** (HOME-01 to HOME-21), with our own branding,
+   colors, copy and letter badges.
+6. **Measured comparison, then repair.** The layout probe that recorded the
+   source was run on the local page at 1024 and 390 px. It found three real
+   differences (BUG-001, BUG-002, BUG-004), which were fixed and measured
+   again until the numbers matched. The table is in `docs/EVALS.md`.
+7. **Checks that can fail.** A planted violation proved the asset check
+   fails; two hand-made mutations proved the tests catch regressions.
+8. **Small commits**, each preceded by a look at exactly what was staged.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -90,5 +116,11 @@ work happens. It describes what was done, not what was planned.
 | `ai-website-cloner-template` | Starting scaffold and the `clone-website` skill |
 | Claude Code built-in browser | Observing the source: structure, styles, interactions, network calls |
 | `curl` | `robots.txt`, agent reference and sitemap, one request each |
+| Context7 documentation server (MCP) | Current Vitest configuration docs |
+| Bundled Next.js docs in `node_modules` | Version 16 changes, metadata and icon conventions |
+| Vitest, Testing Library, jsdom | Unit and component tests |
+| Zod | Validating upstream data at the boundary |
+| Layout probe in the browser console | Measuring our page against the numbers recorded from the source |
+| Reviewer subagent | An independent review of the phase diff by an agent that did not write it |
 
 Later phases add to this log and this table as tools are actually used.

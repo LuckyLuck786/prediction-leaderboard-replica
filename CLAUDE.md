@@ -30,8 +30,10 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
    `src/components/sites/`; the skill suggests it for extracted SVGs, which
    rule 3 forbids.
 5. **The source site's name appears only in** `README.md`, `CLAUDE.md`,
-   `docs/`, the footer disclaimer and the asset check itself. A CI check
-   enforces rules 3 to 5.
+   `docs/`, `src/upstream/` (the API origin and the saved snapshot) and the
+   asset check itself. Application code reads the name from
+   `src/upstream/source.json`; the footer disclaimer and credit are built from
+   it. `npm run check:assets` enforces rules 3 to 5, locally and in CI.
 6. **Disclaimer on every page** and in the README: "Independent demo built for
    a hiring assignment. Not affiliated with predicting.top, Polymarket or
    Kalshi."
@@ -82,11 +84,15 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 - `npm ci --ignore-scripts` installs dependencies without running package
   install scripts.
 - `npm run dev` starts the dev server on http://localhost:3000.
-- `npm run check` runs lint, typecheck and a production build. It must pass
-  before every commit that touches code.
+- `npm run check` runs lint, typecheck, tests, the asset check and a
+  production build. It must pass before every commit that touches code.
+- `npm run test` runs unit and component tests (Vitest). Component tests opt
+  into jsdom with a `// @vitest-environment jsdom` first line.
+- `npm run check:assets` runs the asset check on its own.
+- `npm run snapshot` refreshes `src/upstream/snapshot/` from the upstream API.
 - `npm audit --omit=dev` must report 0 vulnerabilities.
 
-Test and eval commands are added here when the tools are added.
+End-to-end commands are added here when Playwright is added.
 
 ## Conventions
 
@@ -102,6 +108,13 @@ Test and eval commands are added here when the tools are added.
 - Design: structure, spacing and interactions follow the source. Our own
   branding choices (palette, fonts, copy) avoid Inter, Geist and Space
   Grotesk, emojis, invented testimonials and placeholder text.
+- Build from measurements, not from guesses. After building a slice, run the
+  same layout probe on the local page that recorded the source, and compare
+  the numbers before calling it done (see BUG-001, BUG-002, BUG-004).
+- An assumption the source did not let us confirm is named as an assumption
+  in a comment where it lives, and listed in `docs/EVALS.md`.
+- Upstream data is untrusted: only `schema.ts` turns it into app types, only
+  https links are rendered, and outbound links carry no referral parameters.
 
 ## Git
 
@@ -110,6 +123,7 @@ Test and eval commands are added here when the tools are added.
 - Commits written with AI help keep the `Co-Authored-By` trailer. This is a
   deliberate choice for this repository: it is honest evidence of the AI
   workflow.
+- Before every commit, look at exactly what is staged.
 - Never rewrite history. Never push, create the remote or deploy without an
   explicit go from the owner.
 
