@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   MISSING,
+  formatCount,
   formatDaysSince,
+  formatDrawdown,
+  formatProfileMoney,
   formatMoney,
   formatMoneyCompact,
   formatMoneyWhole,
@@ -77,6 +80,30 @@ describe("formatMoverAmount (FMT-03)", () => {
     [-0.5, "-$1"],
   ])("%d -> %s", (value, expected) => {
     expect(formatMoverAmount(value)).toBe(expected);
+  });
+});
+
+describe("formatProfileMoney (FMT-04)", () => {
+  it.each([
+    [1104963.4173, "+$1.10M"], // seen in a profile page title
+    [922199.661638, "+$922.2K"], // seen in a profile page title
+    [-629.49, "-$629"], // seen
+    [0.3, "+$0"],
+    [-0.3, "+$0"],
+  ])("%d -> %s", (value, expected) => {
+    expect(formatProfileMoney(value)).toBe(expected);
+  });
+});
+
+describe("formatDrawdown and formatCount", () => {
+  it("keeps one decimal on drawdown, as seen", () => {
+    expect(formatDrawdown(0.086)).toBe("8.6%");
+    expect(formatDrawdown(1)).toBe("100.0%");
+    expect(formatDrawdown(null)).toBe(MISSING);
+  });
+
+  it("separates thousands", () => {
+    expect(formatCount(11889)).toBe("11,889");
   });
 });
 

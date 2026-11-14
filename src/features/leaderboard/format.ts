@@ -26,6 +26,7 @@ const DOLLARS_AND_CENTS = new Intl.NumberFormat("en-US", {
 });
 
 const WHOLE_DOLLARS = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const COUNT_FORMAT = new Intl.NumberFormat("en-US");
 
 const STAMP_PARTS = {
   day: "numeric",
@@ -63,6 +64,30 @@ export function formatMoneyCompact(value: number): string {
       ? millions(amount)
       : `${Math.round(amount / THOUSAND)}k`;
   return value < 0 ? `$-${short}` : `+$${short}`;
+}
+
+/**
+ * FMT-04. Profile amounts: `+$1.10M`, `+$922.2K`, `-$629`. Seen in the
+ * source's profile page titles: two decimals for millions, one for thousands.
+ */
+export function formatProfileMoney(value: number): string {
+  const amount = Math.abs(value);
+  let short: string;
+  if (amount >= MILLION) short = `${(amount / MILLION).toFixed(2)}M`;
+  else if (amount >= THOUSAND) short = `${(amount / THOUSAND).toFixed(1)}K`;
+  else short = String(Math.round(amount));
+  const isLoss = value < 0 && short !== "0";
+  return `${isLoss ? "-" : "+"}$${short}`;
+}
+
+/** Whole number with thousands separators: `3,000`. */
+export function formatCount(value: number): string {
+  return COUNT_FORMAT.format(value);
+}
+
+/** Max drawdown with one decimal, as on the source: `8.6%`, `100.0%`. */
+export function formatDrawdown(fraction: number | null): string {
+  return fraction === null ? MISSING : `${(fraction * 100).toFixed(1)}%`;
 }
 
 /** FMT-03. Day-mover amounts: `+$52K`, `-$12K`, `+$699`. */
