@@ -28,12 +28,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // The inline script may remove the dark class before React hydrates.
+    // The theme script may remove the dark class before React hydrates.
     <html lang="en" className={`${DARK_CLASS} h-full antialiased`} suppressHydrationWarning>
-      <body className="min-h-full">
+      <head>
+        {/*
+          A plain inline script in <head> runs while the HTML is parsed, before
+          the body exists, so a saved light theme never flashes dark.
+          next/script's beforeInteractive was tried and rejected: in the
+          production HTML it sits at the end of <body> and runs only after the
+          app's own scripts load (docs/DECISIONS.md, D-028).
+        */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        {children}
-      </body>
+      </head>
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }

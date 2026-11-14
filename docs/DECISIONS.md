@@ -201,5 +201,19 @@ preview deployment. The Docker-only `output: "standalone"` setting is removed,
 and Node is pinned to `24.x` in `package.json` so local, CI and Vercel builds
 use the same major version. Hobby plan, no paid features.
 
+### D-028 Theme script lives in the head, as plain inline script
+
+The script that applies a saved light theme must run before the first paint.
+It now sits in `<head>`, where it runs while the HTML is parsed, before the
+body exists. `next/script` with `beforeInteractive` was tried and rejected:
+in the production HTML it was placed at the end of `<body>` and only queued,
+running after the app's own scripts load, which would flash the dark theme.
+
+The development console shows two kinds of errors that are not app defects:
+errors from Fast Refresh picking up a file halfway through an edit, and a
+React notice that it does not run scripts it renders in the browser, which
+happens only when Fast Refresh re-renders the root layout. A fresh page load
+in development and the production build both log no errors.
+
 ## Open items
 
