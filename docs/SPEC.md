@@ -388,22 +388,16 @@ and viewport, and each FMT rule into unit tests.
 - **DEV-07** Footer credits the data source and links back, as its API terms
   ask.
 
-## 8. Open questions for the owner
+## 8. Questions resolved by the owner (2026-11-14)
 
-- **Q-01 Data source.** The source API is documented, free, keyless and
-  rate-limited, and it already contains the computed values (score, sports
-  share, day mover, linked accounts, Kalshi history) that the platforms' own
-  APIs do not provide. Recommendation: use it.
-- **Q-02 Undocumented endpoints.** The Polymarket profile chart and the battle
-  page rely on endpoints outside the public reference. Options: use only
-  documented endpoints and get Polymarket history from Polymarket's own data
-  API; or show the chart for Kalshi traders only.
-- **Q-03 Avatars.** Trader pictures come from third-party hosts named in the
-  API response. Options: load them directly; proxy them through our server;
-  or draw initials instead.
-- **Q-04 Source-specific features.** The "our traders" filter and the hosted
-  battle are tied to the source's own business. Proposal: drop the filter,
-  and build the battle page as a neutral head-to-head of the same two public
-  profiles.
-- **Q-05 Privacy page.** The source has terms but no privacy page. Proposal:
-  add a short one stating that the demo collects nothing.
+- **Q-01 Data source.** The source's documented public API, fetched on our
+  server and cached, with a snapshot fallback (D-011).
+- **Q-02 Undocumented endpoints.** Not used. Polymarket history comes from
+  Polymarket's own data API; the Kalshi non-sports toggle filters locally
+  (D-012).
+- **Q-03 Avatars.** Loaded from the URLs in the API response, with an initials
+  fallback (D-013).
+- **Q-04 Source-specific features.** The "our traders" filter is dropped. The
+  battle page is a neutral head-to-head of the same two public profiles
+  (D-014).
+- **Q-05 Privacy page.** Added (D-015).

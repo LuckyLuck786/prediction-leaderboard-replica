@@ -92,16 +92,47 @@ repository.
 It contains no markup, styles or copy text from the source, because the
 source's terms protect its design, code and original content.
 
+### D-011 Data source: the source's documented public API
+
+Decided by the owner at the phase 1 gate. The API is documented as free,
+keyless and rate-limited, and it already carries the computed values (score,
+sports share, day mover, linked accounts, Kalshi history) that the platforms'
+own APIs do not. We fetch it on our server, cache it for at least five
+minutes, validate it, and fall back to a labeled snapshot. The footer credits
+the source and links back, as its API terms ask.
+
+### D-012 No dependence on undocumented endpoints
+
+Only endpoints in the public API reference are used. Polymarket chart history
+comes from Polymarket's own data API. The Kalshi non-sports toggle filters
+locally on `sports_share`. Anything that cannot be built from documented data
+is left out and listed as a difference.
+
+### D-013 Avatars load from the URLs the API returns
+
+Plain lazy images with an initials fallback, no image proxy or optimizer, so
+the deployment cannot run up image-optimization costs. This is the one place
+a visitor's browser contacts a third-party host; requests send no referrer.
+
+### D-014 Source-specific features
+
+The "our traders" filter is dropped: it only has meaning for the source's own
+business. The battle page becomes a neutral head-to-head of the same two
+public profiles, without the host promotion.
+
+### D-015 Privacy page
+
+Added, short: the demo collects nothing. The source has terms but no privacy
+page.
+
+### D-016 Branch flow
+
+Each phase is built on its own branch and fast-forwarded into `main` at the
+gate, after the owner's go.
+
 ## Open items
 
 - `next.config.ts` still sets `output: "standalone"`, which existed for the
   removed Docker setup. Decide when the deployment is configured.
-- The starter layout loads the Geist font. Replace when branding is chosen.
 - The CI workflow triggers on `master`; this repository uses `main`. Fix when
   CI is extended.
-- Template files still present, pending the owner's decision: `CHANGELOG.md`,
-  `CONTRIBUTING.md`, `SECURITY.md`, `.github/PULL_REQUEST_TEMPLATE.md`,
-  `.github/copilot-setup-steps.yml`.
-- Open questions from the observation step are in `docs/SPEC.md`, section 8
-  (data source, undocumented endpoints, avatars, source-specific features,
-  privacy page).
