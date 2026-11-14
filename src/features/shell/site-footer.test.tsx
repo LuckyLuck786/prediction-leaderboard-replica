@@ -58,9 +58,8 @@ describe("SiteFooter", () => {
     expect(readme).toContain(DISCLAIMER);
   });
 
-  // Empty today: no other page is built yet. The loop guards every link
-  // added later, so a footer link can never again point at a missing page.
-  it("links only to pages that exist", () => {
+  it("links only to pages that exist (BUG-007)", () => {
+    expect(FOOTER_LINKS.length).toBeGreaterThan(0);
     for (const link of FOOTER_LINKS) {
       const page = inRepo(`src/app${link.href}/page.tsx`);
       expect(existsSync(page), `${link.href} has no page`).toBe(true);

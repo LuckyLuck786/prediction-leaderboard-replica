@@ -6,7 +6,14 @@ import { DATA_CREDIT, DISCLAIMER } from "./brand";
  * Footer navigation. A link is added here in the same commit that adds its
  * page: a test fails for any link without a route behind it.
  */
-export const FOOTER_LINKS: ReadonlyArray<{ label: string; href: string }> = [];
+export const FOOTER_LINKS: ReadonlyArray<{ label: string; href: string }> = [
+  { label: "Polymarket board", href: "/polymarket" },
+  { label: "Kalshi board", href: "/kalshi" },
+  { label: "Get listed", href: "/submit" },
+  { label: "API", href: "/api-docs" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy", href: "/privacy" },
+];
 
 export function SiteFooter() {
   return (
