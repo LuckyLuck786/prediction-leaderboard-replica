@@ -4,9 +4,11 @@ import source from "./source.json";
 import {
   UPSTREAM_REVALIDATE_SECONDS,
   UpstreamError,
+  fetchPolymarketJson,
   fetchUpstreamJson,
   isNotFound,
 } from "./client";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./origins";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -29,6 +31,14 @@ describe("fetchUpstreamJson", () => {
       UPSTREAM_REVALIDATE_SECONDS,
     );
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("asks Polymarket's Data API on its own origin", async () => {
+    const fetchMock = stubFetch(async () => Response.json({ data: {} }));
+    await fetchPolymarketJson("/v2/user-pnl?user=0xabc");
+    expect(fetchMock.mock.calls[0][0].toString()).toBe(
+      `${POLYMARKET_DATA_DEFAULT_ORIGIN}/v2/user-pnl?user=0xabc`,
+    );
   });
 
   it("keeps the query string", async () => {

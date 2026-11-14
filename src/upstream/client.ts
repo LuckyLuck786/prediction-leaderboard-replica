@@ -1,7 +1,8 @@
-// The one place this app talks to the upstream public API. Used on the server
-// only: pages and route handlers call it, visitors' browsers never do.
+// The one place this app talks to outside APIs: the upstream public API and
+// Polymarket's documented Data API. Used on the server only: pages and route
+// handlers call it, visitors' browsers never do.
 
-import source from "./source.json";
+import { POLYMARKET_DATA_ORIGIN, UPSTREAM_ORIGIN } from "./origins";
 
 /**
  * How long a cached upstream response is reused, in seconds. Upstream
@@ -28,12 +29,12 @@ export class UpstreamError extends Error {
 }
 
 /**
- * GETs a path on the upstream origin and returns the parsed JSON body,
- * unvalidated: callers pass it through their schema. Throws UpstreamError on a
- * network failure, a timeout, a non-2xx status or a body that is not JSON.
+ * GETs a path on an origin and returns the parsed JSON body, unvalidated:
+ * callers pass it through their schema. Throws UpstreamError on a network
+ * failure, a timeout, a non-2xx status or a body that is not JSON.
  */
-export async function fetchUpstreamJson(path: string): Promise<unknown> {
-  const url = new URL(path, source.origin);
+async function fetchJson(origin: string, path: string): Promise<unknown> {
+  const url = new URL(path, origin);
 
   let response: Response;
   try {
@@ -56,6 +57,16 @@ export async function fetchUpstreamJson(path: string): Promise<unknown> {
   } catch {
     throw new UpstreamError(`${url.pathname} did not return JSON`, response.status);
   }
+}
+
+/** GETs a path on the upstream public API. */
+export function fetchUpstreamJson(path: string): Promise<unknown> {
+  return fetchJson(UPSTREAM_ORIGIN, path);
+}
+
+/** GETs a path on Polymarket's Data API. */
+export function fetchPolymarketJson(path: string): Promise<unknown> {
+  return fetchJson(POLYMARKET_DATA_ORIGIN, path);
 }
 
 /** True when upstream said the thing asked for does not exist. */
