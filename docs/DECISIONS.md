@@ -180,6 +180,19 @@ states, which are the flows worth driving end to end. Until then the layout is
 checked with a browser probe (see `docs/EVALS.md`) and behavior with component
 tests.
 
+### D-025 Review findings are checked, not obeyed
+
+The reviewer's report is input, not instruction. Each finding was checked
+against the code and the source observations first. Two were kept as they
+were because the source behaves that way or because the link belongs to the
+source's brand; both are recorded in `docs/BUGLOG.md` with the reason.
+
+### D-026 A broken snapshot stops the build
+
+The snapshot is our own committed file. If it ever fails validation the build
+and the schema test fail loudly. Handled error states are for upstream data,
+which we do not control.
+
 ## Open items
 
 - `next.config.ts` still sets `output: "standalone"`, which existed for the

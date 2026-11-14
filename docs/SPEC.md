@@ -395,6 +395,12 @@ and viewport, and each FMT rule into unit tests.
   clock (D-022).
 - **DEV-12** Sortable headers are real buttons, so sorting works from the
   keyboard. The source's headers respond to the mouse only.
+- **DEV-13** No footer link to an X account: the source links its own.
+- **DEV-14** Optional columns are hidden below 640 px along with their
+  toggles. On the source a column switched on at desktop width stays on a
+  narrow screen.
+- **DEV-15** While the page shows the saved snapshot, a banner says how many
+  of the upstream traders it holds for the selected period.
 
 ## 8. Questions resolved by the owner (2026-11-14)
 

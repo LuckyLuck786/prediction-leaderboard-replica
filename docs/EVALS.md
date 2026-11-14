@@ -45,7 +45,8 @@ Notes for `/`, 2026-11-14:
    present. Checked in the browser and by component tests.
 2. Period, platform, toggles, optional columns, sorting, search and paging
    pass in component tests and in the browser. Row and name links point at
-   `/account/{id}`, which is not built yet, so navigation ends in a 404.
+   `/account/{id}`, which is not built yet, so navigation ends in a 404. The
+   footer carries no page links until those pages exist (BUG-007).
 3. Rows are compared with the saved snapshot only. The comparison with a live
    API response comes with the data layer.
 4. Measured against the source at 390 px: see the table below.
@@ -99,8 +100,8 @@ other than 1D, and the ROI format.
 | Everything below except the audit, in order | `npm run check` | pass, 2026-11-14 |
 | Lint | `npm run lint` | pass, 2026-11-14 |
 | Type check | `npm run typecheck` | pass, 2026-11-14 |
-| Unit and component tests | `npm run test` | 122 of 122 pass, 2026-11-14 |
-| Asset check | `npm run check:assets` | pass, 64 files, 2026-11-14 |
+| Unit and component tests | `npm run test` | 150 of 150 pass, 2026-11-14 |
+| Asset check | `npm run check:assets` | pass, 67 files, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-14 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-14 |
 
@@ -113,6 +114,12 @@ Two checks were also run by hand to make sure the suite can fail:
 
 The layout numbers above come from a probe run in the browser console at the
 stated viewport. It will become a Playwright test in the evals phase.
+
+**Independent review.** A reviewer agent that had not written the code read
+the phase 2 diff: 19 findings, 10 real defects fixed with tests (BUG-006 to
+BUG-015), the rest answered in `docs/BUGLOG.md`. After the fixes: 150 tests
+pass, a fresh page load logs no console errors, and at 390 px the optional
+columns stay hidden with no horizontal scroll.
 
 End-to-end and accessibility commands are added here when those tools are
 added.

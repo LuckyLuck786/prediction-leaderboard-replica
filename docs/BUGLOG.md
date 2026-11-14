@@ -108,3 +108,120 @@ first committed name that first commit.
 - **Prevention:** missing paths are skipped, untracked non-ignored files are
   included, and two tests cover it. A planted violation was used to confirm
   the check fails when it should.
+
+### Found by the independent review pass (2026-11-14, about 22:30)
+
+A separate reviewer agent, which had not written the code, read the whole
+phase 2 diff against the spec and `CLAUDE.md`. It reported 19 findings: 1
+high, 6 medium, 12 low, and none on security. Each was checked against the
+code before acting. The ones below were real defects and are fixed. The rest
+are listed at the end with what was done about them.
+
+### BUG-006 Trader count misstated the size of the board (high)
+
+- **Feature / file:** home header, `snapshot.ts`, `leaderboard-view.tsx`
+- **What the AI wrote:** the count used the length of the saved snapshot,
+  and the snapshot loader dropped the upstream total that the snapshot file
+  records.
+- **Symptom:** the page said "48 of 60 traders" while upstream listed 581 for
+  that period. The snapshot keeps only the 50 best and 10 worst, and the page
+  did not say so.
+- **How it was caught:** independent review.
+- **Root cause:** two facts, "rows we hold" and "rows upstream has", were
+  collapsed into one.
+- **Fix commit:** `ac7dc98`
+- **Prevention:** the snapshot banner states "holds 60 of the 581 traders
+  listed for this period", per period, with a component test; a snapshot test
+  checks the recorded total.
+
+### BUG-007 Footer linked six pages that do not exist
+
+- **Feature / file:** `site-footer.tsx`
+- **What the AI wrote:** footer links to the board, submit, API, terms and
+  privacy pages ahead of building them.
+- **Symptom:** every footer link returned 404. The footer test checked only
+  the text, so it passed.
+- **How it was caught:** independent review.
+- **Root cause:** the footer was written from the spec's final page list,
+  not from the pages that exist.
+- **Fix commit:** `1d40f62`
+- **Prevention:** links are added in the same commit as their page; a test
+  fails for any footer link without a page file.
+
+### BUG-008 Optional columns could get stuck on a phone
+
+- **Feature / file:** `leaderboard-table.tsx`
+- **What the AI wrote:** the Sharpe, Win% and ROI columns had no breakpoint,
+  while their toggles are hidden below 640 px.
+- **Symptom:** switch a column on at desktop width, narrow the window, and
+  the column stays with no control to remove it.
+- **How it was caught:** independent review; then confirmed in the browser.
+- **Root cause:** the toggle's breakpoint was not applied to what it toggles.
+- **Fix commit:** `ac7dc98`
+- **Prevention:** a component test checks the responsive rule on the column.
+
+### BUG-009 Asset check could be dodged by letter case or a file name
+
+- **Feature / file:** `scripts/check-assets.mjs`
+- **What the AI wrote:** case-sensitive folder matching, and a name check on
+  file contents only.
+- **Symptom:** `Public/Sites/logo.svg` passed, and so did a file whose path
+  named the source site.
+- **How it was caught:** independent review.
+- **Root cause:** macOS disks ignore letter case by default; the check did
+  not. Paths were never searched.
+- **Fix commit:** `ace1d2e`
+- **Prevention:** two tests, one for each hole.
+
+### BUG-010 Repeated trader ids were not handled
+
+- **Feature / file:** `schema.ts`
+- **What the AI wrote:** every valid upstream entry became a row.
+- **Symptom:** none yet: the current data has no repeats. Two entries with
+  the same wallet would share a React key and a profile route, and rows could
+  vanish or duplicate on re-sort.
+- **How it was caught:** independent review.
+- **Root cause:** the id's uniqueness was assumed, not enforced.
+- **Fix commit:** `ac7dc98`
+- **Prevention:** repeats are dropped and counted; tests cover the parser and
+  check the snapshot has unique ids.
+
+### BUG-011 to BUG-015 Smaller defects from the same review
+
+| ID | File | Symptom | Fix commit | Test added |
+|---|---|---|---|---|
+| BUG-011 | `format.ts` | A loss under 50 cents showed as "-$0" | `ac7dc98` | yes |
+| BUG-012 | `format.ts` | Initials cut a letter outside the basic plane in half | `ac7dc98` | yes |
+| BUG-013 | `theme.ts` | With storage blocked, the theme script and toggle threw | `1d40f62` | yes |
+| BUG-014 | `leaderboard-table.tsx` | A day mover shown as a picture had no text for screen readers | `ac7dc98` | yes |
+| BUG-015 | `leaderboard-controls.tsx` | The trader count was a live region and re-announced on every keystroke | `ac7dc98` | no, markup removed |
+
+### BUG-016 A test used URL objects with Node's file functions under jsdom
+
+- **Time:** about 22:35
+- **Feature / file:** `site-footer.test.tsx`, written while fixing BUG-007
+- **What the AI wrote:** paths built as `new URL(..., import.meta.url)` and
+  passed to `existsSync` and `readFileSync`.
+- **Symptom:** `TypeError: The URL must be of scheme file`, in jsdom only.
+- **How it was caught:** the test run.
+- **Root cause:** in a jsdom test the global `URL` is jsdom's, which Node's
+  file functions refuse.
+- **Fix commit:** `1d40f62`
+- **Prevention:** plain paths via `fileURLToPath`; the test was also run from
+  another working directory.
+
+### Review findings not treated as bugs
+
+- **Esports rule hides only traders without an X account.** Kept: it matches
+  the source's own tooltip, observed on 2026-11-14. A comment in `query.ts`
+  now cites it.
+- **Footer has no X account link (HOME-21).** Kept out: that link points to
+  the source's own account. Recorded as DEV-13 in the spec.
+- **Snapshot script does not validate with Zod.** The script is plain Node and
+  cannot import the TypeScript schema. The schema test does the validation and
+  CI runs it. A request timeout was added (`c69e629`).
+- **Loading the snapshot throws on a bad file.** Kept on purpose: the snapshot
+  is our own committed file, so a broken one should stop the build, not ship.
+  It is now validated with Zod before use (`ac7dc98`).
+- **ROI tooltip, duplicated labels, hard-coded score weights.** Wording and
+  single-source fixes, not defects; done in `ac7dc98`.

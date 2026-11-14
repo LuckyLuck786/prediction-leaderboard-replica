@@ -94,6 +94,14 @@ work happens. It describes what was done, not what was planned.
 7. **Checks that can fail.** A planted violation proved the asset check
    fails; two hand-made mutations proved the tests catch regressions.
 8. **Small commits**, each preceded by a look at exactly what was staged.
+9. **Independent review.** A reviewer subagent with read-only instructions,
+   which had not written the code, reviewed the phase diff against the spec
+   and the rules. 19 findings: 1 high, 6 medium, 12 low, none on security.
+   Each was checked against the code before acting: 10 were real defects and
+   were fixed with tests (BUG-006 to BUG-015); 2 were kept on purpose with a
+   recorded reason; the rest were wording or single-source clean-ups.
+10. **Re-verified** after the fixes: full check, a fresh page load with no
+    console errors, and the mobile layout with optional columns switched on.
 
 ### Slips, recorded as they happened
 
