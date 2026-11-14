@@ -1,17 +1,10 @@
-// Trader profile model (spec 4.4). Phase 3 covers PROF-01, PROF-07, PROF-08,
-// PROF-09 and PROF-10; the month strip, history chart and categories follow.
+// Trader profile model (spec 4.4). The history behind PROF-02 to PROF-05
+// lives in history.ts and history-data.ts.
 
 import type { Platform } from "@/features/leaderboard/model";
 
 export const PROFILE_PERIODS = ["1d", "7d", "30d", "all"] as const;
 export type ProfilePeriod = (typeof PROFILE_PERIODS)[number];
-
-export const PROFILE_PERIOD_LABELS: Record<ProfilePeriod, string> = {
-  "1d": "Today",
-  "7d": "7 days",
-  "30d": "30 days",
-  all: "All time",
-};
 
 export interface SmartScore {
   score: number;

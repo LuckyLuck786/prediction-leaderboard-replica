@@ -6,7 +6,6 @@ import {
   MISSING,
   formatCount,
   formatDrawdown,
-  formatProfileMoney,
   formatScore,
   formatSharpe,
   formatTraderName,
@@ -16,7 +15,20 @@ import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/leaderboard/
 import { scoreBandClass } from "@/features/leaderboard/score-band";
 import { cn } from "@/lib/utils";
 
-import { PROFILE_PERIODS, PROFILE_PERIOD_LABELS, type TraderProfile } from "../model";
+import type { CategoriesResult, HistoryResult } from "../history-data";
+import type { TraderProfile } from "../model";
+import { CategoryCard } from "./category-card";
+import { HistoryHeading } from "./history-heading";
+import { MonthStrip } from "./month-strip";
+import { PnlChart } from "./pnl-chart";
+
+const HISTORY_MESSAGES = {
+  empty: "Not enough history to draw yet.",
+  unsupported: "No documented history is available for this trader.",
+  unavailable: "History is unavailable right now.",
+} as const;
+
+const KALSHI_HISTORY_NOTE = "Kalshi history starts when the data source began following this trader.";
 
 /** PROF-09: the card accent follows the trader's main platform. */
 const ACCENT: Record<TraderProfile["platform"], { text: string; border: string; chip: string }> = {
@@ -52,7 +64,20 @@ function Stat({ label, value, className }: { label: string; value: string; class
   );
 }
 
-export function ProfileView({ profile }: { profile: TraderProfile }) {
+export function ProfileView({
+  profile,
+  history,
+  categories,
+  today,
+}: {
+  profile: TraderProfile;
+  history: HistoryResult;
+  categories: CategoriesResult;
+  /** Today's UTC day, decided on the server. */
+  today: string;
+}) {
+  // Month strip input: computed on the server, sent as plain pairs.
+  const changes = history.kind === "ready" ? [...history.changes] : [];
   const accent = ACCENT[profile.platform];
   const displayName = formatTraderName(profile.name);
   const meta = [
@@ -108,24 +133,26 @@ export function ProfileView({ profile }: { profile: TraderProfile }) {
         </div>
       </div>
 
-      <section aria-labelledby="pnl-heading" className={cn(CARD, accent.border, "mb-6")}>
-        <h2 id="pnl-heading" className="mb-3 text-sm text-muted-foreground">
-          Profit and loss
-        </h2>
-        <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-          {PROFILE_PERIODS.map((period) => {
-            const value = profile.pnl[period];
-            return (
-              <Stat
-                key={period}
-                label={PROFILE_PERIOD_LABELS[period]}
-                value={value === null ? MISSING : formatProfileMoney(value)}
-                className={value === null ? undefined : value < 0 ? "text-negative" : "text-positive"}
-              />
-            );
-          })}
-        </div>
+      <MonthStrip changes={changes} today={today} accentBorder={accent.border} />
+
+      <section aria-labelledby="history-heading" className="mb-6 rounded-lg border border-border bg-card p-4">
+        <HistoryHeading note={profile.platform === "kalshi" ? KALSHI_HISTORY_NOTE : null} />
+        {history.kind === "ready" && history.series.length > 1 ? (
+          <PnlChart series={history.series} />
+        ) : (
+          <p className="py-12 text-center text-sm text-muted-foreground">
+            {HISTORY_MESSAGES[history.kind === "ready" ? "empty" : history.kind]}
+          </p>
+        )}
       </section>
+
+      {categories.kind === "ready" && categories.rows.length > 0 ? (
+        <CategoryCard rows={categories.rows} />
+      ) : categories.kind === "unavailable" ? (
+        <p className="mb-6 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
+          Categories are unavailable right now.
+        </p>
+      ) : null}
 
       <section aria-labelledby="score-heading" className={cn(CARD, accent.border, "mb-8")}>
         <h2 id="score-heading" className="mb-3 text-sm text-muted-foreground">

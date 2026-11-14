@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { formatProfileTitleMoney, formatTraderName } from "@/features/leaderboard/format";
 import { ProfileView } from "@/features/profile/components/profile-view";
 import { ProfileUnavailableError, getProfile } from "@/features/profile/data";
+import { getProfileExtras } from "@/features/profile/history-data";
 import { TopBarShell } from "@/features/shell/top-bar-shell";
 
 // Equal to UPSTREAM_REVALIDATE_SECONDS; a test keeps the two in step.
@@ -36,9 +37,16 @@ export default async function ProfilePage({ params }: Props) {
   // the whole revalidate period. error.tsx shows the message instead.
   if (result.kind === "unavailable") throw new ProfileUnavailableError(id);
 
+  const extras = await getProfileExtras(result.profile);
+
   return (
     <TopBarShell width="wide">
-      <ProfileView profile={result.profile} />
+      <ProfileView
+        profile={result.profile}
+        history={extras.history}
+        categories={extras.categories}
+        today={extras.today}
+      />
     </TopBarShell>
   );
 }
