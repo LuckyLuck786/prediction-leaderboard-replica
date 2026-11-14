@@ -5,6 +5,11 @@ node_modules/
 
 # Build
 .next/
+.next-e2e/
+
+# End-to-end test output
+test-results/
+playwright-report/
 out/
 build/
 dist/

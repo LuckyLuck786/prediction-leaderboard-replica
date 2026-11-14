@@ -15,8 +15,10 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "check:assets": "node scripts/check-assets.mjs",
     "snapshot": "node scripts/update-snapshot.mjs",
+    "fixtures:e2e": "node scripts/record-e2e-fixtures.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build"
   },
   "dependencies": {
@@ -32,6 +34,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "10.4.2",
     "@testing-library/react": "16.3.3",
