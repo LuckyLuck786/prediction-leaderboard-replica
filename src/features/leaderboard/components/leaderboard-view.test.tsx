@@ -192,6 +192,7 @@ describe("LeaderboardView", () => {
     renderView({ fetchBoard });
     click("ALL");
     expect((await screen.findByRole("alert")).textContent).toContain("Could not load this period.");
+    expect(screen.getByText("No traders loaded")).toBeTruthy();
 
     await act(async () => click("Try again"));
     expect(await screen.findByText(`${TOTAL} of ${TOTAL} traders`)).toBeTruthy();
@@ -242,6 +243,8 @@ describe("LeaderboardView", () => {
     expect(screen.getByRole("status").textContent).toBe(
       `Live data is unavailable right now. Showing a saved snapshot from 14 Nov, 12:19 UTC: ${TOTAL} of the 581 traders listed for this period, the best and the worst by P&L.`,
     );
+    // A live daily total next to snapshot rows would mix two moments.
+    expect(screen.getByText("Today:").textContent).toContain("–");
 
     // The banner follows the board on screen: live periods have none.
     click("1M");

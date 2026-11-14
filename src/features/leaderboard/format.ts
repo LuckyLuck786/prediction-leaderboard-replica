@@ -11,6 +11,8 @@ const MILLION = 1_000_000;
 const ROUNDS_TO_THOUSAND = 999.5;
 /** Smallest amount that rounds to "1.0M" rather than "1000K". */
 const ROUNDS_TO_MILLION = 999_500;
+/** Smallest amount that would print as "1000.0K" with one decimal of thousands. */
+const ROUNDS_TO_MILLION_AT_ONE_DECIMAL = 999_950;
 /**
  * Mobile rows shorten amounts from here up. Observed: 57.6K stayed full and
  * 349.8K was short, so the real switch lies between the two. Assumed.
@@ -66,18 +68,29 @@ export function formatMoneyCompact(value: number): string {
   return value < 0 ? `$-${short}` : `+$${short}`;
 }
 
-/**
- * FMT-04. Profile amounts: `+$1.10M`, `+$922.2K`, `-$629`. Seen in the
- * source's profile page titles: two decimals for millions, one for thousands.
- */
-export function formatProfileMoney(value: number): string {
+function profileAmount(value: number, millionDecimals: number): string {
   const amount = Math.abs(value);
   let short: string;
-  if (amount >= MILLION) short = `${(amount / MILLION).toFixed(2)}M`;
-  else if (amount >= THOUSAND) short = `${(amount / THOUSAND).toFixed(1)}K`;
-  else short = String(Math.round(amount));
+  // Units are chosen on the rounded figure, so 999,960 is "1.0M", never "1000.0K".
+  if (amount >= ROUNDS_TO_MILLION_AT_ONE_DECIMAL) {
+    short = `${(amount / MILLION).toFixed(millionDecimals)}M`;
+  } else if (amount >= ROUNDS_TO_THOUSAND) {
+    short = `${(amount / THOUSAND).toFixed(1)}K`;
+  } else {
+    short = String(Math.round(amount));
+  }
   const isLoss = value < 0 && short !== "0";
   return `${isLoss ? "-" : "+"}$${short}`;
+}
+
+/** FMT-04. Profile amounts: `+$323.2K`, `-$629`, `+$1.2M`. */
+export function formatProfileMoney(value: number): string {
+  return profileAmount(value, 1);
+}
+
+/** FMT-04. Profile page titles use two decimals for millions: `+$1.10M`, `+$922.2K`. */
+export function formatProfileTitleMoney(value: number): string {
+  return profileAmount(value, 2);
 }
 
 /** Whole number with thousands separators: `3,000`. */

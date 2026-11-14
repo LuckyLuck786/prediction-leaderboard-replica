@@ -6,6 +6,7 @@ import {
   formatDaysSince,
   formatDrawdown,
   formatProfileMoney,
+  formatProfileTitleMoney,
   formatMoney,
   formatMoneyCompact,
   formatMoneyWhole,
@@ -85,13 +86,26 @@ describe("formatMoverAmount (FMT-03)", () => {
 
 describe("formatProfileMoney (FMT-04)", () => {
   it.each([
-    [1104963.4173, "+$1.10M"], // seen in a profile page title
-    [922199.661638, "+$922.2K"], // seen in a profile page title
+    [323247.03, "+$323.2K"], // seen in the category card
+    [1200000, "+$1.2M"], // seen as a chart label
     [-629.49, "-$629"], // seen
+    [999.6, "+$1.0K"],
+    [999949, "+$999.9K"],
+    [999960, "+$1.0M"], // not "+$1000.0K"
     [0.3, "+$0"],
     [-0.3, "+$0"],
   ])("%d -> %s", (value, expected) => {
     expect(formatProfileMoney(value)).toBe(expected);
+  });
+});
+
+describe("formatProfileTitleMoney (FMT-04)", () => {
+  it.each([
+    [1104963.4173, "+$1.10M"], // seen in a profile page title
+    [922199.661638, "+$922.2K"], // seen in a profile page title
+    [999960, "+$1.00M"],
+  ])("%d -> %s", (value, expected) => {
+    expect(formatProfileTitleMoney(value)).toBe(expected);
   });
 });
 

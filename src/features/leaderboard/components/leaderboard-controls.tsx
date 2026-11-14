@@ -33,12 +33,12 @@ const SCORE_LEGEND = `Score blends ${new Intl.ListFormat("en-GB", {
 export function LeaderboardControls({
   state,
   dispatch,
-  counts,
+  countLabel,
 }: {
   state: LeaderboardState;
   dispatch: Dispatch<LeaderboardAction>;
-  /** Rows matching the filters and rows in the board; null while loading. */
-  counts: { shown: number; total: number } | null;
+  /** "421 of 584 traders", or what is happening instead. */
+  countLabel: string;
 }) {
   const { period, query, extraColumns } = state;
 
@@ -56,7 +56,7 @@ export function LeaderboardControls({
           className="h-[30px] w-full border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-ring sm:w-48"
         />
         <p className="text-sm">
-          {counts ? `${counts.shown} of ${counts.total} traders` : "Loading traders"}
+          {countLabel}
         </p>
         <div className="sm:ml-auto">
           <ThemeToggle />

@@ -17,6 +17,8 @@ export const KALSHI_PERIOD_BUTTONS: ReadonlyArray<{ period: KalshiPeriod; label:
 export const KALSHI_BOARD_LIMIT = 1000;
 /** KAL-06: rows per "Show more". */
 export const KALSHI_PAGE_SIZE = 100;
+/** Placeholder rows while a period loads: enough to fill a screen. */
+export const KALSHI_SKELETON_ROWS = 10;
 /** Same rule as the home board's sports filter. */
 export const KALSHI_SPORTS_SHARE_LIMIT = 0.5;
 

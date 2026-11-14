@@ -15,7 +15,8 @@ export const PROFILE_PERIOD_LABELS: Record<ProfilePeriod, string> = {
 
 export interface SmartScore {
   score: number;
-  tier: string;
+  /** "Great", "Risky" and so on; null when upstream sends none. */
+  tier: string | null;
   winRate: number | null;
   sharpe: number | null;
   /** Worst peak-to-trough fall, as a fraction. */
@@ -44,8 +45,12 @@ export interface TraderProfile {
   hyperliquidUrl: string | null;
 }
 
-/** A Polymarket wallet, or a Kalshi username as the source's sitemap uses them. */
-const PROFILE_ID = /^(0x[0-9a-fA-F]{40}|[A-Za-z0-9._-]{1,64})$/;
+/**
+ * A Polymarket wallet, or a Kalshi username as the source's sitemap uses them.
+ * An id made only of dots is refused: "." and ".." would turn
+ * /api/trader/{id} into another upstream path.
+ */
+const PROFILE_ID = /^(0x[0-9a-fA-F]{40}|(?!\.+$)[A-Za-z0-9._-]{1,64})$/;
 
 export function isProfileId(value: string): boolean {
   return PROFILE_ID.test(value);

@@ -135,11 +135,13 @@ export function ProfileView({ profile }: { profile: TraderProfile }) {
           <>
             <div className="mb-4 flex items-baseline gap-3">
               <span className="text-2xl font-bold">{formatScore(profile.score.score)}</span>
-              <span
-                className={cn("rounded bg-muted px-2 py-0.5 text-sm", scoreBandClass(profile.score.score))}
-              >
-                {profile.score.tier}
-              </span>
+              {profile.score.tier ? (
+                <span
+                  className={cn("rounded bg-muted px-2 py-0.5 text-sm", scoreBandClass(profile.score.score))}
+                >
+                  {profile.score.tier}
+                </span>
+              ) : null}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-5">
               <Stat label="Win rate" value={formatWinRate(profile.score.winRate)} />

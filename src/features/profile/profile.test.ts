@@ -92,6 +92,34 @@ describe("parseProfile (DATA-04)", () => {
     });
   });
 
+  it("keeps the profile when the score is missing, and drops only the score card (DATA-08)", () => {
+    const result = parseProfile(
+      { trader: { ...kalshiTrader.trader, smart_score: { score: null, tier: null } } },
+      "ProbabilityDuck",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.profile.score).toBeNull();
+    expect(result.profile.name).toBe("ProbabilityDuck");
+  });
+
+  it("keeps the score without a tier", () => {
+    const result = parseProfile(
+      { trader: { ...kalshiTrader.trader, smart_score: { score: 70, tier: "" } } },
+      "ProbabilityDuck",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.profile.score).toMatchObject({ score: 70, tier: null });
+  });
+
+  it("resolves a relative picture against the upstream origin, like the boards do", () => {
+    const result = parseProfile(
+      { trader: { ...kalshiTrader.trader, pfp: "/api/kalshi-avatar/ProbabilityDuck" } },
+      "ProbabilityDuck",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.profile.avatarUrl).toMatch(/^https:\/\/.+\/api\/kalshi-avatar\/ProbabilityDuck$/);
+  });
+
   it("rejects a body without a trader", () => {
     expect(parseProfile({ error: "nope" }, "x").ok).toBe(false);
   });
@@ -105,6 +133,10 @@ describe("isProfileId", () => {
     ["../../etc/passwd", false],
     ["a b", false],
     ["", false],
+    [".", false], // would turn /api/trader/. into another upstream path
+    ["..", false],
+    ["...", false],
+    ["user.x", true],
   ])("%s -> %s", (id, expected) => {
     expect(isProfileId(id)).toBe(expected);
   });

@@ -16,6 +16,7 @@ import { LeaderboardTable } from "./leaderboard-table";
 import { LocalStamp } from "./local-stamp";
 
 const EMPTY: never[] = [];
+const COUNT_LABELS = { loading: "Loading traders", failed: "No traders loaded" } as const;
 
 export function LeaderboardView({
   heading,
@@ -41,6 +42,7 @@ export function LeaderboardView({
     initialPeriod: initial.board.period,
     initialValue: initial,
     fetchPeriod: fetchBoard,
+    prefetch: true,
   });
 
   const current = boards.get(state.period);
@@ -50,6 +52,8 @@ export function LeaderboardView({
   // Filtering and sorting a few hundred rows is cheap; the React Compiler memoizes it.
   const matching = applyQuery(traders, state.query, state.period);
   const visible = matching.slice(0, state.visibleCount);
+  // The day's total is live data; next to snapshot rows it would mix two moments.
+  const shownDailyProfit = payload?.source.kind === "live" ? dailyProfit : null;
 
   return (
     <>
@@ -71,11 +75,11 @@ export function LeaderboardView({
           </div>
           <p className="text-lg font-semibold">
             Today:{" "}
-            {dailyProfit === null ? (
+            {shownDailyProfit === null ? (
               <span className="text-muted-foreground">{MISSING}</span>
             ) : (
-              <span className={dailyProfit < 0 ? "text-negative" : "text-positive"}>
-                {formatMoneyWhole(dailyProfit)}
+              <span className={shownDailyProfit < 0 ? "text-negative" : "text-positive"}>
+                {formatMoneyWhole(shownDailyProfit)}
               </span>
             )}
           </p>
@@ -94,7 +98,13 @@ export function LeaderboardView({
       <LeaderboardControls
         state={state}
         dispatch={dispatch as Dispatch<LeaderboardAction>}
-        counts={payload ? { shown: matching.length, total: traders.length } : null}
+        countLabel={
+          payload
+            ? `${matching.length} of ${traders.length} traders`
+            : current.status === "failed"
+              ? COUNT_LABELS.failed
+              : COUNT_LABELS.loading
+        }
       />
 
       <LeaderboardTable

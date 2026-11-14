@@ -3,6 +3,8 @@
 
 import { z } from "zod";
 
+import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
+
 import {
   PLATFORMS,
   type DayMover,
@@ -65,28 +67,12 @@ function presentOrNull(value: string | null | undefined): string | null {
   return value ? value : null;
 }
 
-/** Only https links are ever rendered. Anything else is treated as absent. */
-function httpsUrl(value: string | null | undefined): URL | null {
-  if (!value || !URL.canParse(value)) return null;
-  const url = new URL(value);
-  return url.protocol === "https:" ? url : null;
-}
-
-/** Outbound profile links carry no referral or tracking parameters. */
-function profileUrl(value: string | null | undefined): string | null {
-  const url = httpsUrl(value);
-  if (!url) return null;
-  url.search = "";
-  url.hash = "";
-  return url.toString();
-}
-
 function toDayMover(raw: RawTrader["day_mover"]): DayMover | null {
   if (!raw) return null;
   return {
     label: raw.label,
     change: raw.change,
-    iconUrl: httpsUrl(raw.icon)?.toString() ?? null,
+    iconUrl: safeHttpsUrl(raw.icon),
   };
 }
 
@@ -105,8 +91,8 @@ function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
     platform: raw.platform,
     wallet,
     kalshiUsername,
-    avatarUrl: httpsUrl(raw.pfp)?.toString() ?? null,
-    xUrl: profileUrl(raw.twitter),
+    avatarUrl: safeHttpsUrl(raw.pfp),
+    xUrl: cleanLinkUrl(raw.twitter),
     joinedAt:
       joinDate && isDateString(joinDate) ? new Date(joinDate).toISOString() : null,
     pnl: raw.stats.pnl,
@@ -117,8 +103,8 @@ function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
     sportsShare: raw.sports_share ?? null,
     esportsShare: raw.esports_share ?? null,
     dayMover: toDayMover(raw.day_mover),
-    polymarketUrl: profileUrl(raw.polymarket_profile),
-    hyperliquidUrl: profileUrl(raw.hyperliquid_profile),
+    polymarketUrl: cleanLinkUrl(raw.polymarket_profile),
+    hyperliquidUrl: cleanLinkUrl(raw.hyperliquid_profile),
   };
 }
 

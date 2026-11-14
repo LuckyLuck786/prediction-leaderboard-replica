@@ -18,6 +18,7 @@ import {
   DEFAULT_KALSHI_QUERY,
   KALSHI_PAGE_SIZE,
   KALSHI_PERIODS,
+  KALSHI_SKELETON_ROWS,
   KALSHI_PERIOD_BUTTONS,
   type KalshiPeriod,
   type KalshiTrader,
@@ -77,6 +78,8 @@ export function KalshiView({
     initialPeriod: initial.board.period,
     initialValue: initial,
     fetchPeriod: fetchBoard,
+    // KAL-07: each period is fetched when it is selected, as on the source.
+    prefetch: false,
   });
 
   const current = boards.get(period);
@@ -140,6 +143,7 @@ export function KalshiView({
                 onClick={() => {
                   setPeriod(button.period);
                   setVisibleCount(KALSHI_PAGE_SIZE);
+                  boards.request(button.period);
                 }}
                 className="px-2.5 font-medium sm:px-3"
               >
@@ -165,7 +169,11 @@ export function KalshiView({
             className="h-[30px] w-full border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-ring sm:w-56"
           />
           <p className="whitespace-nowrap text-sm">
-            {payload ? `${COUNT_FORMAT.format(matching.length)} traders` : "Loading traders"}
+            {payload
+              ? `${COUNT_FORMAT.format(matching.length)} traders`
+              : current.status === "failed"
+                ? "No traders loaded"
+                : "Loading traders"}
           </p>
         </div>
       </div>
@@ -212,7 +220,7 @@ export function KalshiView({
             </tr>
           ))}
           {current.status === "loading"
-            ? Array.from({ length: KALSHI_PAGE_SIZE / 10 }, (_, index) => (
+            ? Array.from({ length: KALSHI_SKELETON_ROWS }, (_, index) => (
                 <SkeletonRow key={`skeleton-${index}`} />
               ))
             : null}

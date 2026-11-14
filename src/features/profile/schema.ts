@@ -3,8 +3,13 @@
 import { z } from "zod";
 
 import { PLATFORMS } from "@/features/leaderboard/model";
+import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
-import { PROFILE_PERIODS, type ProfilePeriod, type TraderProfile } from "./model";
+import {
+  PROFILE_PERIODS,
+  type ProfilePeriod,
+  type TraderProfile,
+} from "./model";
 
 const optionalString = z.string().nullish();
 const optionalNumber = z.number().nullish();
@@ -21,8 +26,8 @@ const rawProfileSchema = z.object({
     views: optionalNumber,
     smart_score: z
       .object({
-        score: z.number(),
-        tier: z.string(),
+        score: z.number().nullish(),
+        tier: z.string().nullish(),
         winRate: optionalNumber,
         sharpeRatio: optionalNumber,
         maxDrawdownPercent: optionalNumber,
@@ -52,23 +57,17 @@ function toJoined(value: string | null | undefined): string | null {
   return MONTH_YEAR_FORMAT.format(new Date(value));
 }
 
-/** Only https links are rendered, and without referral or tracking parameters. */
-function cleanHttpsUrl(value: string | null | undefined): string | null {
-  if (!value || !URL.canParse(value)) return null;
-  const url = new URL(value);
-  if (url.protocol !== "https:") return null;
-  url.search = "";
-  url.hash = "";
-  return url.toString();
-}
-
-export type ProfileParseResult = { ok: true; profile: TraderProfile } | { ok: false; error: string };
+export type ProfileParseResult =
+  { ok: true; profile: TraderProfile } | { ok: false; error: string };
 
 export function parseProfile(input: unknown, id: string): ProfileParseResult {
   const parsed = rawProfileSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: z.prettifyError(parsed.error) };
+  if (!parsed.success)
+    return { ok: false, error: z.prettifyError(parsed.error) };
   const raw = parsed.data.trader;
-  const score = raw.smart_score ?? null;
+  // DATA-08: any score field can be missing. Without a score there is no card.
+  const score = raw.smart_score;
+  const scoreValue = score?.score ?? null;
 
   const pnl = Object.fromEntries(
     PROFILE_PERIODS.map((period) => [period, raw.stats?.[period]?.pnl ?? null]),
@@ -82,25 +81,26 @@ export function parseProfile(input: unknown, id: string): ProfileParseResult {
       platform: raw.platform,
       wallet: raw.wallet || null,
       kalshiUsername: raw.kalshi_username || null,
-      avatarUrl: cleanHttpsUrl(raw.pfp),
-      xUrl: cleanHttpsUrl(raw.twitter),
+      avatarUrl: safeHttpsUrl(raw.pfp),
+      xUrl: cleanLinkUrl(raw.twitter),
       joined: toJoined(raw.join_date),
       views: raw.views ?? null,
       pnl,
-      score: score
-        ? {
-            score: score.score,
-            tier: score.tier,
-            winRate: score.winRate ?? null,
-            sharpe: score.sharpeRatio ?? null,
-            maxDrawdown: score.maxDrawdownPercent ?? null,
-            profitFactor: score.profitFactor ?? null,
-            rSquared: score.rSquared ?? null,
-          }
-        : null,
-      polymarketUrl: cleanHttpsUrl(raw.polymarket_profile),
-      kalshiUrl: cleanHttpsUrl(raw.kalshi_profile),
-      hyperliquidUrl: cleanHttpsUrl(raw.hyperliquid_profile),
+      score:
+        score && scoreValue !== null
+          ? {
+              score: scoreValue,
+              tier: score.tier || null,
+              winRate: score.winRate ?? null,
+              sharpe: score.sharpeRatio ?? null,
+              maxDrawdown: score.maxDrawdownPercent ?? null,
+              profitFactor: score.profitFactor ?? null,
+              rSquared: score.rSquared ?? null,
+            }
+          : null,
+      polymarketUrl: cleanLinkUrl(raw.polymarket_profile),
+      kalshiUrl: cleanLinkUrl(raw.kalshi_profile),
+      hyperliquidUrl: cleanLinkUrl(raw.hyperliquid_profile),
     },
   };
 }

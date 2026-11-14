@@ -6,6 +6,14 @@ import { fetchUpstreamJson, isNotFound } from "@/upstream/client";
 import { isProfileId, type TraderProfile } from "./model";
 import { parseProfile } from "./schema";
 
+/** Upstream failed for a reason other than "no such trader". */
+export class ProfileUnavailableError extends Error {
+  constructor(id: string) {
+    super(`Profile ${id} is unavailable right now`);
+    this.name = "ProfileUnavailableError";
+  }
+}
+
 export type ProfileResult =
   | { kind: "found"; profile: TraderProfile }
   | { kind: "not-found" }

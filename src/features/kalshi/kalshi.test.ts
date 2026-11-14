@@ -58,11 +58,18 @@ describe("parseKalshiBoard (DATA-03)", () => {
         raw({ kalshi_username: "dogname", profile_path: "/account/dogname" }),
         raw({ kalshi_username: "other", profile_path: "/account/someone-else" }),
         raw({ kalshi_username: "third", profile_path: "https://evil.example/x" }),
+        // Our profile route would 404 on this username, so no local link.
+        raw({ kalshi_username: "has space", profile_path: "/account/has space" }),
       ]),
       "all",
     );
     if (!result.ok) throw new Error(result.error);
-    expect(result.board.traders.map((trader) => trader.profileId)).toEqual(["dogname", null, null]);
+    expect(result.board.traders.map((trader) => trader.profileId)).toEqual([
+      "dogname",
+      null,
+      null,
+      null,
+    ]);
   });
 
   it("keeps only plausible X handles", () => {

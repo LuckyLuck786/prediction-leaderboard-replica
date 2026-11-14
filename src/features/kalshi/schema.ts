@@ -3,7 +3,8 @@
 
 import { z } from "zod";
 
-import source from "@/upstream/source.json";
+import { isProfileId } from "@/features/profile/model";
+import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import type { KalshiBoard, KalshiPeriod, KalshiTrader } from "./model";
 
@@ -29,31 +30,19 @@ const envelopeSchema = z.object({
 /** X allows letters, digits and underscores, up to 15 characters. */
 const X_HANDLE = /^[A-Za-z0-9_]{1,15}$/;
 
-/**
- * An https URL, resolving a relative path against the upstream origin (the
- * Kalshi board sends some pictures as "/api/kalshi-avatar/..."), with any
- * query string or fragment removed.
- */
-function cleanHttpsUrl(value: string | null | undefined): string | null {
-  if (!value || !URL.canParse(value, source.origin)) return null;
-  const url = new URL(value, source.origin);
-  if (url.protocol !== "https:") return null;
-  url.search = "";
-  url.hash = "";
-  return url.toString();
-}
-
 function toTrader(raw: z.infer<typeof rawTraderSchema>): KalshiTrader {
   const username = raw.kalshi_username;
   return {
     rank: raw.rank,
     username,
     name: raw.name ? raw.name : username,
-    avatarUrl: cleanHttpsUrl(raw.pfp),
+    avatarUrl: safeHttpsUrl(raw.pfp),
     pnl: raw.pnl,
-    // Only trust the exact form upstream uses for its own profile pages.
-    profileId: raw.profile_path === `/account/${username}` ? username : null,
-    kalshiUrl: cleanHttpsUrl(raw.kalshi_url),
+    // Only trust the exact form upstream uses for its own profile pages, and
+    // only for a username our profile route accepts (otherwise a 404).
+    profileId:
+      raw.profile_path === `/account/${username}` && isProfileId(username) ? username : null,
+    kalshiUrl: cleanLinkUrl(raw.kalshi_url),
     xHandle: raw.x_handle && X_HANDLE.test(raw.x_handle) ? raw.x_handle : null,
     sportsShare: raw.sports_share ?? null,
   };
