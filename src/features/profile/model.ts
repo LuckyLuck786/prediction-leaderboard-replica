@@ -31,6 +31,8 @@ export interface TraderProfile {
   name: string;
   platform: Platform;
   wallet: string | null;
+  /** Every Polymarket wallet of the trader, the main one first. */
+  wallets: string[];
   kalshiUsername: string | null;
   avatarUrl: string | null;
   xUrl: string | null;
@@ -51,6 +53,9 @@ export interface TraderProfile {
  * /api/trader/{id} into another upstream path.
  */
 const PROFILE_ID = /^(0x[0-9a-fA-F]{40}|(?!\.+$)[A-Za-z0-9._-]{1,64})$/;
+
+/** A Polymarket wallet address. */
+export const WALLET = /^0x[0-9a-fA-F]{40}$/;
 
 export function isProfileId(value: string): boolean {
   return PROFILE_ID.test(value);

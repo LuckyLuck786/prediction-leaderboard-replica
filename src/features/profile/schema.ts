@@ -7,6 +7,7 @@ import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import {
   PROFILE_PERIODS,
+  WALLET,
   type ProfilePeriod,
   type TraderProfile,
 } from "./model";
@@ -19,6 +20,7 @@ const rawProfileSchema = z.object({
     name: z.string().min(1),
     platform: z.enum(PLATFORMS),
     wallet: optionalString,
+    additional_wallets: z.array(z.string()).nullish(),
     kalshi_username: optionalString,
     pfp: optionalString,
     twitter: optionalString,
@@ -80,6 +82,15 @@ export function parseProfile(input: unknown, id: string): ProfileParseResult {
       name: raw.name,
       platform: raw.platform,
       wallet: raw.wallet || null,
+      // Only well-formed addresses: each one becomes a request to Polymarket.
+      // Lowercased first, so one wallet written in two cases is fetched once.
+      wallets: [
+        ...new Set(
+          [raw.wallet, ...(raw.additional_wallets ?? [])]
+            .filter((wallet): wallet is string => typeof wallet === "string" && WALLET.test(wallet))
+            .map((wallet) => wallet.toLowerCase()),
+        ),
+      ],
       kalshiUsername: raw.kalshi_username || null,
       avatarUrl: safeHttpsUrl(raw.pfp),
       xUrl: cleanLinkUrl(raw.twitter),

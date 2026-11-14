@@ -120,6 +120,23 @@ describe("parseProfile (DATA-04)", () => {
     expect(result.profile.avatarUrl).toMatch(/^https:\/\/.+\/api\/kalshi-avatar\/ProbabilityDuck$/);
   });
 
+  it("lists each well-formed wallet once, whatever its letter case (D-035)", () => {
+    const main = "0xec981ed70ae69c5cbcac08c1ba063e734f6bafcd";
+    const result = parseProfile(
+      {
+        trader: {
+          name: "elucidate",
+          platform: "polymarket",
+          wallet: main,
+          additional_wallets: [main.toUpperCase().replace("0X", "0x"), "0xnot-a-wallet", "0x" + "1".repeat(40)],
+        },
+      },
+      main,
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.profile.wallets).toEqual([main, "0x" + "1".repeat(40)]);
+  });
+
   it("rejects a body without a trader", () => {
     expect(parseProfile({ error: "nope" }, "x").ok).toBe(false);
   });
