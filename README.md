@@ -13,11 +13,12 @@ verified.
 
 **Live:** https://prediction-leaderboard-replica.vercel.app
 
-**Status:** the home, Polymarket and Kalshi boards run on live data, trader
-profiles show the header, P&L and Smart Score, and the terms, privacy,
-get-listed and API pages are in place. Still to come: the profile's month
-strip and history chart, the head-to-head page, end-to-end tests and the full
-evals pass.
+**Status:** the home, Polymarket and Kalshi boards run on live data. Trader
+profiles show the header, a month strip that opens into a daily or monthly
+calendar, the P&L history chart, Kalshi P&L by category and the Smart Score.
+The terms, privacy, get-listed and API pages are in place, and end-to-end
+tests run in CI. Still to come: the head-to-head page and the full evals pass
+(accessibility and performance).
 
 ## What is deliberately different
 
@@ -51,6 +52,16 @@ npm run test           # unit and component tests only
 npm run check:assets   # no source-site files or names where they do not belong
 npm audit --omit=dev   # must report 0 vulnerabilities
 ```
+
+End-to-end tests build the app and run it against a local fixture server
+that replays recorded API answers, so they need no network:
+
+```bash
+npx playwright install chromium   # once: the browser the tests drive
+npm run test:e2e                  # desktop and phone sizes
+```
+
+`npm run fixtures:e2e` records those API answers again (five spaced requests).
 
 Results and the measured comparison with the source are in
 [docs/EVALS.md](docs/EVALS.md).

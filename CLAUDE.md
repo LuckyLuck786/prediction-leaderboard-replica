@@ -96,7 +96,14 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 - `npm run snapshot` refreshes `src/upstream/snapshot/` from the upstream API.
 - `npm audit --omit=dev` must report 0 vulnerabilities.
 
-End-to-end commands are added here when Playwright is added.
+- `npm run test:e2e` builds the app into `.next-e2e` and runs the Playwright
+  tests offline against `e2e/fixture-server.mjs`, at desktop and phone sizes.
+  It needs the Chromium build of the pinned Playwright version
+  (`npx playwright install chromium`).
+- `npm run fixtures:e2e` re-records the API answers in `e2e/fixtures/`.
+- Restart the dev server after switching branches or running a production
+  build; a stale one serves 404s for routes that exist.
+- Stop only processes whose command line contains this repository's path.
 
 ## Conventions
 

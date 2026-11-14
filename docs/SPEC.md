@@ -404,12 +404,26 @@ and viewport, and each FMT rule into unit tests.
 - **DEV-16** The Kalshi non-sports toggle filters the fetched top 1,000
   locally (433 traders on 2026-11-14) instead of asking the source's server
   (472), whose parameter is undocumented (D-012).
-- **DEV-17** Until phase 4, profiles show a P&L-by-period card in place of
-  the month strip and history chart (D-031).
+- **DEV-17** From phase 3 until phase 4, profiles showed a P&L-by-period
+  card in place of the month strip and history chart (D-031). Phase 4
+  replaced it with PROF-02 to PROF-05; the interim card is gone.
 - **DEV-18** Skeleton rows while a period loads; a failed load says so and
   offers a retry (STATE-03).
 - **DEV-19** The "Today" total is shown only next to live rows; beside the
   snapshot it shows a dash.
+- **DEV-20** The category card has no "Last 24h" movers row: its data comes
+  from an undocumented endpoint (D-039).
+- **DEV-21** No share cards (PROF-06, first to cut; D-039).
+- **DEV-22** A trader listed only on Hyperliquid gets a message in place of
+  the history chart and calendar: there is no documented history for them
+  (D-035).
+- **DEV-23** Calendar days are UTC days (D-036). For the trader recorded on
+  2026-11-14, 9 of 11 monthly totals equal the source's; August and
+  September 2026 differ by about $2.5K and $1.2K, months where the history
+  has gaps.
+- **DEV-24** Polymarket history comes from Polymarket's documented data API,
+  not the source's undocumented history route (D-035). For the trader
+  compared, the chart's labels are the same.
 
 ## 8. Questions resolved by the owner (2026-11-14)
 

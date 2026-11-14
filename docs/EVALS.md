@@ -4,10 +4,11 @@ How we verify that the replica matches the source in structure and behavior,
 and that it works correctly. Branding differences are expected and excluded:
 see `docs/DECISIONS.md`, D-007.
 
-**Status (2026-11-14, end of phase 3):** the three boards, profiles and the
-simple pages are built and checked against live data in the browser. End-to-
-end automation, axe and Lighthouse are still to come. A cell stays "not run"
-until its check has actually been run.
+**Status (2026-11-15, end of phase 4):** the three boards, full profiles
+and the simple pages are built and checked against live data in the
+browser, and an offline end-to-end suite runs in CI at desktop and phone
+sizes. Axe and Lighthouse are still to come. A cell stays "not run" until
+its check has actually been run.
 
 ## Check groups
 
@@ -34,7 +35,7 @@ Each cell is checked against the acceptance list for that route in
 | `/` | pass (1) | pass (2) | pass (3) | pass (4) | ours only (5) | ours only (5) | pass, unit (6) | not run |
 | `/polymarket` | pass | pass | pass (3) | not run | not run | not run | pass, unit (6) | not run |
 | `/kalshi` | pass (7) | pass (7) | pass (7) | not run | not run | not run | pass, unit (6) | not run |
-| `/account/[id]` | partial (8) | pass (8) | pass (8) | not run | not run | not run | pass, unit (8) | not run |
+| `/account/[id]` | pass (8) | pass (8, 11) | pass (8, 12) | ours only, e2e (13) | not run | ours only, e2e (13) | pass, unit and e2e (8) | not run |
 | `/battle` | not built | not built | not built | not built | not built | not built | not built | not built |
 | `/api-docs` | pass (9) | pass (9) | pass (9) | not run | not run | not run | not run | not run |
 | `/submit` | pass (10) | pass (10) | n/a | not run | not run | not run | n/a | not run |
@@ -68,11 +69,27 @@ Notes, 2026-11-14 (items 2, 3, 6 updated at the end of phase 3):
 8. Profiles for a Kalshi and a Polymarket trader render header, P&L and Smart
    Score equal to the API; an unknown id is a 404 page; a malformed id,
    including `..`, is a 404 without any upstream request; any other upstream
-   failure is thrown to the error boundary, so it is never cached. Month strip, chart and categories are
-   phase 4, hence "partial".
+   failure is thrown to the error boundary, so it is never cached. Phase 4
+   added the month strip, calendar, chart and category card; share cards and
+   the "Last 24h" movers are left out on purpose (DEV-20, DEV-21). A failed
+   history or category load leaves the rest of the profile in place with a
+   message (unit tests).
 9. Both documented routes return live data; an unknown period returns 404.
 10. The form's fieldset and button are disabled; a click on Submit fires no
     submit event; the form has no action.
+11. Month strip: previous and next month, the disabled ends, the calendar's
+    Daily and Monthly views, the chart's hover readout and the Kalshi note
+    behind its info button pass in the browser and in end-to-end tests.
+12. **Against the source's recorded values** for one Kalshi trader
+    (ProbabilityDuck, 2026-11-14): November header "+$161,061, 9W / 4L"
+    equal; all 14 day shades equal; chart labels `-$12K +$338K +$688K
+    +$1.0M +$1.2M` and `Sep 25 ... Nov 26` equal; 14 category rows equal;
+    9 of 11 monthly totals equal (DEV-23). For one Polymarket trader
+    (elucidate): labels `-$110K +$190K +$490K +$790K +$1.0M` and
+    `Aug 24 Mar 25 Sep 25 Apr 26 Nov 26` equal.
+13. End-to-end at 390 and 1440 px: every part renders and the page has no
+    horizontal scroll. The source was measured at 1024 px only (table
+    below).
 
 ### Measured parity, home page
 
@@ -106,24 +123,53 @@ Known differences, all deliberate: the brand mark and "demo" tag beside the
 heading, the snapshot banner, letter badges in place of platform logos, no
 "our traders" filter, and our own colors and copy.
 
+### Measured parity, profile page
+
+Same probe, same viewport (1024 px), same trader. Source on 2026-11-14 about
+23:45 IST, ours on 2026-11-15 00:15 IST. Sizes in px.
+
+| Measure | Source | Ours |
+|---|---|---|
+| Avatar | 76 x 76 | 76 x 76 |
+| Name | 24 px bold | 24 px bold |
+| Month strip, collapsed | 864 x 51 | 864 x 51 |
+| Strip row | 862 x 48 | 862 x 48 |
+| Month label | 80 x 20, 16 below the strip's top | 80 x 20, 16 below the strip's top |
+| Day bar | 8 x 16 | 8 x 16 |
+| Month strip, expanded | about 747 high | 748.4 high |
+| Day cell | 116.3 x 116.3, first at 115 below the strip's top | 116.3 x 116.3, first at 115 below the strip's top |
+| P&L history card | 864 x 262 | 864 x 262 |
+| Chart area | 830 x 192 | 830 x 192 |
+| Category list | 830 x 323, 14 rows | 830 x 323, 14 rows |
+| Category row: name, bar, amount | 208 / 502 / 96, 17.5 high | 207.5 / 502.5 / 96, 17.5 high |
+
+Known differences: the category card is 389 px high against 421 because the
+"Last 24h" row is not built (DEV-20); everything below the header sits 4 px
+higher than on the source, whose header block was not measured in detail;
+the expanded calendar is 1.4 px taller. Our colors and copy differ on
+purpose.
+
 Assumptions in the code that the source did not let us confirm, each marked in
 the code where it lives: the amount at which mobile rows switch to short money
 (100,000), the esports threshold (0.5), the Sharpe column heading for periods
-other than 1D, and the ROI format.
+other than 1D, and the ROI format. Added in phase 4: Polymarket's 00:00 UTC
+points read as the previous day's close, and how a trader on both platforms
+is added up (D-042).
 
 ## Rerun commands
 
 | Check | Command | Last result |
 |---|---|---|
-| Everything below except the audit, in order | `npm run check` | pass, 2026-11-14 |
-| Lint | `npm run lint` | pass, 2026-11-14 |
-| Type check | `npm run typecheck` | pass, 2026-11-14 |
-| Unit and component tests | `npm run test` | 242 of 242 pass, 2026-11-14 |
-| Asset check | `npm run check:assets` | pass, 109 files, 2026-11-14 |
+| Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
+| Lint | `npm run lint` | pass, 2026-11-15 |
+| Type check | `npm run typecheck` | pass, 2026-11-15 |
+| Unit and component tests | `npm run test` | 355 of 355 pass, 2026-11-15 |
+| End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 48 pass, 2 skipped by design (hover-only checks on the phone), 2026-11-15 |
+| Asset check | `npm run check:assets` | pass, 134 files, 2026-11-15 |
 | CI on GitHub | push to `main` | pass, 2026-11-14 |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
-| Production build | `npm run build` | pass, 2026-11-14 |
-| Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-14 |
+| Production build | `npm run build` | pass, 2026-11-15 |
+| Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |
 
 Two checks were also run by hand to make sure the suite can fail:
 
@@ -141,5 +187,14 @@ BUG-015), the rest answered in `docs/BUGLOG.md`. After the fixes: 150 tests
 pass, a fresh page load logs no console errors, and at 390 px the optional
 columns stay hidden with no horizontal scroll.
 
-End-to-end and accessibility commands are added here when those tools are
-added.
+**Phase 4 review.** A reviewer agent read the phase 4 diff: 11 findings, 8
+real defects fixed with tests (BUG-042 to BUG-049). After the fixes: 355
+unit tests and 48 end-to-end tests pass, and the Polymarket profile's last
+day reads +$13,493 against the trader record's 1-day P&L of +$13,142.
+
+**End-to-end suite** (`e2e/`): boards, filters, search, paging, profiles of
+both platforms with calendar, chart and categories, the 404 and error pages,
+the disabled form, the saved theme, the API routes, and no horizontal scroll
+at either size. It runs offline: every request to another host is aborted.
+
+Accessibility commands are added here when that tool is added.

@@ -139,6 +139,41 @@ work happens. It describes what was done, not what was planned.
 7. **Re-verified** after the fixes: 242 tests, the browser checks of the
    changed pages, then merged to `main`, which deploys to production.
 
+### Phase 4: the full trader profile and end-to-end tests (2026-11-14 to 15)
+
+1. **One more look at the source**, one profile page, slowly: the month
+   strip and its day bars, the expanded calendar in both views, the chart's
+   labels and hover readout, the category rows. Every day shade, label and
+   total was written down with its raw value.
+2. **A documented source for Polymarket history.** A web search found
+   Polymarket's own data API; its OpenAPI contract was read for the exact
+   parameters before one test request (D-035).
+3. **History maths as pure functions, tested against the recorded source
+   values** before any component existed: daily results, shading, monthly
+   totals, chart axis. Three of the first guesses failed those tests or the
+   comparison and were replaced by rules derived from the numbers (BUG-033,
+   BUG-036, BUG-037).
+4. **Components** for the month strip, calendar, chart and category card,
+   then the profile page wired to them. The interim P&L card from phase 3
+   was removed (DEV-17).
+5. **Checked in the browser against the source's recorded numbers**: chart
+   labels, calendar shades, month totals, category rows, and a layout probe
+   at the same viewport as the source.
+6. **End-to-end tests** with Playwright, run offline against a fixture
+   server that replays recorded answers (D-040), at desktop and phone sizes,
+   and added to CI as a second job.
+7. **Layout probe** at the source's viewport: two cards were taller than
+   the source's and were corrected (BUG-040, BUG-041).
+8. **Independent review** of the phase diff by a reviewer subagent: 11
+   findings. Eight were real defects, fixed with tests (BUG-042 to
+   BUG-049), including two that only show for traders unlike the one the
+   source was compared on: a trader on both platforms, and the Polymarket
+   calendar. One was a trade-off, recorded as a decision (D-041); the rest
+   were clean-ups.
+9. **Re-verified** after the fixes: 355 unit tests, 48 end-to-end tests,
+   the Polymarket profile in the browser (its last day now matches the
+   trader's own 1-day figure), then merged to `main`.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -147,6 +182,19 @@ work happens. It describes what was done, not what was planned.
   Caught by reading the `git status` output between the two commits. History
   is not rewritten in this repository, so it stays as is. Since then each
   commit is preceded by a look at exactly what is staged.
+- **A stale dev server looked like a code bug** (phase 4, about 23:55 IST).
+  A profile that had worked returned 404. A throwaway test calling the real
+  functions showed the code was fine; the development server had been
+  running since before phase 3, through branch switches and production
+  builds. Restarting it fixed the page. About two minutes lost.
+- **A process from another project was stopped** (phase 4, about 23:57 IST).
+  To restart the dev server, every process matching `npm run dev` was
+  listed, and an orphaned one was stopped on the assumption that it was a
+  leftover of this repository. It belonged to another project on the same
+  machine; its watcher stopped with it. That project's dev server was
+  running again a few seconds later (a new process started at 23:57) and the
+  owner was told. Since then only processes whose command line contains this
+  repository's path are stopped.
 
 ## Tools used so far
 
@@ -169,5 +217,9 @@ work happens. It describes what was done, not what was planned.
 | graphify (skill) | Knowledge graph of code and docs, so later work reads the graph instead of whole files |
 | GitHub CLI | Repository creation, CI run status |
 | Vercel (MCP server) | Project creation linked to GitHub, deployment status |
+| Firecrawl search (MCP server) | Finding Polymarket's documented P&L history endpoint |
+| Polymarket's OpenAPI contract | Exact parameters and fields of that endpoint, read before calling it |
+| Playwright 1.64 | End-to-end tests at desktop and phone sizes, offline, locally and in CI |
+| Context7 documentation server (MCP) | Current Playwright configuration docs |
 
 Later phases add to this log and this table as tools are actually used.

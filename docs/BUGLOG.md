@@ -315,3 +315,97 @@ Not treated as defects, with the reason:
   literal types the JSON cannot give, and a test fails if the two differ.
 - **A magic number for skeleton rows.** Cleaned up (named constant), not a
   defect.
+
+## Phase 4 (2026-11-14 23:45 to 2026-11-15 00:20 IST)
+
+Times in this section are IST. Every phase 4 bug was caught before its code
+was first committed, so "Fix commit" names that first commit.
+
+### BUG-033 Calendar shades scaled to the month's biggest day
+
+- **Time:** 2026-11-14, about 23:50
+- **Feature / file:** month strip and calendar, `src/features/profile/history.ts`
+- **What the AI wrote:** each day's shade as a share of the month's largest
+  gain or loss, with a separate "worst day" shade, inferred from how the
+  source's colors looked.
+- **Symptom:** against the recorded November month, 10 November came out
+  as a medium loss instead of a light one and 11 November as a strong loss
+  instead of a medium one.
+- **How it was caught:** test. The first test of the function used the
+  source's recorded day shades as its expected values, and failed.
+- **Root cause:** the rule was guessed from appearance instead of read from
+  the numbers. Every observed shade fits fixed dollar steps (D-037).
+- **Fix commit:** `eab2de9`
+- **Prevention:** every day shade observed on the source is a test case.
+
+### BUG-034 A test expected `-$4.35K` where the source shows `-$4.34K`
+
+- **Time:** 2026-11-14, about 23:53
+- **Feature / file:** `src/features/leaderboard/format.test.ts`
+- **What the AI wrote:** an expected value for -4,345 rounded by hand to
+  `-$4.35K`.
+- **Symptom:** the month-total format test failed; the code printed
+  `-$4.34K`, which is what the source shows for the same month.
+- **How it was caught:** test run, checked against the value recorded on the
+  source.
+- **Root cause:** in floating point 4.345 is 4.34499..., so it rounds down.
+  The test was wrong, the code was right.
+- **Fix commit:** `1f4a581`
+- **Prevention:** expected strings in format tests come from recorded source
+  values and are marked "seen".
+
+### BUG-035 to BUG-036 Chart axis and calendar sums
+
+| ID | Time | File | What was wrong | How caught | Fix commit |
+|---|---|---|---|---|---|
+| BUG-035 | 23:58 | `history.ts`, `pnl-chart.tsx` | The value axis ran from the data's own minimum to its maximum (`+$89K` to `+$1.1M`) where the source shows `-$12K` to `+$1.2M`, and the last date label was cut off at the right edge | visual diff against the recorded source labels, then a test with both recorded source axes as expected values | `eab2de9`, `bc342de` |
+| BUG-036 | 2026-11-15 00:00 | `history.ts` | A day after a gap in the history took the whole change since the last recorded day, so monthly totals differed from the source's (for example October: +$55,262 against +$57,523) | computing all eleven 2026 monthly totals from the real history and comparing them with the totals recorded on the source | `eab2de9` |
+
+Root causes: the axis was written as "nice numbers around the data" without
+looking at how the source pads it; the daily rule assumed a change is always
+"close minus previous close". The source pads the range by 10% (D-038) and
+counts a day only when the day before has data (D-036). Prevention: both
+recorded axes and the consecutive-day rule are unit tests.
+
+### BUG-037 to BUG-041 Caught by lint, typecheck and the layout probe
+
+| ID | Time | File | What was wrong | How caught | Fix commit |
+|---|---|---|---|---|---|
+| BUG-037 | 23:55 | `src/app/account/[id]/page.tsx` | `Date.now()` read during render to decide "today", which can differ between server and browser | lint (React Compiler purity rule) | `a945cd3`, `bc342de` |
+| BUG-038 | 00:00 | `month-strip.tsx` | Calendar titles used the board format, `$-10,863`, where the profile shows `-$10,863` | browser check against the recorded source titles | `1f4a581`, `bc342de` |
+| BUG-039 | 00:04 | `e2e/test.ts` | The offline test fixture was declared so that every test's arguments were typed `never` | typecheck | `6351b05` |
+| BUG-040 | 00:15 | `category-card.tsx` | Category rows 20 px high against 17.5 px on the source, making the list 35 px taller | layout probe at the source's viewport | `bc342de` |
+| BUG-041 | 00:15 | `profile-view.tsx` | The Kalshi note was printed under the chart heading, making the card 278 px high against 262 px; the source keeps it behind an info icon | layout probe at the source's viewport | `bc342de` |
+
+### Found by the phase 4 independent review (2026-11-15, about 00:20)
+
+A reviewer subagent that had not written the code read the phase 4 diff:
+11 findings, 2 rated high and 2 medium. Each was checked against the code
+and the recorded data before fixing.
+
+| ID | File | Defect | Fix |
+|---|---|---|---|
+| BUG-042 | `history.ts` | For a trader on both platforms, the Kalshi series counted as 0 before its first point, so the day Kalshi tracking began showed the trader's whole Kalshi total (+$90,139 in the recorded history) as a one-day gain, marked "best", with a cliff in the chart (confirmed from the fixture) | Calendar adds each series' own daily changes; the chart holds a late series at its first value; tests |
+| BUG-043 | `history-data.ts` | Polymarket's daily points are stamped 00:00 UTC and hold the total as the day begins, but were filed as that day's close, so every Polymarket calendar day showed the previous day's result. For the recorded trader the last day read +$2,987 where the trader record's own 1-day P&L is +$13,142 (confirmed) | A point at exactly 00:00 UTC is filed as the previous day's close; the last day now reads +$13,493; test with the recorded points |
+| BUG-044 | `history.ts` | The chart's tick loop never ended when the data range was below the values' float precision, which would hang the page render on the server (reproduced by the reviewer) | Near-flat ranges drawn flat; the loop counts ticks; regression test with the reproducing pair |
+| BUG-045 | `history-data.ts` | History timestamps were not range-checked; one far outside any real date crashed date formatting outside the error handling and took the whole profile to the error page (reproduced by the reviewer) | Whole numbers between 2015 and 2100 only, in the right unit for each API; a bad record makes the history "unavailable" instead; tests |
+| BUG-046 | `profile-view.tsx` | Every trader without documented history saw "not available for Hyperliquid traders", including a Kalshi trader without a username | One message that fits every case |
+| BUG-047 | `origins.ts` | The origin overrides accepted any URL, including remote `http:` and schemes without an origin, against the https-only data rule | https only, or http on localhost; tests |
+| BUG-048 | `e2e/profile.spec.ts` | "404 without asking upstream" would also pass if the app did ask, because the fixture server answers 404 too | Title now claims only the 404; the no-request part stays with the unit tests of `getProfile`, which do check it |
+| BUG-049 | `schema.ts` | Wallets were de-duplicated by exact text, so one address in two letter cases would be fetched twice and its P&L counted twice | Lowercased before de-duplicating; test |
+
+How they were caught: independent review. All eight were caught before the
+code was first committed. Fix commits: BUG-042 in `eab2de9` and `a945cd3`;
+BUG-043, BUG-045 and BUG-049 in `a945cd3`; BUG-044 in `eab2de9`; BUG-046 in
+`bc342de`; BUG-047 in `e13ba10`; BUG-048 in `6351b05`.
+
+Not treated as defects, with the reason:
+
+- **A degraded history or category card is cached for five minutes.** True,
+  and kept on purpose: the rest of the profile stays available, which
+  matters more than five minutes of a missing card. Recorded as D-041.
+- **`e2e/fixtures/` allowed to name the source.** No fixture names it, so the
+  entry was removed rather than widening rule 5.
+- **Two symbols left unused by this phase, a hard-coded dash, a comment
+  pointing at a note that did not exist yet.** Clean-ups, done in the same
+  commit.

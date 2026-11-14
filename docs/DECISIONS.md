@@ -261,5 +261,91 @@ not. Each Kalshi period is a 1,000-row board, and the source fetches them only
 when selected (KAL-07), so this board does the same and shows skeleton rows
 while a period loads.
 
+### D-035 Where profile history comes from (2026-11-14, phase 4)
+
+Kalshi history comes from the documented `/api/kalshi/{username}/history`.
+Polymarket history comes from Polymarket's own documented data API,
+`GET /v2/user-pnl?interval=all&fidelity=1d`, one request per wallet; a trader
+with several wallets gets the sum, each wallet's last value carried forward.
+Its `trade_pnl` field gave the same all-time figure and the same chart labels
+as the source, so it is the field used. The source's own Polymarket history
+route is undocumented and is not used (Q-02). Traders listed only on
+Hyperliquid have no documented history, so their profile says so instead of
+showing a chart.
+
+### D-036 Calendar days are UTC, and a day needs the day before
+
+A day's result is that day's last cumulative value minus the previous UTC
+day's last value, and it exists only when the previous day has data. This
+rule was chosen by computing monthly totals from the real history and
+comparing them with the eleven totals the source showed for 2026: UTC days
+with this rule matched 9 exactly. IST days matched 3, New York days 1, and
+UTC days that bridge a gap got August, September and October wrong. The two
+months that still differ (August and September, by about $2.5K and $1.2K)
+are recorded as a known difference (DEV-23).
+
+### D-037 Calendar shading by fixed dollar steps
+
+Every day shade recorded on the source fits fixed steps: under $100 is flat,
+then steps at $500, $2K, $5K and $10K, the same for gains and losses, and the
+month's best gain gets the highlight color. A first rule that scaled shades
+to the month's largest day did not fit (BUG-033). The thresholds live in
+`history.ts` and the test file holds every observed day.
+
+### D-038 The P&L chart is plain SVG
+
+No chart library: one line, a dashed zero line, five date labels, four or
+five money labels and a hover readout are about 200 lines of SVG and React.
+The value axis copies the observed behavior instead of guessing: the data
+range is padded by 10% on each side, the step is a quarter of the range
+rounded up to a multiple of 0.05 of its order of magnitude, and the top label
+is the padded maximum. That reproduces both recorded source charts label for
+label (`history.test.ts`).
+
+### D-039 Two profile pieces are not built
+
+- **"Last 24h" category movers.** They come from an undocumented endpoint
+  (Q-02). The category rows themselves come from the documented one.
+- **Share cards (PROF-06).** Marked "first to cut" in the spec. They need
+  server-rendered images and share actions, and add nothing to the data.
+
+Both are listed in `docs/SPEC.md` as DEV-20 and DEV-21.
+
+### D-040 End-to-end tests run offline
+
+Playwright drives the production build against a local fixture server that
+replays the committed snapshot and five recorded API answers
+(`npm run fixtures:e2e` records them again). History is moved forward by
+whole days so it always ends today, which keeps the current month's calendar
+populated whatever the date. The two upstream origins can be pointed at the
+fixture server through `UPSTREAM_ORIGIN` and `POLYMARKET_DATA_ORIGIN`; each
+must be an absolute URL or the server refuses to start, and only the origin
+part is used. Every request to a non-local host is aborted inside the tests,
+pictures included. The test build goes to `.next-e2e`, so it never disturbs
+a running development server. Playwright is pinned to 1.64.0 because that
+release uses the Chromium build already installed on the owner's machine,
+which saved a browser download; CI installs its own copy.
+
+### D-041 A failed history card is cached with the page
+
+If the history or category request fails while a profile is rendered, the
+page shows the rest of the profile with a short message in that card, and
+that version is cached for the usual five minutes. The alternative, failing
+the whole page so nothing is cached (as BUG-023 does for the trader record),
+would take away a working profile because of one card. Raised by the phase
+4 review.
+
+### D-042 Two history readings checked against the API, not the source
+
+- **Polymarket days.** A daily point stamped 00:00 UTC is read as the
+  previous day's close (BUG-043). The source's Polymarket calendar was not
+  recorded, so this is checked against the trader record's 1-day P&L from
+  the documented API instead.
+- **Traders on both platforms.** Each series' daily changes are added, and
+  the chart holds a series that starts late at its first value (BUG-042). The
+  source's route for these traders is undocumented and was not observed.
+
+Both are listed as assumptions in `docs/EVALS.md`.
+
 ## Open items
 
