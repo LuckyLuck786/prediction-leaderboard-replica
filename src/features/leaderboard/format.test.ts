@@ -2,14 +2,19 @@ import { describe, expect, it } from "vitest";
 
 import {
   MISSING,
+  formatChartDate,
+  formatChartMoney,
+  formatChartTick,
   formatCount,
   formatDaysSince,
   formatDrawdown,
   formatProfileMoney,
   formatProfileTitleMoney,
+  formatSignedWhole,
   formatMoney,
   formatMoneyCompact,
   formatMoneyWhole,
+  formatMonthTotal,
   formatMoverAmount,
   formatRoi,
   formatScore,
@@ -106,6 +111,43 @@ describe("formatProfileTitleMoney (FMT-04)", () => {
     [999960, "+$1.00M"],
   ])("%d -> %s", (value, expected) => {
     expect(formatProfileTitleMoney(value)).toBe(expected);
+  });
+});
+
+describe("calendar and chart formats (PROF-02 to PROF-04)", () => {
+  it.each([
+    [797340, "+$797.34K"], // seen: year to date
+    [92798, "+$92.80K"], // seen: month tile
+    [5548, "+$5.55K"], // seen
+    [-4345, "-$4.34K"], // seen: AUG tile; 4.345 is 4.3449... in floating point, as on the source
+    [999996, "+$1.00M"], // never "+$1000.00K"
+    [629, "+$629"],
+    [-0.2, "+$0"],
+  ])("month total %d -> %s", (value, expected) => {
+    expect(formatMonthTotal(value)).toBe(expected);
+  });
+
+  it.each([
+    [-11600, "-$12K"], // seen: axis
+    [338400, "+$338K"], // seen
+    [1038400, "+$1.0M"], // seen
+    [1216600, "+$1.2M"], // seen
+    [670000, "+$670K"], // seen: tooltip
+    [999600, "+$1.0M"],
+    [450, "+$450"],
+  ])("chart label %d -> %s", (value, expected) => {
+    expect(formatChartMoney(value)).toBe(expected);
+  });
+
+  it("writes calendar amounts with the sign first, as seen", () => {
+    expect(formatSignedWhole(161061)).toBe("+$161,061");
+    expect(formatSignedWhole(-10863)).toBe("-$10,863");
+    expect(formatSignedWhole(-0.4)).toBe("+$0");
+  });
+
+  it("formats chart dates in UTC as seen", () => {
+    expect(formatChartTick(Date.UTC(2025, 8, 26, 23, 30))).toBe("Sep 25");
+    expect(formatChartDate(Date.UTC(2026, 4, 21))).toBe("May 21, 2026");
   });
 });
 

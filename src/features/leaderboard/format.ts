@@ -93,6 +93,67 @@ export function formatProfileTitleMoney(value: number): string {
   return profileAmount(value, 2);
 }
 
+function scaledAmount(
+  value: number,
+  decimals: { thousands: number; millions: number },
+): string {
+  const amount = Math.abs(value);
+  const kText = (amount / THOUSAND).toFixed(decimals.thousands);
+  let short: string;
+  // Units are chosen on the rounded figure, so nothing prints as "1000K".
+  if (amount >= MILLION || Number(kText) >= THOUSAND) {
+    short = `${(amount / MILLION).toFixed(decimals.millions)}M`;
+  } else if (Math.round(amount) >= THOUSAND) {
+    short = `${kText}K`;
+  } else {
+    short = String(Math.round(amount));
+  }
+  const isLoss = value < 0 && Number(short.replace(/[KM]$/, "")) !== 0;
+  return `${isLoss ? "-" : "+"}$${short}`;
+}
+
+/**
+ * Whole dollars with the sign first, as the profile calendar writes them:
+ * `+$161,061`, `-$10,863`. (The boards write losses as `$-21,622.00`.)
+ */
+export function formatSignedWhole(value: number): string {
+  const dollars = Math.round(value);
+  const digits = WHOLE_DOLLARS.format(Math.abs(dollars));
+  return dollars < 0 ? `-$${digits}` : `+$${digits}`;
+}
+
+/** Month and year totals in the calendar's Monthly view: `+$92.80K`, `-$4.34K`. */
+export function formatMonthTotal(value: number): string {
+  return scaledAmount(value, { thousands: 2, millions: 2 });
+}
+
+/** Chart axis labels and tooltips: `+$338K`, `-$12K`, `+$1.2M`. */
+export function formatChartMoney(value: number): string {
+  return scaledAmount(value, { thousands: 0, millions: 1 });
+}
+
+const CHART_TICK_DATE = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  year: "2-digit",
+  timeZone: "UTC",
+});
+const CHART_TOOLTIP_DATE = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+/** Chart time axis: `Sep 25`. */
+export function formatChartTick(t: number): string {
+  return CHART_TICK_DATE.format(new Date(t));
+}
+
+/** Chart tooltip: `May 21, 2026`. */
+export function formatChartDate(t: number): string {
+  return CHART_TOOLTIP_DATE.format(new Date(t));
+}
+
 /** Whole number with thousands separators: `3,000`. */
 export function formatCount(value: number): string {
   return COUNT_FORMAT.format(value);
