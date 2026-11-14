@@ -1,5 +1,17 @@
 {
   "name": "predicting.top",
   "origin": "https://predicting.top",
-  "leaderboardPeriods": ["1d", "30d", "ytd", "all"]
+  "leaderboardPeriods": [
+    "1d",
+    "30d",
+    "ytd",
+    "all"
+  ],
+  "kalshiPeriods": [
+    "all",
+    "30d",
+    "7d",
+    "1d"
+  ],
+  "kalshiLimit": 1000
 }

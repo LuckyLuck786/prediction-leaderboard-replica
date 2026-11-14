@@ -18,7 +18,10 @@ const OUT_FILE = new URL("leaderboard.json", OUT_DIR);
 // and sort, including negative values, without committing the full list.
 const TOP_COUNT = 50;
 const BOTTOM_COUNT = 10;
-// Upstream allows 100 requests a minute. Five spaced requests stay far below.
+// The Kalshi board is ranked by profit with no losses at the top 1,000 level,
+// so its first page is what the fallback needs.
+const KALSHI_KEEP = 100;
+// Upstream allows 100 requests a minute. Nine spaced requests stay far below.
 const REQUEST_GAP_MS = 2000;
 // A stalled connection must fail the run, not hang it.
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -61,6 +64,23 @@ async function main() {
     await sleep(REQUEST_GAP_MS);
   }
 
+  const kalshi = {};
+  for (const period of source.kalshiPeriods) {
+    const body = await getJson(
+      `${source.origin}/api/kalshi-leaderboard?period=${period}&limit=${source.kalshiLimit}`,
+    );
+    if (typeof body?.lastUpdated !== "string" || !Array.isArray(body?.traders)) {
+      throw new Error(`Unexpected Kalshi board shape for period ${period}`);
+    }
+    kalshi[period] = {
+      lastUpdated: body.lastUpdated,
+      upstreamTotal: body.traders.length,
+      traders: [...body.traders].sort((a, b) => a.rank - b.rank).slice(0, KALSHI_KEEP),
+    };
+    console.log(`kalshi ${period}: kept ${kalshi[period].traders.length} of ${body.traders.length}`);
+    await sleep(REQUEST_GAP_MS);
+  }
+
   const dailyProfit = await getJson(`${source.origin}/api/daily-profit`);
   if (typeof dailyProfit?.raw !== "number") {
     throw new Error("Unexpected daily-profit shape");
@@ -71,6 +91,7 @@ async function main() {
     source: source.origin,
     dailyProfit,
     periods,
+    kalshi,
   };
 
   await mkdir(OUT_DIR, { recursive: true });

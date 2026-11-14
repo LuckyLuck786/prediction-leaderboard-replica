@@ -51,7 +51,7 @@ Results and the measured comparison with the source are in
 [docs/EVALS.md](docs/EVALS.md).
 
 `npm run snapshot` refreshes the saved data snapshot from the upstream public
-API (five spaced requests).
+API (nine spaced requests).
 
 ## How it was built and verified
 
