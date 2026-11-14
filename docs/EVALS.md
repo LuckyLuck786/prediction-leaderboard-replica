@@ -166,7 +166,7 @@ is added up (D-042).
 | Unit and component tests | `npm run test` | 355 of 355 pass, 2026-11-15 |
 | End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 48 pass, 2 skipped by design (hover-only checks on the phone), 2026-11-15 |
 | Asset check | `npm run check:assets` | pass, 134 files, 2026-11-15 |
-| CI on GitHub | push to `main` | pass, 2026-11-14 |
+| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |
