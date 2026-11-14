@@ -1,45 +1,54 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useReducer, type Dispatch } from "react";
 
 import { BRAND_MARK_PATH, PRODUCT_TAG } from "@/features/shell/brand";
+import { usePeriodData } from "@/lib/use-period-data";
 
-import { formatMoneyWhole, formatStamp } from "../format";
-import type { Leaderboard, LeaderboardPeriod, PlatformFilter } from "../model";
+import { fetchBoard as fetchBoardFromApi } from "../board-api";
+import type { BoardPayload } from "../data";
+import { MISSING, formatMoneyWhole, formatStamp } from "../format";
+import { LEADERBOARD_PERIODS, PAGE_SIZE, type LeaderboardPeriod, type PlatformFilter } from "../model";
 import { applyQuery } from "../query";
-import { createInitialState, reduceLeaderboard } from "../state";
+import { createInitialState, reduceLeaderboard, type LeaderboardAction } from "../state";
 import { LeaderboardControls } from "./leaderboard-controls";
 import { LeaderboardTable } from "./leaderboard-table";
 import { LocalStamp } from "./local-stamp";
 
+const EMPTY: never[] = [];
+
 export function LeaderboardView({
   heading,
   description,
-  boards,
+  initial,
   dailyProfit,
-  snapshot,
   initialPlatform = "all",
+  fetchBoard = fetchBoardFromApi,
 }: {
   heading: string;
   description: string;
-  boards: Record<LeaderboardPeriod, Leaderboard>;
-  /** Combined profit of all tracked traders today, in dollars. */
-  dailyProfit: number;
-  /** Set when the page shows the saved snapshot rather than live data. */
-  snapshot: {
-    capturedAt: string;
-    /** Traders upstream listed per period; the snapshot holds fewer. */
-    upstreamTotals: Record<LeaderboardPeriod, number>;
-  } | null;
+  /** The board for the default period, rendered on the server. */
+  initial: BoardPayload;
+  /** Combined profit of all tracked traders today, in dollars; null when unavailable. */
+  dailyProfit: number | null;
   initialPlatform?: PlatformFilter;
+  /** Loads the other periods. Replaced in tests. */
+  fetchBoard?: (period: LeaderboardPeriod) => Promise<BoardPayload>;
 }) {
   const [state, dispatch] = useReducer(reduceLeaderboard, initialPlatform, createInitialState);
+  const boards = usePeriodData({
+    periods: LEADERBOARD_PERIODS,
+    initialPeriod: initial.board.period,
+    initialValue: initial,
+    fetchPeriod: fetchBoard,
+  });
 
-  const board = boards[state.period];
-  const matching = useMemo(
-    () => applyQuery(board.traders, state.query, state.period),
-    [board.traders, state.query, state.period],
-  );
+  const current = boards.get(state.period);
+  const payload = current.status === "ready" ? current.value : null;
+  const traders = payload?.board.traders ?? EMPTY;
+
+  // Filtering and sorting a few hundred rows is cheap; the React Compiler memoizes it.
+  const matching = applyQuery(traders, state.query, state.period);
   const visible = matching.slice(0, state.visibleCount);
 
   return (
@@ -57,43 +66,61 @@ export function LeaderboardView({
           <div className="flex flex-col gap-0.5">
             <p className="text-sm text-muted-foreground">{description}</p>
             <p className="text-xs text-muted-foreground">
-              Data as of <LocalStamp iso={board.lastUpdated} />
+              Data as of {payload ? <LocalStamp iso={payload.board.lastUpdated} /> : MISSING}
             </p>
           </div>
           <p className="text-lg font-semibold">
             Today:{" "}
-            <span className={dailyProfit < 0 ? "text-negative" : "text-positive"}>
-              {formatMoneyWhole(dailyProfit)}
-            </span>
+            {dailyProfit === null ? (
+              <span className="text-muted-foreground">{MISSING}</span>
+            ) : (
+              <span className={dailyProfit < 0 ? "text-negative" : "text-positive"}>
+                {formatMoneyWhole(dailyProfit)}
+              </span>
+            )}
           </p>
         </div>
       </header>
 
-      {snapshot ? (
+      {payload?.source.kind === "snapshot" ? (
         <p role="status" className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm">
-          Saved snapshot from {formatStamp(snapshot.capturedAt, "UTC")} UTC. It holds{" "}
-          {board.traders.length} of the {snapshot.upstreamTotals[state.period]} traders listed
-          for this period: the best and the worst by P&amp;L. This is not live data.
+          Live data is unavailable right now. Showing a saved snapshot from{" "}
+          {formatStamp(payload.source.capturedAt, "UTC")} UTC: {payload.board.traders.length} of
+          the {payload.source.upstreamTotal} traders listed for this period, the best and the
+          worst by P&amp;L.
         </p>
       ) : null}
 
       <LeaderboardControls
         state={state}
-        dispatch={dispatch}
-        shownCount={matching.length}
-        totalCount={board.traders.length}
+        dispatch={dispatch as Dispatch<LeaderboardAction>}
+        counts={payload ? { shown: matching.length, total: traders.length } : null}
       />
 
       <LeaderboardTable
         traders={visible}
         period={state.period}
-        asOf={board.lastUpdated}
+        asOf={payload?.board.lastUpdated ?? null}
         extraColumns={state.extraColumns}
         sort={state.query.sort}
         onSort={(key) => dispatch({ type: "sortBy", key })}
+        skeletonRows={current.status === "loading" ? PAGE_SIZE : 0}
       />
 
-      {matching.length === 0 ? (
+      {current.status === "failed" ? (
+        <div role="alert" className="py-8 text-center text-sm text-muted-foreground">
+          <p>Could not load this period.</p>
+          <button
+            type="button"
+            onClick={() => boards.retry(state.period)}
+            className="mt-2 border border-border px-3 py-1 text-foreground hover:bg-accent"
+          >
+            Try again
+          </button>
+        </div>
+      ) : null}
+
+      {payload && matching.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">
           No traders match these filters.
         </p>

@@ -1,7 +1,8 @@
 "use client";
 
-import type { Dispatch, ReactNode } from "react";
+import type { Dispatch } from "react";
 
+import { Chip } from "@/features/shell/chip";
 import { ThemeToggle } from "@/features/shell/theme-toggle";
 import { cn } from "@/lib/utils";
 
@@ -29,50 +30,15 @@ const SCORE_LEGEND = `Score blends ${new Intl.ListFormat("en-GB", {
   type: "conjunction",
 }).format(SCORE_WEIGHTS.map((weight) => `${weight.part} ${weight.percent}%`))}.`;
 
-// The source draws no border on its chips, so sizes match only without one.
-const CHIP_ON = "bg-primary text-primary-foreground";
-const CHIP_OFF = "text-foreground hover:bg-accent";
-
-function Chip({
-  active,
-  title,
-  onClick,
-  className,
-  children,
-}: {
-  active: boolean;
-  title?: string;
-  onClick: () => void;
-  className?: string;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      title={title}
-      onClick={onClick}
-      className={cn(
-        "flex h-6 items-center gap-1 whitespace-nowrap px-2 text-xs sm:h-7 sm:text-sm",
-        active ? CHIP_ON : CHIP_OFF,
-        className,
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function LeaderboardControls({
   state,
   dispatch,
-  shownCount,
-  totalCount,
+  counts,
 }: {
   state: LeaderboardState;
   dispatch: Dispatch<LeaderboardAction>;
-  shownCount: number;
-  totalCount: number;
+  /** Rows matching the filters and rows in the board; null while loading. */
+  counts: { shown: number; total: number } | null;
 }) {
   const { period, query, extraColumns } = state;
 
@@ -90,7 +56,7 @@ export function LeaderboardControls({
           className="h-[30px] w-full border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-ring sm:w-48"
         />
         <p className="text-sm">
-          {shownCount} of {totalCount} traders
+          {counts ? `${counts.shown} of ${counts.total} traders` : "Loading traders"}
         </p>
         <div className="sm:ml-auto">
           <ThemeToggle />

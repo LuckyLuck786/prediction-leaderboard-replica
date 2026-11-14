@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { PAGE_SIZE, type Trader } from "../model";
-import { makeBoards, makeTrader } from "../test-helpers";
+import type { BoardPayload } from "../data";
+import { PAGE_SIZE, type LeaderboardPeriod, type Trader } from "../model";
+import { makeBoard, makeTrader } from "../test-helpers";
 import { LeaderboardView } from "./leaderboard-view";
 
 const push = vi.fn();
@@ -43,17 +44,32 @@ const traders: Trader[] = Array.from({ length: TOTAL }, (_, index) => {
   });
 });
 
-function renderView(props: Partial<ComponentProps<typeof LeaderboardView>> = {}) {
-  return render(
+const LIVE = { kind: "live" } as const;
+const payload = (period: LeaderboardPeriod, list: Trader[] = traders): BoardPayload => ({
+  board: makeBoard(period, list),
+  source: LIVE,
+});
+
+/**
+ * Renders the view with the 1D board and a fake loader for the other periods.
+ * `perPeriod` replaces the trader list of a period.
+ */
+function renderView(
+  props: Partial<ComponentProps<typeof LeaderboardView>> = {},
+  perPeriod: Partial<Record<LeaderboardPeriod, Trader[]>> = {},
+) {
+  const fetchBoard = vi.fn(async (period: LeaderboardPeriod) => payload(period, perPeriod[period]));
+  const view = render(
     <LeaderboardView
       heading="Test board"
       description="A board for tests."
-      boards={makeBoards(traders)}
+      initial={payload("1d", perPeriod["1d"])}
       dailyProfit={403821}
-      snapshot={null}
+      fetchBoard={fetchBoard}
       {...props}
     />,
   );
+  return { ...view, fetchBoard };
 }
 
 const bodyRows = () => screen.getAllByRole("row").slice(1);
@@ -142,12 +158,50 @@ describe("LeaderboardView", () => {
     expect(screen.queryByRole("button", { name: "$5+" })).toBeNull();
   });
 
-  it("shows the board that belongs to the selected period (HOME-04)", () => {
+  it("loads every other period after the first paint, once each", async () => {
+    const { fetchBoard } = renderView();
+    await screen.findByText(`${TOTAL} of ${TOTAL} traders`);
+    expect(fetchBoard.mock.calls.map(([period]) => period).sort()).toEqual(["30d", "all", "ytd"]);
+  });
+
+  it("shows the board that belongs to the selected period (HOME-04)", async () => {
     const allTime = [makeTrader({ id: "veteran", pnl: 7270821 })];
-    renderView({ boards: makeBoards(traders, { all: allTime }) });
+    renderView({}, { all: allTime });
     click("ALL");
+    expect(await screen.findByText("1 of 1 traders")).toBeTruthy();
     expect(firstNames(1)).toEqual(["veteran"]);
-    expect(screen.getByText("1 of 1 traders")).toBeTruthy();
+  });
+
+  it("draws placeholder rows while a period loads (STATE-03)", () => {
+    const never = new Promise<BoardPayload>(() => {});
+    renderView({ fetchBoard: () => never });
+    click("ALL");
+    expect(screen.getByText("Loading traders")).toBeTruthy();
+    // Placeholders are hidden from assistive technology, so query the DOM.
+    expect(document.querySelectorAll('tbody tr[aria-hidden="true"]')).toHaveLength(PAGE_SIZE);
+    expect(bodyRows()).toHaveLength(0);
+  });
+
+  it("says when a period fails to load, and retries on request", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    let attempt = 0;
+    const fetchBoard = vi.fn(async (period: LeaderboardPeriod) => {
+      if (period === "all" && attempt++ === 0) throw new Error("offline");
+      return payload(period);
+    });
+    renderView({ fetchBoard });
+    click("ALL");
+    expect((await screen.findByRole("alert")).textContent).toContain("Could not load this period.");
+
+    await act(async () => click("Try again"));
+    expect(await screen.findByText(`${TOTAL} of ${TOTAL} traders`)).toBeTruthy();
+    expect(screen.queryByRole("alert")).toBeNull();
+    vi.mocked(console.error).mockRestore();
+  });
+
+  it("shows a dash when the daily total is unavailable (HOME-02)", () => {
+    renderView({ dailyProfit: null });
+    expect(screen.getByText("Today:").textContent).toContain("–");
   });
 
   it("adds an optional column named for the period (HOME-10)", () => {
@@ -172,24 +226,29 @@ describe("LeaderboardView", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("labels a saved snapshot, and only a saved snapshot", () => {
+  it("labels a saved snapshot, and only a saved snapshot (DEV-15)", async () => {
     const { unmount } = renderView();
     expect(screen.queryByRole("status")).toBeNull();
     unmount();
 
+    const snapshotOf = (period: LeaderboardPeriod, upstreamTotal: number): BoardPayload => ({
+      board: makeBoard(period, traders),
+      source: { kind: "snapshot", capturedAt: "2026-11-14T12:19:35.677Z", upstreamTotal },
+    });
     renderView({
-      snapshot: {
-        capturedAt: "2026-11-14T12:19:35.677Z",
-        upstreamTotals: { "1d": 581, "30d": 652, ytd: 772, all: 788 },
-      },
+      initial: snapshotOf("1d", 581),
+      fetchBoard: async (period) => (period === "all" ? snapshotOf("all", 788) : payload(period)),
     });
     expect(screen.getByRole("status").textContent).toBe(
-      `Saved snapshot from 14 Nov, 12:19 UTC. It holds ${TOTAL} of the 581 traders listed for this period: the best and the worst by P&L. This is not live data.`,
+      `Live data is unavailable right now. Showing a saved snapshot from 14 Nov, 12:19 UTC: ${TOTAL} of the 581 traders listed for this period, the best and the worst by P&L.`,
     );
 
-    // The disclosed total follows the selected period.
+    // The banner follows the board on screen: live periods have none.
+    click("1M");
+    await screen.findByText(`${TOTAL} of ${TOTAL} traders`);
+    expect(screen.queryByRole("status")).toBeNull();
     click("ALL");
-    expect(screen.getByRole("status").textContent).toContain(`${TOTAL} of the 788 traders`);
+    expect((await screen.findByRole("status")).textContent).toContain(`${TOTAL} of the 788 traders`);
   });
 
   it("keeps optional columns off narrow screens, where their toggles are hidden (HOME-10)", () => {
@@ -204,7 +263,7 @@ describe("LeaderboardView", () => {
     expect(winRateCell?.className).toContain("hidden");
   });
 
-  it("shows the day's biggest mover in 1D only (HOME-17)", () => {
+  it("shows the day's biggest mover in 1D only (HOME-17)", async () => {
     const moved = [
       makeTrader({ id: "labelled", pnl: 3, dayMover: { label: "Politics", change: -11962, iconUrl: null } }),
       makeTrader({
@@ -213,7 +272,7 @@ describe("LeaderboardView", () => {
         dayMover: { label: "Will it rain?", change: 8813.3, iconUrl: "https://example.com/i.png" },
       }),
     ];
-    renderView({ boards: makeBoards(moved) });
+    renderView({}, { "1d": moved, all: moved });
     click("$5+");
 
     const [labelled, pictured] = bodyRows().map((row) => cellsOf(row).at(-1));
@@ -225,6 +284,7 @@ describe("LeaderboardView", () => {
     expect(pictured?.textContent).toContain("+$9K");
 
     click("ALL");
+    await screen.findByText("2 of 2 traders");
     expect(cellsOf(bodyRows()[0]).at(-1)?.textContent).not.toContain("Politics");
   });
 });

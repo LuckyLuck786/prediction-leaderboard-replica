@@ -60,6 +60,24 @@ const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
 
 const BADGE_LINK = "flex shrink-0 items-center justify-center hover:opacity-70";
 
+/** #, picture, trader, joined, score and P&L: the columns that are always there. */
+const BASE_COLUMN_COUNT = 6;
+
+/** A grey placeholder row with the height of a real one (61 px, 49 px on mobile). */
+function SkeletonRow({ columnCount }: { columnCount: number }) {
+  return (
+    <tr aria-hidden className="h-[49px] border-b border-border sm:h-[61px]">
+      <td colSpan={columnCount} className="p-1 sm:p-2">
+        <div className="flex items-center gap-3">
+          <div className="h-6 w-6 shrink-0 rounded-full bg-muted motion-safe:animate-pulse sm:h-10 sm:w-10" />
+          <div className="h-4 w-1/3 bg-muted motion-safe:animate-pulse" />
+          <div className="ml-auto h-4 w-1/5 bg-muted motion-safe:animate-pulse" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 /** Links inside a row must not also trigger the row's own navigation. */
 const keepInsideRow = (event: MouseEvent) => event.stopPropagation();
 
@@ -177,16 +195,20 @@ export function LeaderboardTable({
   extraColumns,
   sort,
   onSort,
+  skeletonRows = 0,
 }: {
   traders: readonly Trader[];
   period: LeaderboardPeriod;
-  /** ISO timestamp of the data; "joined" is counted up to this moment. */
-  asOf: string;
+  /** ISO timestamp of the data; "joined" is counted up to this moment. Null while loading. */
+  asOf: string | null;
   extraColumns: readonly ExtraColumn[];
   sort: SortState | null;
   onSort: (key: SortKey) => void;
+  /** Placeholder rows to draw while the data loads (spec STATE-03). */
+  skeletonRows?: number;
 }) {
   const router = useRouter();
+  const columnCount = BASE_COLUMN_COUNT + extraColumns.length;
 
   return (
     <table className="w-full table-fixed border-collapse">
@@ -284,7 +306,7 @@ export function LeaderboardTable({
                 </div>
               </td>
               <td className="hidden whitespace-nowrap p-2 text-left text-base text-muted-foreground sm:text-lg md:table-cell">
-                {formatDaysSince(trader.joinedAt, asOf)}
+                {asOf ? formatDaysSince(trader.joinedAt, asOf) : null}
               </td>
               <td className="p-1 text-center sm:p-2">
                 <span
@@ -313,6 +335,9 @@ export function LeaderboardTable({
             </tr>
           );
         })}
+        {Array.from({ length: skeletonRows }, (_, index) => (
+          <SkeletonRow key={`skeleton-${index}`} columnCount={columnCount} />
+        ))}
       </tbody>
     </table>
   );
