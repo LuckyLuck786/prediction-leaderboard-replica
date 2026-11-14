@@ -58,7 +58,11 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 ## Data rules
 
 - Fetch upstream data on the server (route handlers or server components)
-  with caching and revalidation. Visitors' browsers never call upstream.
+  with caching and revalidation. Visitors' browsers never call upstream for
+  data. Pictures are the one exception: they load from the URL the API gives
+  (D-013, D-033).
+- Every upstream URL goes through `src/upstream/urls.ts`: https only, and
+  outbound links lose their query string.
 - Validate every upstream response with a Zod schema at the boundary. A failed
   parse produces a handled error state, never a crash.
 - Keep a small snapshot fixture so the demo renders when upstream is down or

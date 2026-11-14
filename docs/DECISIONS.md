@@ -209,11 +209,57 @@ body exists. `next/script` with `beforeInteractive` was tried and rejected:
 in the production HTML it was placed at the end of `<body>` and only queued,
 running after the app's own scripts load, which would flash the dark theme.
 
-The development console shows two kinds of errors that are not app defects:
-errors from Fast Refresh picking up a file halfway through an edit, and a
-React notice that it does not run scripts it renders in the browser, which
-happens only when Fast Refresh re-renders the root layout. A fresh page load
-in development and the production build both log no errors.
+Correction, same day: the React notice about a script it renders in the
+browser was first put down to Fast Refresh only. It also appeared on a fresh
+load of a 404 page (BUG-019). The script is now rendered only into the server
+HTML and dropped after hydration, and the saved theme is re-applied once
+mounted (BUG-018). Errors from Fast Refresh picking up a half-edited file
+remain possible while editing and are not app defects.
+
+### D-029 One period ships with the page, the others load from our route
+
+Each upstream board is 570 to 700 KB of JSON. Sending all four periods with
+the page would make it several times heavier, so the server renders the 1D
+board and the browser fetches the other periods from our cached
+`/api/boards/{period}` right after the first paint, as the source does with
+its own API. Switching period is then instant, and the browser still never
+calls upstream for data.
+
+### D-030 Daily total is never mixed with the snapshot
+
+If upstream's daily total cannot be read, the header shows a dash. Showing
+the snapshot's total next to live rows would put two different moments on one
+screen.
+
+### D-031 Profiles in two steps
+
+Phase 3 builds the profile page from the documented trader endpoint so every
+row link resolves: header, P&L by period and the Smart Score card. The P&L by
+period card is an interim summary that the source does not have; phase 4
+replaces it with the month strip, the history chart and the category bars,
+after a closer look at the source's profile pages.
+
+### D-032 Unknown profile ids never reach upstream
+
+`/account/{id}` accepts only a wallet address or a username made of letters,
+digits, dots, dashes and underscores. Anything else is a 404 without a
+request, so a crafted path cannot be forwarded to the upstream API.
+
+### D-033 Pictures are exempt from "the browser never calls upstream"
+
+Amends D-013, after the phase 3 review asked. Trader figures are always
+fetched by our server. Pictures are not: a visitor's browser loads each
+avatar or market icon from the URL the API gives, which can be X,
+Polymarket's image hosts or the data source's own site. The owner chose this
+over an image proxy (Q-03): a proxy would put every image request through our
+host and its bandwidth for no gain in what is shown. The privacy page says so.
+
+### D-034 Kalshi periods load on demand
+
+The home board prefetches its other periods (D-029); the Kalshi board does
+not. Each Kalshi period is a 1,000-row board, and the source fetches them only
+when selected (KAL-07), so this board does the same and shows skeleton rows
+while a period loads.
 
 ## Open items
 

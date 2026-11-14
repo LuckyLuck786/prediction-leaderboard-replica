@@ -4,9 +4,10 @@ How we verify that the replica matches the source in structure and behavior,
 and that it works correctly. Branding differences are expected and excluded:
 see `docs/DECISIONS.md`, D-007.
 
-**Status: the home page shell has been checked against a saved snapshot.**
-Nothing has been checked against live data yet, and no other route is built.
-A cell stays "not run" until its check has actually been run.
+**Status (2026-11-14, end of phase 3):** the three boards, profiles and the
+simple pages are built and checked against live data in the browser. End-to-
+end automation, axe and Lighthouse are still to come. A cell stays "not run"
+until its check has actually been run.
 
 ## Check groups
 
@@ -30,31 +31,48 @@ Each cell is checked against the acceptance list for that route in
 
 | Route | Structure | Function | Data | Layout 390 | Layout 768 | Layout 1440 | Robustness | A11y |
 |---|---|---|---|---|---|---|---|---|
-| `/` | pass (1) | partial (2) | not run (3) | pass (4) | ours only (5) | ours only (5) | unit only (6) | not run |
-| `/polymarket` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/kalshi` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/account/[id]` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/battle` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/api-docs` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/submit` | not run | not run | not run | not run | not run | not run | not run | not run |
-| `/terms` | not run | not run | not run | not run | not run | not run | not run | not run |
+| `/` | pass (1) | pass (2) | pass (3) | pass (4) | ours only (5) | ours only (5) | pass, unit (6) | not run |
+| `/polymarket` | pass | pass | pass (3) | not run | not run | not run | pass, unit (6) | not run |
+| `/kalshi` | pass (7) | pass (7) | pass (7) | not run | not run | not run | pass, unit (6) | not run |
+| `/account/[id]` | partial (8) | pass (8) | pass (8) | not run | not run | not run | pass, unit (8) | not run |
+| `/battle` | not built | not built | not built | not built | not built | not built | not built | not built |
+| `/api-docs` | pass (9) | pass (9) | pass (9) | not run | not run | not run | not run | not run |
+| `/submit` | pass (10) | pass (10) | n/a | not run | not run | not run | n/a | not run |
+| `/terms`, `/privacy` | pass | n/a | n/a | not run | not run | not run | n/a | not run |
 
-Notes for `/`, 2026-11-14:
+Notes, 2026-11-14 (items 2, 3, 6 updated at the end of phase 3):
 
 1. Columns, header labels, footer links, disclaimer and first page of 30 rows
    present. Checked in the browser and by component tests.
 2. Period, platform, toggles, optional columns, sorting, search and paging
-   pass in component tests and in the browser. Row and name links point at
-   `/account/{id}`, which is not built yet, so navigation ends in a 404. The
-   footer carries no page links until those pages exist (BUG-007).
-3. Rows are compared with the saved snapshot only. The comparison with a live
-   API response comes with the data layer.
+   pass in component tests and in the browser. Row and name links open the
+   trader's profile; footer links open real pages.
+3. **Live comparison:** our `/api/boards/1d` against one direct upstream
+   response: all 584 traders present, 0 rejected, P&L and score equal for
+   every one, top five by P&L in the same order. Live counts in the browser:
+   1D 421 of 584, 1M 571 of 652, YTD 678 of 773, ALL 693 of 788.
 4. Measured against the source at 390 px: see the table below.
 5. Our page renders without horizontal scroll and with the expected columns
    at 768 and 1440 px. The source was not observed at these widths, so this is
    not yet a comparison.
-6. Malformed, empty and hostile upstream data are covered by schema unit
-   tests. Slow, down and rate-limited upstream need the data layer.
+6. Malformed, empty and hostile data, a 429, a timeout, a non-JSON body and
+   a network failure are covered by unit tests of the client, the schemas and
+   the fallback: the page serves the labelled snapshot, the daily total shows
+   a dash, a failed period load offers a retry.
+7. `/kalshi` live: no other period is fetched on load; selecting one shows
+   skeleton rows, then the board. "1,000 traders", 100 rows then "Show more
+   (900 left)",
+   search "duck" gives 7 traders with their true ranks (183, 248, ...),
+   non-sports 433, 7D reorders the board. 31 of the first 100 names link to a
+   local profile, 69 to Kalshi.
+8. Profiles for a Kalshi and a Polymarket trader render header, P&L and Smart
+   Score equal to the API; an unknown id is a 404 page; a malformed id,
+   including `..`, is a 404 without any upstream request; any other upstream
+   failure is thrown to the error boundary, so it is never cached. Month strip, chart and categories are
+   phase 4, hence "partial".
+9. Both documented routes return live data; an unknown period returns 404.
+10. The form's fieldset and button are disabled; a click on Submit fires no
+    submit event; the form has no action.
 
 ### Measured parity, home page
 
@@ -100,8 +118,10 @@ other than 1D, and the ROI format.
 | Everything below except the audit, in order | `npm run check` | pass, 2026-11-14 |
 | Lint | `npm run lint` | pass, 2026-11-14 |
 | Type check | `npm run typecheck` | pass, 2026-11-14 |
-| Unit and component tests | `npm run test` | 150 of 150 pass, 2026-11-14 |
-| Asset check | `npm run check:assets` | pass, 67 files, 2026-11-14 |
+| Unit and component tests | `npm run test` | 242 of 242 pass, 2026-11-14 |
+| Asset check | `npm run check:assets` | pass, 109 files, 2026-11-14 |
+| CI on GitHub | push to `main` | pass, 2026-11-14 |
+| Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-14 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-14 |
 

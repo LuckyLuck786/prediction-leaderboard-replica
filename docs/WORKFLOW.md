@@ -103,6 +103,42 @@ work happens. It describes what was done, not what was planned.
 10. **Re-verified** after the fixes: full check, a fresh page load with no
     console errors, and the mobile layout with optional columns switched on.
 
+### Between phases: publishing (2026-11-14)
+
+1. **Knowledge graph first.** `/graphify` indexed the repository: code by
+   AST, the docs and the brand mark by three extraction subagents. 600
+   nodes, 1,153 edges, 40 communities; later questions about the codebase
+   go to the graph before reading files.
+2. **Privacy audit before going public.** Every tracked file and the whole
+   history were searched for personal details, local paths and secrets.
+   None found.
+3. **Repository and hosting.** A public GitHub repository was created and
+   linked to Vercel through Vercel's GitHub app: `main` deploys to
+   production, other branches to previews. The first CI runs on GitHub
+   passed.
+
+### Phase 3: live data, platform boards and the missing pages (2026-11-14)
+
+1. **Framework docs first**, again from the bundled Next.js docs: fetch
+   caching, `revalidate`, route handlers, `generateStaticParams`,
+   `notFound`.
+2. **One upstream client**, server only, with a timeout and a five-minute
+   cache, then schemas and fallbacks per board.
+3. **Pages built from the spec IDs**: Polymarket and Kalshi boards,
+   profiles, terms, privacy, get-listed (switched off) and API.
+4. **Checked in the browser against live data**, including a trader-by-
+   trader comparison of our route with upstream (584 of 584 equal).
+5. **Bugs found on the way** were logged as they appeared (BUG-017 to
+   BUG-022). Two came from looking past the obvious: the production HTML
+   for the theme script, and a fresh 404 page with a saved theme.
+6. **Independent review** of the phase diff by a reviewer subagent: 16
+   findings and a question. Ten were real defects, fixed with tests
+   (BUG-023 to BUG-032); two were reproduced by hand first. The others were
+   answered with a reason in the bug log, including the question, which was
+   settled by checking the source's own numbers.
+7. **Re-verified** after the fixes: 242 tests, the browser checks of the
+   changed pages, then merged to `main`, which deploys to production.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -130,5 +166,8 @@ work happens. It describes what was done, not what was planned.
 | Zod | Validating upstream data at the boundary |
 | Layout probe in the browser console | Measuring our page against the numbers recorded from the source |
 | Reviewer subagent | An independent review of the phase diff by an agent that did not write it |
+| graphify (skill) | Knowledge graph of code and docs, so later work reads the graph instead of whole files |
+| GitHub CLI | Repository creation, CI run status |
+| Vercel (MCP server) | Project creation linked to GitHub, deployment status |
 
 Later phases add to this log and this table as tools are actually used.

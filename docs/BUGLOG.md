@@ -225,3 +225,93 @@ are listed at the end with what was done about them.
   It is now validated with Zod before use (`ac7dc98`).
 - **ROI tooltip, duplicated labels, hard-coded score weights.** Wording and
   single-source fixes, not defects; done in `ac7dc98`.
+
+## Phase 3 (2026-11-14, about 23:00 to 23:40)
+
+### BUG-017 Theme script would have flashed dark in production
+
+- **Feature / file:** `src/app/layout.tsx`
+- **What the AI wrote:** to silence a development warning, the theme script
+  was moved to `next/script` with `strategy="beforeInteractive"`.
+- **Symptom:** none shipped. In the production HTML the script sat at the
+  end of `<body>`, queued, and ran only after the app's own scripts loaded:
+  a visitor with a saved light theme would have seen the dark page first.
+- **How it was caught:** inspecting the production build's HTML before
+  committing, instead of trusting the strategy's name.
+- **Root cause:** for inline scripts in this Next.js version, the strategy
+  queues the code rather than placing a blocking tag in the head.
+- **Fix commit:** `3db08b4` (plain script in `<head>`), refined in `efcfcd1`
+- **Prevention:** decision D-028; the theme check in the evals now loads a
+  page with a saved light theme.
+
+### BUG-018 Saved light theme lost on a 404 page
+
+- **Feature / file:** `src/features/shell/theme.ts`, `theme-script.tsx`
+- **What the AI wrote:** the theme was applied only by the head script.
+- **Symptom:** with "light" saved, `/account/unknown` showed the dark theme.
+- **How it was caught:** browser check of the 404 page with a saved theme.
+- **Root cause:** on a not-found page React renders the root layout in the
+  browser and resets the class on `<html>` to the server's dark default,
+  after the head script has already run.
+- **Fix commit:** `efcfcd1`
+- **Prevention:** the saved theme is re-applied once mounted; a unit test
+  covers restoring it after a reset.
+
+### BUG-019 React error from a client-rendered script tag
+
+- **Feature / file:** `src/app/layout.tsx`
+- **What the AI wrote:** the inline theme script as a plain `<script>`
+  element in the root layout.
+- **Symptom:** "Encountered a script tag while rendering React component"
+  in the console. Decision D-028 first called this Fast Refresh noise only;
+  that was wrong: it also appeared on a fresh load of a 404 page.
+- **How it was caught:** reading the console after a fresh 404 load.
+- **Root cause:** React never runs a script it creates in the browser and
+  says so whenever it renders one there, which the 404 page triggers.
+- **Fix commit:** `efcfcd1`
+- **Prevention:** the script is rendered only into the server HTML, then
+  dropped after hydration; D-028 corrected.
+
+### BUG-020 to BUG-022 Caught by lint and by the test run
+
+| ID | File | What was wrong | How caught | Fix commit |
+|---|---|---|---|---|
+| BUG-020 | `leaderboard-view.tsx`, `kalshi-view.tsx` | Manual `useMemo` on values the React Compiler could not prove stable, so it skipped optimising both components | lint | `ce347b9`, `d12ae00` |
+| BUG-021 | `leaderboard-view.test.tsx` | The loading test looked for placeholder rows by role, but they are hidden from assistive technology, so it found none | test run | `ce347b9` |
+| BUG-022 | `src/app/revalidate.test.ts` | A variable named `module`, which Next.js reserves | lint | `513f444` |
+
+### Found by the phase 3 independent review (2026-11-14, about 23:50)
+
+A reviewer subagent that had not written the code read the phase 3 diff:
+16 findings and 1 question, 3 rated medium. Each was checked against the
+code; the two marked "confirmed" were also reproduced by hand before fixing.
+
+| ID | File | Defect | Fix |
+|---|---|---|---|
+| BUG-023 | `src/app/account/[id]/page.tsx` | An upstream failure rendered an "unavailable" page that was then cached for five minutes for every visitor of that trader | Thrown instead; `error.tsx` shows the message with a retry, nothing is cached |
+| BUG-024 | `src/features/profile/model.ts` | The id `..` passed validation and turned `/api/trader/..` into a request for the upstream API root (confirmed) | Dot-only ids refused; tests for `.`, `..`, `...` |
+| BUG-025 | three schemas | Three URL cleaners disagreed: a relative picture showed on the Kalshi board but became initials on a profile | One shared module, `src/upstream/urls.ts`, with tests |
+| BUG-026 | `src/features/kalshi/schema.ts` | A Kalshi username our profile route rejects still got a local profile link, which would 404 | Local link only when the username is a valid profile id |
+| BUG-027 | `src/features/leaderboard/format.ts` | `formatProfileMoney(999960)` printed `+$1000.0K` (confirmed) | Unit chosen on the rounded figure; boundary tests |
+| BUG-028 | `src/features/leaderboard/format.ts` | Profile cards used the title's two-decimal millions (`+$1.20M`) where the source shows `+$1.2M` | Two named formatters, card and title |
+| BUG-029 | `src/features/profile/schema.ts` | A score of null made the whole profile "unavailable" | Score fields optional; only the score card is dropped |
+| BUG-030 | both board views | After a failed load the count still said "Loading traders" | Separate "No traders loaded" label, tested |
+| BUG-031 | `leaderboard-view.tsx` | A live "Today" total could sit next to snapshot rows | The total shows only beside live rows, tested |
+| BUG-032 | `kalshi-view.tsx` | Every Kalshi visit fetched three other 1,000-row boards, against KAL-07 | Fetched when selected, as on the source, tested |
+
+How they were caught: independent review. Fix commit for all ten: `d93c875`.
+
+Not treated as defects, with the reason:
+
+- **Pictures load from upstream hosts in the browser.** Owner decision Q-03 /
+  D-013; D-013 now states the exemption explicitly and `CLAUDE.md` says the
+  "browser never calls upstream" rule is about data.
+- **Profile month strip, chart and categories missing.** Planned for phase 4
+  (D-031, DEV-17); the parity matrix marks profiles "partial".
+- **"Sharpe 3D" heading over the 1D Sharpe value.** Checked against the
+  source: its "Sharpe 3D" column showed 0.11 for a trader whose `sharpe1d` is
+  0.11. Field and heading both match the source.
+- **Period lists repeated in `source.json` and in code.** Kept: the code needs
+  literal types the JSON cannot give, and a test fails if the two differ.
+- **A magic number for skeleton rows.** Cleaned up (named constant), not a
+  defect.

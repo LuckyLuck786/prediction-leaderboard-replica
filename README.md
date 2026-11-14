@@ -11,9 +11,13 @@ trader profiles and a platform comparison. The assignment was to replicate
 https://predicting.top/ using AI coding tools and to show how the result was
 verified.
 
-**Status: the home page is built and runs on a saved snapshot of the data.**
-Live data, the platform pages and trader profiles come next. This section is
-updated as pages are built.
+**Live:** https://prediction-leaderboard-replica.vercel.app
+
+**Status:** the home, Polymarket and Kalshi boards run on live data, trader
+profiles show the header, P&L and Smart Score, and the terms, privacy,
+get-listed and API pages are in place. Still to come: the profile's month
+strip and history chart, the head-to-head page, end-to-end tests and the full
+evals pass.
 
 ## What is deliberately different
 
@@ -29,7 +33,8 @@ site shows only what the upstream public API already publishes.
 
 ## Run it
 
-Requires Node.js 24 or newer.
+Requires Node.js 24. No API key or environment variable is needed: the data
+comes from a public, keyless API.
 
 ```bash
 npm ci --ignore-scripts

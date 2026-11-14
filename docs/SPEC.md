@@ -401,6 +401,15 @@ and viewport, and each FMT rule into unit tests.
   narrow screen.
 - **DEV-15** While the page shows the saved snapshot, a banner says how many
   of the upstream traders it holds for the selected period.
+- **DEV-16** The Kalshi non-sports toggle filters the fetched top 1,000
+  locally (433 traders on 2026-11-14) instead of asking the source's server
+  (472), whose parameter is undocumented (D-012).
+- **DEV-17** Until phase 4, profiles show a P&L-by-period card in place of
+  the month strip and history chart (D-031).
+- **DEV-18** Skeleton rows while a period loads; a failed load says so and
+  offers a retry (STATE-03).
+- **DEV-19** The "Today" total is shown only next to live rows; beside the
+  snapshot it shows a dash.
 
 ## 8. Questions resolved by the owner (2026-11-14)
 
