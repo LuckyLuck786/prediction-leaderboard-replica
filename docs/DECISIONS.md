@@ -193,7 +193,13 @@ The snapshot is our own committed file. If it ever fails validation the build
 and the schema test fail loudly. Handled error states are for upstream data,
 which we do not control.
 
+### D-027 Hosting on Vercel, deployed from GitHub
+
+The repository is linked to a Vercel project through Vercel's GitHub app, so
+every push to `main` deploys to production and every other branch gets a
+preview deployment. The Docker-only `output: "standalone"` setting is removed,
+and Node is pinned to `24.x` in `package.json` so local, CI and Vercel builds
+use the same major version. Hobby plan, no paid features.
+
 ## Open items
 
-- `next.config.ts` still sets `output: "standalone"`, which existed for the
-  removed Docker setup. Decide when the deployment is configured.

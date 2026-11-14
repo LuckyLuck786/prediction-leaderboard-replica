@@ -6,7 +6,7 @@
   "author": "Shaik Luqman",
   "license": "SEE LICENSE IN LICENSE",
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "next dev",
