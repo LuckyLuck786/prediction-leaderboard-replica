@@ -10,13 +10,25 @@ export type Theme = "dark" | "light";
  * who chose the light theme never sees a dark flash. Kept as a string because
  * it must execute before React loads.
  */
-export const THEME_INIT_SCRIPT = `if (localStorage.getItem(${JSON.stringify(
-  THEME_STORAGE_KEY,
-)}) === "light") document.documentElement.classList.remove(${JSON.stringify(DARK_CLASS)});`;
+export const THEME_INIT_SCRIPT = `try {
+  if (localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)}) === "light") {
+    document.documentElement.classList.remove(${JSON.stringify(DARK_CLASS)});
+  }
+} catch (error) {
+  console.error("Could not read the saved theme; using the default.", error);
+}`;
 
+/**
+ * Switches the theme for this page view and tries to remember it. A browser
+ * may block storage; the switch still works and the failure is reported.
+ */
 export function toggleTheme(): Theme {
   const isDark = document.documentElement.classList.toggle(DARK_CLASS);
   const theme: Theme = isDark ? "dark" : "light";
-  localStorage.setItem(THEME_STORAGE_KEY, theme);
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  } catch (error) {
+    console.error("Could not save the theme choice; it will reset on reload.", error);
+  }
   return theme;
 }
