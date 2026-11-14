@@ -48,6 +48,26 @@ describe("asset check", () => {
   it("does not treat a similarly named file as allowed", () => {
     expect(findViolations([file("src/README.md.tsx", NAME)], NAME)).toHaveLength(1);
   });
+
+  it("sees through a change of letter case in a capture folder", () => {
+    const violations = findViolations(
+      [file("Public/Sites/source/logo.svg", "<svg/>"), file("DOCS/Research/notes.md", "notes")],
+      NAME,
+    );
+    expect(violations).toHaveLength(2);
+    expect(violations.every((message) => message.includes("capture folder"))).toBe(true);
+  });
+
+  it("flags a file whose path names the source, even a binary one", () => {
+    const violations = findViolations(
+      [{ path: `public/brand/${NAME}.png`, content: null }, file(`src/${NAME.toUpperCase()}/x.ts`, "")],
+      NAME,
+    );
+    expect(violations).toEqual([
+      `public/brand/${NAME}.png: file path names the source site`,
+      `src/${NAME.toUpperCase()}/x.ts: file path names the source site`,
+    ]);
+  });
 });
 
 describe("loadFiles", () => {

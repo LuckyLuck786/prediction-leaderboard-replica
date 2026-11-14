@@ -39,8 +39,14 @@ export const ALLOWED_TO_NAME_SOURCE = [
 
 const BINARY_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp4|webm|pdf)$/i;
 
-const isUnder = (file, prefixes) =>
-  prefixes.some((prefix) => (prefix.endsWith("/") ? file.startsWith(prefix) : file === prefix));
+// Compared in lower case: on a case-insensitive disk, Public/Sites is public/sites.
+const isUnder = (file, prefixes) => {
+  const lower = file.toLowerCase();
+  return prefixes.some((prefix) => {
+    const wanted = prefix.toLowerCase();
+    return wanted.endsWith("/") ? lower.startsWith(wanted) : lower === wanted;
+  });
+};
 
 /**
  * @param {{ path: string, content: string | null }[]} files tracked files;
@@ -57,7 +63,12 @@ export function findViolations(files, sourceName) {
       violations.push(`${path}: tracked file inside a capture folder`);
       continue;
     }
-    if (content === null || isUnder(path, ALLOWED_TO_NAME_SOURCE)) continue;
+    if (isUnder(path, ALLOWED_TO_NAME_SOURCE)) continue;
+    // A file can name the source in its path as well as in its content.
+    if (path.toLowerCase().includes(needle)) {
+      violations.push(`${path}: file path names the source site`);
+    }
+    if (content === null) continue;
 
     const lines = content.split("\n");
     lines.forEach((line, index) => {
