@@ -3,7 +3,9 @@
 // The snapshot is what the site renders when upstream is down or rate-limited.
 // It stores upstream objects exactly as received (a trimmed list, every
 // field), so the app parses live data and the snapshot through the same
-// schema. Run with: npm run snapshot
+// schema. This script checks only the outline of each response. The schema
+// test is what proves the saved file is usable, and CI runs it.
+// Run with: npm run snapshot, then npm run test
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 
@@ -18,12 +20,17 @@ const TOP_COUNT = 50;
 const BOTTOM_COUNT = 10;
 // Upstream allows 100 requests a minute. Five spaced requests stay far below.
 const REQUEST_GAP_MS = 2000;
+// A stalled connection must fail the run, not hang it.
+const REQUEST_TIMEOUT_MS = 20_000;
 const USER_AGENT = "snapshot-script/1.0 (node)";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function getJson(url) {
-  const response = await fetch(url, { headers: { "User-Agent": USER_AGENT } });
+  const response = await fetch(url, {
+    headers: { "User-Agent": USER_AGENT },
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`${url} answered ${response.status} ${response.statusText}`);
   }
