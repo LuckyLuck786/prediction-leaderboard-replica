@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Luqky's Prediction Leaderboard">
+  <rect width="32" height="32" fill="#141311"/>
+  <path d="M6 5h5v17h15v5H6z" fill="#d9a441"/>
+  <rect x="14" y="13" width="4" height="6" fill="#ece9e2"/>
+  <rect x="21" y="7" width="4" height="12" fill="#ece9e2"/>
+</svg>

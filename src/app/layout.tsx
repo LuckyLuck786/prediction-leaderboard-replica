@@ -1,20 +1,25 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+
+import {
+  BRAND_MARK_PATH,
+  PRODUCT_DESCRIPTION,
+  PRODUCT_NAME,
+} from "@/features/shell/brand";
+import { DARK_CLASS, THEME_INIT_SCRIPT } from "@/features/shell/theme";
+
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Website Clone",
-  description: "Pixel-perfect website clone",
+  title: { default: PRODUCT_NAME, template: `%s | ${PRODUCT_NAME}` },
+  description: PRODUCT_DESCRIPTION,
+  icons: { icon: BRAND_MARK_PATH },
+  // A look-alike demo has no business competing with the original in search.
+  robots: { index: false, follow: false },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -23,11 +28,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    // The inline script may remove the dark class before React hydrates.
+    <html lang="en" className={`${DARK_CLASS} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full">
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {children}
+      </body>
     </html>
   );
 }
