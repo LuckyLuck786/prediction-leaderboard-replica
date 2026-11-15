@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "check:assets": "node scripts/check-assets.mjs",
     "check:outage": "bash scripts/check-outage-build.sh",
+    "lighthouse": "node scripts/lighthouse.mjs",
     "snapshot": "node scripts/update-snapshot.mjs",
     "fixtures:e2e": "node scripts/record-e2e-fixtures.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build"
