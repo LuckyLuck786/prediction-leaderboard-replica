@@ -204,7 +204,7 @@ which the source's chart never needed.
 | End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 55 pass, 3 skipped by design (hover-only checks on the phone), 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
 | Asset check | `npm run check:assets` | pass, 152 files, 2026-11-15 |
-| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 |
+| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 after BUG-058; the phase 5 merge first failed end-to-end |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |

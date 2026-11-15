@@ -203,6 +203,10 @@ work happens. It describes what was done, not what was planned.
    `npm run check:outage`.
 7. **Re-verified**: 382 unit tests, 55 end-to-end tests, the outage eval,
    and the pages on the dev server with live data.
+8. **Merged and deployed.** The live site served every route, cached as
+   before. CI's end-to-end job failed on the merge: a phase 4 test read the
+   profile chart before it was drawn (BUG-058), which the CI page snapshot
+   showed. Fixed with waiting assertions; CI then passed both jobs.
 
 ### Slips, recorded as they happened
 
