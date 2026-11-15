@@ -1,6 +1,8 @@
 // Live trader profile. Server only. There is no snapshot for profiles: an
 // unknown trader is a 404, and any other failure is shown as such.
 
+import { cache } from "react";
+
 import { fetchUpstreamJson, isNotFound } from "@/upstream/client";
 
 import { isProfileId, type TraderProfile } from "./model";
@@ -19,7 +21,12 @@ export type ProfileResult =
   | { kind: "not-found" }
   | { kind: "unavailable" };
 
-export async function getProfile(id: string): Promise<ProfileResult> {
+/**
+ * One trader record. Memoized for the length of one render, because a
+ * profile page asks for it twice (title and body) and upstream fetches are
+ * not cached (BUG-050).
+ */
+export const getProfile = cache(async function getProfile(id: string): Promise<ProfileResult> {
   if (!isProfileId(id)) return { kind: "not-found" };
   try {
     const body = await fetchUpstreamJson(`/api/trader/${encodeURIComponent(id)}`);
@@ -31,4 +38,4 @@ export async function getProfile(id: string): Promise<ProfileResult> {
     console.error(`Profile ${id}: unavailable.`, error);
     return { kind: "unavailable" };
   }
-}
+});

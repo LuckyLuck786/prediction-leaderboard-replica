@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import source from "./source.json";
 import {
-  UPSTREAM_REVALIDATE_SECONDS,
   UpstreamError,
   fetchPolymarketJson,
   fetchUpstreamJson,
@@ -21,16 +20,21 @@ function stubFetch(implementation: (url: URL, init: RequestInit) => Promise<Resp
 }
 
 describe("fetchUpstreamJson", () => {
-  it("asks the upstream origin, caches for the revalidate period, and returns the body", async () => {
+  it("asks the upstream origin with a timeout, and returns the body", async () => {
     const fetchMock = stubFetch(async () => Response.json({ ok: 1 }));
     await expect(fetchUpstreamJson("/api/daily-profit")).resolves.toEqual({ ok: 1 });
 
     const [url, init] = fetchMock.mock.calls[0];
     expect(url.toString()).toBe(`${source.origin}/api/daily-profit`);
-    expect((init as { next?: { revalidate?: number } }).next?.revalidate).toBe(
-      UPSTREAM_REVALIDATE_SECONDS,
-    );
     expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("keeps nothing in the fetch cache, so the timeout always applies (BUG-050)", async () => {
+    const fetchMock = stubFetch(async () => Response.json({ ok: 1 }));
+    await fetchUpstreamJson("/api/daily-profit");
+    const init = fetchMock.mock.calls[0][1] as { next?: unknown; cache?: unknown };
+    expect(init.cache).toBe("no-store");
+    expect(init.next).toBeUndefined();
   });
 
   it("asks Polymarket's Data API on its own origin", async () => {

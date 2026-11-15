@@ -9,6 +9,9 @@ import { TopBarShell } from "@/features/shell/top-bar-shell";
 
 // Equal to UPSTREAM_REVALIDATE_SECONDS; a test keeps the two in step.
 export const revalidate = 300;
+// Upstream requests skip the fetch cache (cache: "no-store"); this keeps the
+// route static anyway, refreshed on the schedule above (BUG-050, D-047).
+export const dynamic = "force-static";
 
 // No profile is built ahead of time; each is rendered on its first visit and
 // then cached for the revalidate period.
