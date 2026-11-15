@@ -65,6 +65,17 @@ describe("API routes", () => {
     expect(await response.json()).toEqual(payload);
   });
 
+  it.each([
+    ["/api/boards", getBoardRoute],
+    ["/api/kalshi", getKalshiRoute],
+  ] as const)("%s answers an unknown period with JSON, without asking upstream (BUG-085)", async (base, route) => {
+    const response = await route(new Request(`http://test${base}/2y`), params({ period: "2y" }));
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ error: "Unknown period" });
+    expect(getBoard).not.toHaveBeenCalled();
+    expect(getKalshiBoard).not.toHaveBeenCalled();
+  });
+
   it("/api/kalshi/{period} returns the board payload as JSON", async () => {
     const payload = {
       board: { period: "7d" as const, lastUpdated: "2026-11-14T00:00:00.000Z", traders: [], rejectedCount: 0 },

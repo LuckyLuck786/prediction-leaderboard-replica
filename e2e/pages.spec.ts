@@ -87,6 +87,8 @@ test.describe("API routes", () => {
     expect(body.board.traders.length).toBeGreaterThan(0);
 
     expect((await request.get("/api/kalshi/7d")).status()).toBe(200);
-    expect((await request.get("/api/boards/2y")).status()).toBe(404);
+    const unknown = await request.get("/api/boards/2y");
+    expect(unknown.status()).toBe(404);
+    expect((await unknown.json()).error).toBe("Unknown period");
   });
 });

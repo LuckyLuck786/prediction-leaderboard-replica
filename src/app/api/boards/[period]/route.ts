@@ -1,5 +1,6 @@
 import { getBoard } from "@/features/leaderboard/data";
-import { LEADERBOARD_PERIODS, type LeaderboardPeriod } from "@/features/leaderboard/model";
+import { LEADERBOARD_PERIODS } from "@/features/leaderboard/model";
+import { isOneOf, unknownPeriod } from "@/lib/api-route";
 
 // Must be a literal for Next.js to read it. Equal to
 // UPSTREAM_REVALIDATE_SECONDS; a test keeps the two in step.
@@ -8,8 +9,8 @@ export const revalidate = 300;
 // route static anyway, refreshed on the schedule above (BUG-050, D-047).
 export const dynamic = "force-static";
 
-// Only the four periods exist; anything else is a 404 without running GET.
-export const dynamicParams = false;
+// The four periods are built ahead of time. Any other path reaches GET, which
+// answers with a JSON 404 (BUG-085).
 
 export function generateStaticParams() {
   return LEADERBOARD_PERIODS.map((period) => ({ period }));
@@ -21,5 +22,6 @@ export async function GET(
   { params }: { params: Promise<{ period: string }> },
 ) {
   const { period } = await params;
-  return Response.json(await getBoard(period as LeaderboardPeriod));
+  if (!isOneOf(LEADERBOARD_PERIODS, period)) return unknownPeriod(LEADERBOARD_PERIODS);
+  return Response.json(await getBoard(period));
 }
