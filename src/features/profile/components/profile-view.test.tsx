@@ -17,6 +17,7 @@ vi.mock("next/link", () => ({
 const TODAY = "2026-11-15";
 const WALLET = "0x6d3c5bd13984b2de47c3a88ddc455309aab3d294";
 const NO_HISTORY: HistoryResult = { kind: "unsupported" };
+const UNAVAILABLE: HistoryResult = { kind: "unavailable" };
 const NO_CATEGORIES: CategoriesResult = { kind: "none" };
 
 const score: SmartScore = {
@@ -102,7 +103,7 @@ describe("ProfileView header", () => {
 describe("ProfileView history", () => {
   it.each([
     ["unsupported", NO_HISTORY, "No documented history is available for this trader."],
-    ["unavailable", { kind: "unavailable" } as HistoryResult, "History is unavailable right now."],
+    ["unavailable", UNAVAILABLE, "History is unavailable right now."],
     ["one point", history(1), "Not enough history to draw yet."],
   ])("says why there is no chart: %s", (_case, result, message) => {
     renderView({ history: result });
