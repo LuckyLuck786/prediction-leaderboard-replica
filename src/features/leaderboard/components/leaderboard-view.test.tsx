@@ -266,6 +266,14 @@ describe("LeaderboardView", () => {
     expect(winRateCell?.className).toContain("hidden");
   });
 
+  it("names a platform for screen readers even when there is no page to link to (BUG-080)", () => {
+    const unlinked = [makeTrader({ id: "no-page", pnl: 9, platform: "polymarket", polymarketUrl: null })];
+    renderView({}, { "1d": unlinked });
+    const [row] = bodyRows();
+    expect(within(row).queryByRole("link", { name: /on Polymarket/ })).toBeNull();
+    expect(within(row).getByText("Polymarket").className).toContain("sr-only");
+  });
+
   it("shows the day's biggest mover in 1D only (HOME-17)", async () => {
     const moved = [
       makeTrader({ id: "labelled", pnl: 3, dayMover: { label: "Politics", change: -11962, iconUrl: null } }),

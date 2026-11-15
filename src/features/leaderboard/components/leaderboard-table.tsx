@@ -155,7 +155,14 @@ function PlatformLink({ trader, platform }: { trader: Trader; platform: Filterab
     );
   }
 
-  return <span title={PLATFORM_NAMES[platform]}>{badge}</span>;
+  // No page to link to: the badge stays, and its name is given in text,
+  // because the badge itself is hidden from assistive technology (BUG-080).
+  return (
+    <span title={PLATFORM_NAMES[platform]}>
+      {badge}
+      <span className="sr-only">{PLATFORM_NAMES[platform]}</span>
+    </span>
+  );
 }
 
 function DayMoverLine({ trader }: { trader: Trader }) {
