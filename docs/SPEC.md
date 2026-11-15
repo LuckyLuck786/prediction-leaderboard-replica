@@ -76,7 +76,7 @@ memory: it is not in the URL and is lost on reload.
 - **TOK-06** Platform accents: Polymarket sky blue rgb(56,189,248); Kalshi
   green.
 
-Our branding (name, logo, accent color, favicon, social image) replaces the
+Our branding (name, logo, accent color, favicon) replaces the
 source's. See section 7.
 
 ### 3.2 Shells
@@ -376,8 +376,8 @@ and viewport, and each FMT rule into unit tests.
 
 ## 7. Deliberate differences from the source
 
-- **DEV-01** Original name, logo, copy, accent color, favicon and social
-  image. Disclaimer in the footer of every page.
+- **DEV-01** Original name, logo, copy, accent color and favicon; no social
+  preview image. Disclaimer in the footer of every page.
 - **DEV-02** Data is fetched on our server and cached; the source fetches from
   the browser.
 - **DEV-03** Skeletons, an empty-search message and error states with a

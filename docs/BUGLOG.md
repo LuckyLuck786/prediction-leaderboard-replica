@@ -530,3 +530,44 @@ change that caused it was dropped before committing.
 
 Not treated as a defect: the review's tenth point, code citing bug and
 decision numbers before the log had them. These entries are that fix.
+
+## Phase 7 (2026-11-15, final review)
+
+### BUG-074 No error page of last resort
+
+- **Feature / file:** `src/app/error.tsx`, `src/app/global-error.tsx` (new)
+- **What the AI wrote:** error pages for profiles and the head-to-head page
+  only.
+- **Symptom:** an unexpected error on any other page would have shown
+  Next.js's default error screen, without the disclaimer every page must
+  carry (CLAUDE.md rule 6).
+- **How it was caught:** the definition-of-done audit, checking every page,
+  error, 404 and loading file for the disclaimer; the final review found it
+  too.
+- **Fix commit:** `117dda4`
+- **Prevention:** a component test renders all four error pages and checks
+  the disclaimer and the retry.
+
+### Found by the final whole-repository review (2026-11-15, about 14:00)
+
+A reviewer subagent read the whole repository, not a diff: 14 findings, none
+rated high. Each was checked against the code first; the traversal was
+reproduced with requests against the fixture server.
+
+| ID | File | Defect | Fix |
+|---|---|---|---|
+| BUG-075 | `profile/schema.ts`, `leaderboard/schema.ts` | The Kalshi username from upstream went unchecked into upstream request paths and local profile links: `..` would have pointed `/api/kalshi/../history` at `/api/history` | Kept only if our routes accept it as a profile id; tests |
+| BUG-076 | `src/upstream/urls.ts` | Outbound links were resolved against the data source's origin, so a bare handle in the `twitter` field would have become a link to the data source labelled "on X" | Outbound links must be absolute https URLs; tests |
+| BUG-077 | `e2e/fixture-server.mjs` | The test server read any `.json` file a request could name with `..`, and listened on every network interface | Plain fixture names only; listens on 127.0.0.1; traversal requests now get 404 |
+| BUG-078 | `leaderboard/query.ts` | A code comment quoted the source's tooltip word for word, against rule 3 | Paraphrased |
+| BUG-079 | README, CLAUDE.md, SPEC, EVALS, AGENTS.md, two comments | Docs said more than was true: that the asset check catches copied images, fonts and text (it checks names and capture folders); that a social preview image exists; test sizes; what `npm run check` runs; a theme script "in the body"; a React Compiler that is not enabled; submission links still "not deployed" | Each statement corrected to what the code does |
+
+How they were caught: final review. Fix commits: BUG-075 and BUG-076 in
+`ab172be`; BUG-077 in `e4a2d15`; BUG-078 in `2ea93f6`; BUG-079 in `2ea93f6`
+(the comments) and in the phase 7 docs commit (the docs).
+
+Not treated as defects, with the reason: the unused template component and
+packages (removed, D-055), version ranges (pinned, D-055), missing security
+headers (added, D-054), the shared upstream limit (accepted, D-056), the
+template's skill (kept, D-057), and an unused test helper and snapshot field
+(removed).

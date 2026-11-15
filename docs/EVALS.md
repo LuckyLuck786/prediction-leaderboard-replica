@@ -4,7 +4,7 @@ How we verify that the replica matches the source in structure and behavior,
 and that it works correctly. Branding differences are expected and excluded:
 see `docs/DECISIONS.md`, D-007.
 
-**Status (2026-11-15, end of phase 6):** every route is built and checked
+**Status (2026-11-15, end of phase 7):** every route is built and checked
 against live data. The offline end-to-end suite runs in CI at phone, tablet
 and desktop size and includes axe, keyboard and measured-parity checks;
 Lighthouse has been run on production. A cell says "not run" only if its
@@ -244,13 +244,13 @@ further runs on the final build showed 0, and its cause was not found.
 | Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
 | Lint | `npm run lint` | pass, 2026-11-15 |
 | Type check | `npm run typecheck` | pass, 2026-11-15 |
-| Unit and component tests | `npm run test` | 416 of 416 pass, 2026-11-15 |
-| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 193 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
+| Unit and component tests | `npm run test` | 428 of 428 pass, 2026-11-15 |
+| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 202 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
 | Colour contrast of every token and calendar shade | part of `npm run test` (`src/app/contrast.test.ts`) | 34 of 34 pass, 2026-11-15 |
 | Accessibility (axe), keyboard and measured parity | part of `npm run test:e2e` | see the end-to-end row |
 | Lighthouse, deployed site | `npm run lighthouse` | performance 99 to 100, accessibility 100 on every page, 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
-| Asset check | `npm run check:assets` | pass, 159 files, 2026-11-15 |
+| Asset check | `npm run check:assets` | pass, 160 files, 2026-11-15 |
 | CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, phase 6 merge |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
@@ -265,7 +265,9 @@ Two checks were also run by hand to make sure the suite can fail:
 
 The layout numbers above come from a probe run in the browser console at the
 stated viewport. Since phase 6 the same numbers are asserted by
-`e2e/parity.spec.ts` (D-052).
+`e2e/parity.spec.ts` (D-052). In CI, on Linux, the widths set by text are
+skipped, because the system font differs from the Mac they were measured on;
+every size set by CSS is checked there too.
 
 **Independent review.** A reviewer agent that had not written the code read
 the phase 2 diff: 19 findings, 10 real defects fixed with tests (BUG-006 to
@@ -279,8 +281,8 @@ unit tests and 48 end-to-end tests pass, and the Polymarket profile's last
 day reads +$13,493 against the trader record's 1-day P&L of +$13,142.
 
 **End-to-end suite** (`e2e/`): boards, filters, search, paging, profiles of
-both platforms with calendar, chart and categories, the 404 and error pages,
-the disabled form, the saved theme, the API routes, and no horizontal scroll
-at either size. It runs offline: every request to another host is aborted.
-
-Accessibility commands are added here when that tool is added.
+both platforms with calendar, chart and categories, the head-to-head page,
+the 404 and error pages, the disabled form, the saved theme, the API routes,
+the security headers, no profile prefetching, axe, keyboard and measured
+parity, at phone, tablet and desktop size. It runs offline: every request to
+another host is aborted.

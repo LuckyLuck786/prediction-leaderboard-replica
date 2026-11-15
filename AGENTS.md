@@ -25,7 +25,7 @@ A reusable template for reverse-engineering any website into a clean, modern Nex
 - `npm run build` — Production build
 - `npm run lint` — ESLint check
 - `npm run typecheck` — TypeScript check
-- `npm run check` — Run lint + typecheck + build
+- `npm run check` — Run lint, typecheck, unit tests, the asset check and a production build
 
 ## Code Style
 - TypeScript strict mode, no `any`
@@ -41,6 +41,10 @@ A reusable template for reverse-engineering any website into a clean, modern Nex
 - **Beauty-first** — every pixel matters
 
 ## Project Structure
+This is the template's layout. This project's own layout and rules are in
+`CLAUDE.md`: features live in `src/features/`, and the `sites/` folders below
+are not used, because copying the source site's files is forbidden there.
+
 ```
 src/
   app/              # Next.js routes

@@ -8,11 +8,12 @@
 
 This project started as a copy of that template. The first commit in this
 repository's history contains the template files unchanged. The parts that
-still derive from it are the Next.js, Tailwind CSS and shadcn/ui scaffold
+still derive from it are the Next.js and Tailwind CSS scaffold
 (`package.json`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`,
-`next.config.ts`, `components.json`, `src/app/globals.css`, `src/lib/utils.ts`,
-`src/components/ui/`), the agent instructions in `AGENTS.md`, and the
-`clone-website` skill under `.agents/skills/` and `.claude/commands/`.
+`next.config.ts`, `src/app/globals.css`, `src/lib/utils.ts`), the agent
+instructions in `AGENTS.md`, and the `clone-website` skill under
+`.agents/skills/` and `.claude/commands/`. The template's shadcn/ui
+component and configuration were removed (docs/DECISIONS.md, D-055).
 
 Those portions remain under the MIT License, reproduced below.
 
@@ -40,8 +41,26 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-## npm dependencies
+## Packages shipped in the deployed site
 
-Runtime and build dependencies are listed in `package.json` and pinned in
-`package-lock.json`. Each package is distributed under its own license, which
-ships inside `node_modules/<package>/` after `npm ci`.
+Code from these packages is part of what visitors download. Each one's full
+license text ships inside `node_modules/<package>/` after `npm ci`; Next.js
+also carries the licenses of the code it bundles.
+
+| Package | Version | License |
+|---|---|---|
+| next | 16.4.6 | MIT |
+| react | 19.2.4 | MIT |
+| react-dom | 19.2.4 | MIT |
+| zod | 4.6.7 | MIT |
+| clsx | 2.1.1 | MIT |
+| tailwind-merge | 3.5.0 | MIT |
+| lucide-react (icons) | 1.6.0 | ISC |
+
+## Development tools
+
+Build, test and lint tools are listed in `package.json` and pinned in
+`package-lock.json`; none of their code is shipped. Of note: Playwright
+(Apache-2.0) drives the end-to-end tests and axe-core (MPL-2.0, through
+`@axe-core/playwright`) runs the accessibility checks. Lighthouse
+(Apache-2.0) is run through `npx` and is not a dependency.

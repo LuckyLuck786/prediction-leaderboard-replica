@@ -233,6 +233,26 @@ work happens. It describes what was done, not what was planned.
 7. **Re-verified**: unit tests including a token contrast test, the full
    end-to-end suite at three sizes, Lighthouse median of three runs.
 
+### Phase 7: final review (2026-11-15)
+
+1. **The definition of done, checked by script**: required files present;
+   every commit authored by the owner with the co-author trailer; every
+   fix commit in the bug log present in history; no "not run" left in the
+   parity matrix; no secrets, local paths or e-mail addresses in history;
+   the disclaimer on every page, error, 404 and loading file. One gap:
+   no error page of last resort (BUG-074).
+2. **The README from a fresh clone of the public repository**: install,
+   `npm run check`, the browser install, the end-to-end suite, the audit,
+   the outage eval and the dev server, all as written.
+3. **A whole-repository review** by a reviewer subagent, not a diff
+   review: 14 findings. Five real defects (BUG-075 to BUG-079), the rest
+   clean-ups and hardening: the unused template UI stack and the `shadcn`
+   CLI removed, versions pinned, security headers, notices listing the
+   shipped packages (D-054 to D-057).
+4. **Re-verified**: unit tests, the end-to-end suite at three sizes (which
+   includes the layout, accessibility and keyboard checks, so removing the
+   template's styles changed nothing they measure), the asset check.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -287,6 +307,10 @@ work happens. It describes what was done, not what was planned.
   checked that a ring style existed. Both were written in this phase and
   both looked green. The review caught them; each check now has a
   demonstration that it fails on the defect it is for.
+- **The zsh `path` variable, again** (phase 7). A loop variable named `path`
+  replaced the shell's `PATH` a second time; the command failed loudly and
+  was rerun with `route`. A leftover test server from that run was found by
+  its port and stopped only after checking it ran from this repository.
 
 ## Tools used so far
 

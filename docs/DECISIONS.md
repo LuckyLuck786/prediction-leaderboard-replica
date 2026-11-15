@@ -53,6 +53,10 @@ packages that only the `shadcn` CLI pulls in (`proxy-addr`, `body-parser`,
 `@modelcontextprotocol/sdk`, `zod`, `brace-expansion`). They never reach the
 deployed bundle. Revisit if the CLI is still needed after the UI is built.
 
+Update (2026-11-15, phase 7): it was not needed. The CLI, the one unused
+template component and its two runtime packages were removed (D-055); dev
+advisories went from 21 to 7, all moderate, all in lint tooling.
+
 ### D-006 Commit identity
 
 Commits are authored by the repository owner using GitHub's private noreply
@@ -69,6 +73,9 @@ accent color, favicon and social image. Publishing a look-alike of a live
 product under someone else's brand would be passing off their work, and the
 template's own README says logos, brand assets and original copy belong to
 their owners. Every page carries a disclaimer.
+
+Correction (2026-11-15, phase 7): no social preview image was made, so none
+is claimed any more; link previews show the page title and description.
 
 ### D-008 License
 
@@ -474,6 +481,41 @@ exactly (its only dependency is axe-core); no local code could replace the
 rule engine. Lighthouse 13.6.0 runs through `npx`, pinned, with install
 scripts off, against Playwright's Chromium, so nothing is added to the
 project or installed globally.
+
+### D-054 Security headers (2026-11-15, phase 7)
+
+Every response carries `Referrer-Policy: no-referrer` (as the pictures
+already did), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` and
+a `Permissions-Policy` that asks for no device feature, and no longer says
+which framework serves it. No content security policy: the inline theme
+script would need a nonce per request, which would make every page dynamic
+(D-047); the site renders no HTML from upstream data, which only ever
+reaches the page as text. An end-to-end test checks the headers.
+
+### D-055 Unused template parts removed, versions pinned
+
+The template's button component was never used. It, `components.json`, the
+`@base-ui/react` and `class-variance-authority` packages it needed, the
+`tw-animate-css` and `shadcn` style imports and the `shadcn` CLI are
+removed; the layout tests and accessibility checks pass unchanged. Every
+dependency in `package.json` is now an exact version, as CLAUDE.md asks; the
+template had left ten as ranges.
+
+### D-056 Accepted: profiles can spend the shared upstream limit
+
+Any valid-looking profile id makes our server ask upstream, and a failed
+profile is deliberately not cached (BUG-023), so many requests for unknown
+or failing profiles would spend the upstream rate limit our server shares.
+Accepted for a demo: a firewall rate limit on `/account/*` is the remedy if
+it is ever abused, and the owner would set it in Vercel.
+
+### D-057 The template's clone-website skill stays
+
+`.agents/skills/clone-website/` and `.claude/commands/clone-website.md`
+came with the template and were used in phase 1 for observing the source.
+Their steps for copying the source's assets and text are overridden by
+CLAUDE.md, which says so at its top. They stay as the template shipped them,
+credited in THIRD_PARTY_NOTICES.md.
 
 ## Open items
 

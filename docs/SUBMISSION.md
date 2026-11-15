@@ -10,10 +10,12 @@ an interview with the owner about their real habits and past projects.**
 
 | Item | URL |
 |---|---|
-| Live site | not deployed yet |
-| Repository | not created yet |
-| Evals plan, bug log, workflow | not published yet |
-| Walkthrough video | not recorded yet |
+| Live site | https://prediction-leaderboard-replica.vercel.app |
+| Repository | https://github.com/LuckyLuck786/prediction-leaderboard-replica |
+| Evals plan | https://github.com/LuckyLuck786/prediction-leaderboard-replica/blob/main/docs/EVALS.md |
+| Bug log | https://github.com/LuckyLuck786/prediction-leaderboard-replica/blob/main/docs/BUGLOG.md |
+| Workflow | https://github.com/LuckyLuck786/prediction-leaderboard-replica/blob/main/docs/WORKFLOW.md |
+| Walkthrough video | to be recorded by the owner |
 
 ## Long answer 1: AI building workflow, step by step
 

@@ -20,7 +20,7 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
    grid, component structure, spacing, density, responsive behavior,
    interactions and functionality follow the source.
 2. **Original branding only.** Product name, logo, wordmark, all copy text,
-   accent color, favicon and social preview image are ours. Brand assets live
+   accent color and favicon are ours (there is no social preview image). Brand assets live
    in `public/brand/`.
 3. **Never commit or deploy source-site files.** No extracted images, logos,
    icons, SVGs, font files, videos or text from the source site. Use Lucide
@@ -33,7 +33,10 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
    `docs/`, `src/upstream/` (the API origin and the saved snapshot) and the
    asset check itself. Application code reads the name from
    `src/upstream/source.json`; the footer disclaimer and credit are built from
-   it. `npm run check:assets` enforces rules 3 to 5, locally and in CI.
+   it. `npm run check:assets` checks what a script can of rules 3 to 5, locally
+   and in CI: no committed capture folders, and the source's name only in the
+   places above. Whether an image, icon, font or sentence came from the source
+   is checked by review.
 6. **Disclaimer on every page** and in the README: "Independent demo built for
    a hiring assignment. Not affiliated with predicting.top, Polymarket or
    Kalshi."
@@ -97,7 +100,8 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 - `npm audit --omit=dev` must report 0 vulnerabilities.
 
 - `npm run test:e2e` builds the app into `.next-e2e` and runs the Playwright
-  tests offline against `e2e/fixture-server.mjs`, at desktop and phone sizes.
+  tests offline against `e2e/fixture-server.mjs`, at phone, tablet and
+  desktop sizes.
   It needs the Chromium build of the pinned Playwright version
   (`npx playwright install chromium`).
 - `npm run fixtures:e2e` records the API answers in `e2e/fixtures/` that are
@@ -127,7 +131,7 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 
 - Structure follows the domain: feature code lives together in
   `src/features/<feature>/` (components, data access, schemas, tests).
-  `src/components/ui/` holds shadcn primitives only.
+  Shared helpers live in `src/lib/`.
 - One source of truth per fact. Formatters, constants and schemas are defined
   once and imported.
 - No magic numbers or strings. Name them.

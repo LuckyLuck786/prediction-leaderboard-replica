@@ -20,16 +20,18 @@ A head-to-head page compares one Polymarket and one Kalshi trader since a
 common start. The terms, privacy, get-listed and API pages are in place, and
 end-to-end tests run in CI at phone, tablet and desktop size, including
 automated accessibility checks (WCAG 2.2 AA), keyboard checks and the
-measured layout comparison with the source. Still to come: the final
-review.
+measured layout comparison with the source. The build is finished and
+reviewed; what remains is the submission itself.
 
 ## What is deliberately different
 
 The layout, routes, components, spacing, responsive behavior and interactions
 follow the source as closely as we can measure. The product name, logo, copy,
-accent color, favicon and social image are original on purpose. No images,
+accent color and favicon are original on purpose. No images,
 icons, fonts or text from the source site are in this repository or in the
-deployment, and a CI check enforces that. Publishing a look-alike of a live
+deployment: the code was written to that rule and reviewed against it, and a
+CI check fails if the source's name appears outside the few files allowed to
+mention it, or if a raw capture is committed. Publishing a look-alike of a live
 product under its own brand would be passing off someone else's work.
 
 There is no login, wallet connection, payment or working submission form. The
@@ -61,7 +63,7 @@ that replays recorded API answers, so they need no network:
 
 ```bash
 npx playwright install chromium   # once: the browser the tests drive
-npm run test:e2e                  # desktop and phone sizes
+npm run test:e2e                  # phone, tablet and desktop sizes
 ```
 
 `npm run fixtures:e2e` records any of those API answers that are missing
