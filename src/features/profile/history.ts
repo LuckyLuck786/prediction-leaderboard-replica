@@ -83,7 +83,9 @@ export function sumDailyChanges(series: readonly (readonly SeriesPoint[])[]): Ma
   for (const points of series) {
     for (const [key, change] of dailyChanges(points)) total.set(key, (total.get(key) ?? 0) + change);
   }
-  return total;
+  // Oldest day first, whichever series it came from: the month strip's earliest
+  // month is read from here (BUG-082).
+  return new Map([...total].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
 }
 
 /**

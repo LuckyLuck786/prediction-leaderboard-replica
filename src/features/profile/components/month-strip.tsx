@@ -78,7 +78,9 @@ export function MonthStrip({
 }) {
   const changeMap = new Map(changes);
   const current = parseKey(today);
-  const first = changes.length > 0 ? parseKey(changes[0][0]) : current;
+  // The earliest day with a result, wherever it sits in the list (BUG-082).
+  const earliest = changes.reduce<string | null>((min, [key]) => (min === null || key < min ? key : min), null);
+  const first = earliest === null ? current : parseKey(earliest);
 
   const [cursor, setCursor] = useState(current);
   const [expanded, setExpanded] = useState(false);

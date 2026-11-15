@@ -70,6 +70,19 @@ describe("sumDailyChanges", () => {
     });
   });
 
+  it("lists days oldest first, whichever series starts first (BUG-082)", () => {
+    // Kalshi loads first but starts late; Polymarket starts two years earlier.
+    const kalshi = [
+      { t: at("2025-12-01T12:00:00Z"), v: 10 },
+      { t: at("2025-12-02T12:00:00Z"), v: 20 },
+    ];
+    const polymarket = [
+      { t: at("2024-01-14T12:00:00Z"), v: 1 },
+      { t: at("2024-01-15T12:00:00Z"), v: 3 },
+    ];
+    expect([...sumDailyChanges([kalshi, polymarket]).keys()]).toEqual(["2024-01-15", "2025-12-02"]);
+  });
+
   it("equals dailyChanges for a single series", () => {
     const a = [
       { t: at("2026-11-01T12:00:00Z"), v: 1 },
