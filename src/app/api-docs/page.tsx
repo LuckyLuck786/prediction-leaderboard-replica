@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CopyButton } from "@/features/api-docs/copy-button";
-import { CACHE_MINUTES, ENDPOINTS, FETCH_EXAMPLE } from "@/features/api-docs/endpoints";
+import { CACHE_MINUTES, DATA_SOURCES, ENDPOINTS, FETCH_EXAMPLE } from "@/features/api-docs/endpoints";
 import { DATA_CREDIT } from "@/features/shell/brand";
 import { TopBarShell } from "@/features/shell/top-bar-shell";
 import { INSET_FOCUS_RING } from "@/lib/focus";
@@ -11,6 +11,7 @@ export const metadata: Metadata = { title: "API" };
 
 const MONO = "font-mono text-xs";
 
+/** R-06 (spec 4.6): this site's JSON routes, an example, and the data sources behind them. */
 export default function ApiDocsPage() {
   return (
     <TopBarShell width="medium" backLabel="Back">
@@ -74,6 +75,26 @@ export default function ApiDocsPage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section aria-labelledby="sources-heading" className="mb-8">
+        <h2 id="sources-heading" className="mb-3 text-sm font-semibold">
+          Where the data comes from
+        </h2>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Every page is built from these requests, made by our server, never by your browser.
+        </p>
+        <ul className="space-y-2 text-sm">
+          {DATA_SOURCES.map((request) => (
+            <li key={request.origin + request.path}>
+              <span className={`${MONO} break-all`}>
+                GET {request.origin}
+                {request.path}
+              </span>
+              <span className="text-muted-foreground"> for {request.usedFor}</span>
+            </li>
+          ))}
+        </ul>
       </section>
     </TopBarShell>
   );

@@ -1,9 +1,12 @@
-// The routes this demo serves. Each one is ours, cached on our server, and
-// built only from the documented upstream API.
+// What the API page documents: the JSON routes this site serves (ours,
+// cached on our server) and the documented upstream requests they are built
+// from.
 
 import { LEADERBOARD_PERIODS } from "@/features/leaderboard/model";
-import { KALSHI_PERIODS } from "@/features/kalshi/model";
+import { KALSHI_BOARD_LIMIT, KALSHI_PERIODS } from "@/features/kalshi/model";
 import { UPSTREAM_REVALIDATE_SECONDS } from "@/upstream/client";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/origins";
+import source from "@/upstream/source.json";
 
 export interface EndpointDoc {
   path: string;
@@ -13,6 +16,7 @@ export interface EndpointDoc {
   fields: string;
 }
 
+/** The JSON routes this site serves, as the API page lists them. */
 export const ENDPOINTS: readonly EndpointDoc[] = [
   {
     path: "/api/boards/{period}",
@@ -32,8 +36,44 @@ export const ENDPOINTS: readonly EndpointDoc[] = [
   },
 ];
 
-export const CACHE_MINUTES = UPSTREAM_REVALIDATE_SECONDS / 60;
+/**
+ * What this site reads to build its pages, all requested by our server, never
+ * by the visitor's browser: six requests to the data source's documented
+ * public API, one to Polymarket's documented Data API (D-035). A test checks
+ * this list against the requests the code really makes, both ways.
+ */
+export const DATA_SOURCES: ReadonlyArray<{ origin: string; path: string; usedFor: string }> = [
+  {
+    origin: source.origin,
+    path: `/api/leaderboard?period={${LEADERBOARD_PERIODS.join("|")}}`,
+    usedFor: "the home and Polymarket boards",
+  },
+  { origin: source.origin, path: "/api/daily-profit", usedFor: "today's total above the boards" },
+  {
+    origin: source.origin,
+    path: `/api/kalshi-leaderboard?period={${KALSHI_PERIODS.join("|")}}&limit=${KALSHI_BOARD_LIMIT}`,
+    usedFor: "the Kalshi board",
+  },
+  { origin: source.origin, path: "/api/trader/{id}", usedFor: "profiles and the head-to-head page" },
+  {
+    origin: source.origin,
+    path: "/api/kalshi/{username}/history",
+    usedFor: "Kalshi P&L history and the head-to-head chart",
+  },
+  { origin: source.origin, path: "/api/kalshi/{username}/categories", usedFor: "Kalshi P&L by category" },
+  {
+    origin: POLYMARKET_DATA_DEFAULT_ORIGIN,
+    path: "/v2/user-pnl?user={wallet}&interval=all&fidelity=1d",
+    usedFor: "Polymarket P&L history and the head-to-head chart",
+  },
+];
 
+const SECONDS_PER_MINUTE = 60;
+
+/** How long a route's answer is reused, in minutes, for the API page's wording. */
+export const CACHE_MINUTES = UPSTREAM_REVALIDATE_SECONDS / SECONDS_PER_MINUTE;
+
+/** The example on the API page. */
 export const FETCH_EXAMPLE = `// The 10 biggest Kalshi winners this week
 const res = await fetch("/api/kalshi/7d");
 const { board, source } = await res.json();
