@@ -4,6 +4,8 @@ import { CopyButton } from "@/features/api-docs/copy-button";
 import { CACHE_MINUTES, ENDPOINTS, FETCH_EXAMPLE } from "@/features/api-docs/endpoints";
 import { DATA_CREDIT } from "@/features/shell/brand";
 import { TopBarShell } from "@/features/shell/top-bar-shell";
+import { INSET_FOCUS_RING } from "@/lib/focus";
+import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "API" };
 
@@ -33,7 +35,15 @@ export default function ApiDocsPage() {
             <span>JavaScript</span>
             <CopyButton text={FETCH_EXAMPLE} />
           </div>
-          <pre className={`overflow-x-auto p-3 ${MONO}`}>{FETCH_EXAMPLE}</pre>
+          {/* Scrolls sideways on a phone, so it takes keyboard focus (BUG-061). */}
+          <pre
+            tabIndex={0}
+            role="region"
+            aria-label="Example request in JavaScript"
+            className={cn("overflow-x-auto p-3", MONO, INSET_FOCUS_RING)}
+          >
+            {FETCH_EXAMPLE}
+          </pre>
         </div>
       </section>
 

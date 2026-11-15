@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 
+import { INSET_FOCUS_RING } from "@/lib/focus";
 import { profilePath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +59,7 @@ const EXTRA_COLUMN_VISIBILITY = "hidden sm:table-cell";
 const SORT_ARROWS = { asc: "↓", desc: "↑" } as const;
 const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
 
-const BADGE_LINK = "flex shrink-0 items-center justify-center hover:opacity-70";
+const BADGE_LINK = cn("flex shrink-0 items-center justify-center hover:opacity-70", INSET_FOCUS_RING);
 
 /** #, picture, trader, joined, score and P&L: the columns that are always there. */
 const BASE_COLUMN_COUNT = 6;
@@ -284,11 +285,15 @@ export function LeaderboardTable({
                     prefetch={false}
                     onClick={keepInsideRow}
                     title={trader.name}
-                    className="min-w-0 max-w-[60px] truncate text-sm text-foreground hover:underline sm:max-w-none sm:text-lg"
+                    className={cn(
+                      "min-w-0 max-w-[60px] truncate text-sm text-foreground hover:underline sm:max-w-none sm:text-lg",
+                      INSET_FOCUS_RING,
+                    )}
                   >
                     {displayName}
                   </Link>
-                  <div className="ml-0.5 flex shrink-0 gap-0.5 sm:ml-1.5 sm:gap-1">
+                  {/* 4 px apart on phones too: 20 px links need 24 px between centres (WCAG 2.5.8, BUG-060). */}
+                  <div className="ml-0.5 flex shrink-0 gap-1 sm:ml-1.5">
                     {trader.xUrl ? (
                       <a
                         href={trader.xUrl}

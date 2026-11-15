@@ -61,26 +61,28 @@
   --secondary: #d6d2c9;
   --secondary-foreground: #1c1b19;
   --muted: #e6e2da;
-  --muted-foreground: #5f5a52;
+  --muted-foreground: #5c5750;
   --accent: #e9e6df;
   --accent-foreground: #1c1b19;
-  --destructive: #b83a2a;
+  --destructive: #a03225;
   --border: #d9d5cc;
   --input: #b9b4a9;
-  --ring: #8f5f0f;
+  --ring: #7a510d;
   --radius: 0.8rem;
 
-  --brand: #8f5f0f;
-  --positive: #177a4e;
-  --negative: #b83a2a;
-  --score-risky: #b83a2a;
-  --score-weak: #9a5410;
-  --score-fair: #566f10;
-  --score-good: #177a4e;
-  --score-strong: #0f5f3b;
-  --polymarket: #1b6fa8;
-  --kalshi: #177a4e;
-  --hyperliquid: #0f7a70;
+  /* Accents are 4.5:1 or more against every surface and their own 10% tint
+     (WCAG AA for text), checked by the axe tests (BUG-059). */
+  --brand: #7a510d;
+  --positive: #136642;
+  --negative: #a03225;
+  --score-risky: #a03225;
+  --score-weak: #86490e;
+  --score-fair: #4b610e;
+  --score-good: #136642;
+  --score-strong: #0b4a2e;
+  --polymarket: #175d8d;
+  --kalshi: #136642;
+  --hyperliquid: #0c645c;
 }
 
 /* Dark theme: the default, as on the source. Warm near-black. */
@@ -96,18 +98,18 @@
   --secondary: #34312c;
   --secondary-foreground: #ece9e2;
   --muted: #27251f;
-  --muted-foreground: #9a948a;
+  --muted-foreground: #a09a91;
   --accent: #2b2924;
   --accent-foreground: #ece9e2;
-  --destructive: #ea7366;
+  --destructive: #eb796c;
   --border: #302d29;
   --input: #27251f;
   --ring: #d9a441;
 
   --brand: #d9a441;
   --positive: #4fbf8b;
-  --negative: #ea7366;
-  --score-risky: #ea7366;
+  --negative: #eb796c;
+  --score-risky: #eb796c;
   --score-weak: #e6a05a;
   --score-fair: #bccb5e;
   --score-good: #4fbf8b;
@@ -120,6 +122,15 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  /*
+   * One focus ring everywhere, in the full ring colour (3:1 or more against
+   * the page and cards, checked in src/app/contrast.test.ts). Elements inside
+   * a container that clips draw it inside instead (BUG-065).
+   */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
   html {
     @apply font-sans;

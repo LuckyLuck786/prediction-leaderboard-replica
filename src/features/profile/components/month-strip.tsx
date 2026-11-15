@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { summariseMonth, summariseYear, type DayCell } from "../history";
-import { BAR_BACKGROUND, CELL_BACKGROUND, amountTextClass, signedTextClass } from "./tone-styles";
+import { BAR_BACKGROUND, CELL_BACKGROUND, cellTextClass, signedTextClass } from "./tone-styles";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
@@ -43,14 +43,14 @@ function DayTile({ cell }: { cell: DayCell }) {
         CELL_BACKGROUND[cell.tone],
       )}
     >
-      <span className={cn("text-xs font-medium", cell.future ? "text-muted-foreground/50" : "text-foreground/70")}>
+      <span className={cn("text-xs font-medium", cell.future ? "text-muted-foreground" : cellTextClass(cell.tone))}>
         {cell.day}
       </span>
       {cell.future ? null : (
         <span
           className={cn(
             "text-[10px] font-bold leading-none",
-            cell.change === null ? "text-muted-foreground" : amountTextClass(cell.tone, cell.change),
+            cellTextClass(cell.tone),
           )}
         >
           {cell.change === null ? MISSING : formatProfileMoney(cell.change)}
