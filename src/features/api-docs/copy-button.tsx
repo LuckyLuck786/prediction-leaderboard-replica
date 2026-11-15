@@ -29,7 +29,8 @@ export function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
-      onClick={copy}
+      // copy handles its own failure, so the promise never rejects.
+      onClick={() => void copy()}
       aria-live="polite"
       className="rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-accent"
     >

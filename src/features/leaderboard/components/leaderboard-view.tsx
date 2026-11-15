@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, type Dispatch } from "react";
+import { useReducer } from "react";
 
 import { BRAND_MARK_PATH, PRODUCT_TAG } from "@/features/shell/brand";
 import { usePeriodData } from "@/lib/use-period-data";
@@ -10,7 +10,7 @@ import type { BoardPayload } from "../data";
 import { MISSING, formatMoneyWhole, formatStamp } from "../format";
 import { LEADERBOARD_PERIODS, PAGE_SIZE, type LeaderboardPeriod, type PlatformFilter } from "../model";
 import { applyQuery } from "../query";
-import { createInitialState, reduceLeaderboard, type LeaderboardAction } from "../state";
+import { createInitialState, reduceLeaderboard } from "../state";
 import { LeaderboardControls } from "./leaderboard-controls";
 import { LeaderboardTable } from "./leaderboard-table";
 import { LocalStamp } from "./local-stamp";
@@ -100,7 +100,7 @@ export function LeaderboardView({
 
       <LeaderboardControls
         state={state}
-        dispatch={dispatch as Dispatch<LeaderboardAction>}
+        dispatch={dispatch}
         countLabel={
           payload
             ? `${matching.length} of ${traders.length} traders`

@@ -61,11 +61,9 @@ describe("fetchUpstreamJson", () => {
     stubFetch(async () => {
       throw new TypeError("fetch failed");
     });
-    await expect(fetchUpstreamJson("/api/x")).rejects.toMatchObject({
-      name: "UpstreamError",
-      status: null,
-      message: expect.stringContaining("fetch failed"),
-    });
+    const failure = fetchUpstreamJson("/api/x");
+    await expect(failure).rejects.toMatchObject({ name: "UpstreamError", status: null });
+    await expect(failure).rejects.toThrow("fetch failed");
   });
 
   it("reports a body that is not JSON", async () => {

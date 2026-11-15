@@ -86,13 +86,13 @@ test.describe("API routes", () => {
   test("serve boards as JSON and refuse unknown periods", async ({ request }) => {
     const board = await request.get("/api/boards/30d");
     expect(board.status()).toBe(200);
-    const body = await board.json();
+    const body = (await board.json()) as { source: { kind: string }; board: { traders: unknown[] } };
     expect(body.source.kind).toBe("live");
     expect(body.board.traders.length).toBeGreaterThan(0);
 
     expect((await request.get("/api/kalshi/7d")).status()).toBe(200);
     const unknown = await request.get("/api/boards/2y");
     expect(unknown.status()).toBe(404);
-    expect((await unknown.json()).error).toBe("Unknown period");
+    expect(((await unknown.json()) as { error: string }).error).toBe("Unknown period");
   });
 });
