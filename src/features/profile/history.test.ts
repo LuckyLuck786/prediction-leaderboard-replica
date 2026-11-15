@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatChartMoney } from "@/features/leaderboard/format";
+import { nth } from "@/lib/test-utils";
 
 import {
   valueRange,
@@ -9,6 +10,7 @@ import {
   roomyTicks,
   dailyChanges,
   dayKey,
+  parseDayKey,
   summariseMonth,
   sumDailyChanges,
   summariseYear,
@@ -19,6 +21,13 @@ import {
 } from "./history";
 
 const at = (iso: string) => Date.parse(iso);
+
+describe("parseDayKey", () => {
+  it("reads the year and the month, January as 0", () => {
+    expect(parseDayKey("2026-01-31")).toEqual({ year: 2026, month: 0 });
+    expect(parseDayKey("2025-12-01")).toEqual({ year: 2025, month: 11 });
+  });
+});
 
 describe("dailyChanges", () => {
   it("measures each UTC day against the previous day's last value", () => {
@@ -120,7 +129,7 @@ describe("combineSeries", () => {
     ];
     const kalshi = [{ t: at("2025-09-26T14:25:32Z"), v: 90_139 }];
     const combined = combineSeries([polymarket, kalshi]);
-    expect(combined[0].v).toBe(91_139);
+    expect(combined[0]?.v).toBe(91_139);
     expect(combined.at(-1)?.v).toBe(91_339);
   });
 
@@ -166,14 +175,14 @@ describe("summariseMonth (PROF-02, PROF-03)", () => {
   });
 
   it("marks the month's best gain on its own", () => {
-    expect(month.days[3].tone).toBe("best");
+    expect(month.days[3]?.tone).toBe("best");
     expect(month.days.filter((cell) => cell.tone === "best")).toHaveLength(1);
   });
 
   it("counts a small loss as a loss even though it is shaded flat", () => {
     const small = summariseMonth(new Map([["2026-09-19", -78]]), 2026, 8, "2026-11-14");
     expect(small.losses).toBe(1);
-    expect(small.days[18].tone).toBe("flat");
+    expect(small.days[18]?.tone).toBe("flat");
   });
 
   it("leaves future days and days without data empty", () => {
@@ -248,8 +257,8 @@ describe("summariseYear", () => {
       "2026-11-14",
     );
     expect(year.months).toHaveLength(11);
-    expect(year.months[0].total).toBe(100);
-    expect(year.months[1].total).toBeNull();
+    expect(year.months[0]?.total).toBe(100);
+    expect(year.months[1]?.total).toBeNull();
     expect(year.total).toBe(70);
   });
 
@@ -264,7 +273,7 @@ describe("chart ticks (PROF-04)", () => {
     // running from about $89.6K to $1.105M.
     const axis = valueAxis(89_600, 1_104_963);
     expect(axis.ticks.map(formatChartMoney)).toEqual(["-$12K", "+$338K", "+$688K", "+$1.0M", "+$1.2M"]);
-    expect(axis.ticks[1] - axis.ticks[0]).toBeCloseTo(350_000);
+    expect(nth(axis.ticks, 1) - nth(axis.ticks, 0)).toBeCloseTo(350_000);
   });
 
   it("reproduces the step of a recorded Polymarket chart", () => {

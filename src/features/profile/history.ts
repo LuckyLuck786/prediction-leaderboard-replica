@@ -32,20 +32,29 @@ export function combineSeries(series: readonly (readonly SeriesPoint[])[]): Seri
   const times = [...new Set(nonEmpty.flatMap((points) => points.map((point) => point.t)))].sort(
     (a, b) => a - b,
   );
-  const cursors = nonEmpty.map(() => -1);
+  // Each series' latest value so far, its first value until its first point.
+  const tracks = nonEmpty.map((points) => ({ points, next: 0, value: points[0]?.v ?? 0 }));
   return times.map((t) => {
     let total = 0;
-    nonEmpty.forEach((points, index) => {
-      while (cursors[index] + 1 < points.length && points[cursors[index] + 1].t <= t) {
-        cursors[index] += 1;
+    for (const track of tracks) {
+      let point = track.points[track.next];
+      while (point && point.t <= t) {
+        track.value = point.v;
+        track.next += 1;
+        point = track.points[track.next];
       }
-      total += points[Math.max(cursors[index], 0)].v;
-    });
+      total += track.value;
+    }
     return { t, v: total };
   });
 }
 
 const MS_PER_DAY = 86_400_000;
+
+/** The year and month (0 = January) of a day key such as "2026-11-14". */
+export function parseDayKey(key: string): { year: number; month: number } {
+  return { year: Number(key.slice(0, 4)), month: Number(key.slice(5, 7)) - 1 };
+}
 
 /** The UTC day before a day key. */
 function previousDayKey(key: string): string {
@@ -195,8 +204,8 @@ export function summariseYear(
   year: number,
   today: string,
 ): YearSummary {
-  const [todayYear, todayMonth] = today.split("-").map(Number);
-  const lastMonth = year < todayYear ? 11 : todayMonth - 1;
+  const now = parseDayKey(today);
+  const lastMonth = year < now.year ? 11 : now.month;
   const months = Array.from({ length: lastMonth + 1 }, (_, month) => ({
     month,
     total: summariseMonth(changes, year, month, today).total,
@@ -300,14 +309,16 @@ export function roomyTicks(ticks: readonly number[], pixelsPerUnit: number): num
 
 /** Index of the point closest in time to `t` (points sorted by time, at least one). */
 export function nearestIndex(points: readonly SeriesPoint[], t: number): number {
+  // Every index read below lies within the list, so the fallback never applies.
+  const timeAt = (index: number) => points[index]?.t ?? Number.NaN;
   let low = 0;
   let high = points.length - 1;
   while (low < high) {
     const middle = (low + high) >> 1;
-    if (points[middle].t < t) low = middle + 1;
+    if (timeAt(middle) < t) low = middle + 1;
     else high = middle;
   }
-  if (low > 0 && t - points[low - 1].t < points[low].t - t) return low - 1;
+  if (low > 0 && t - timeAt(low - 1) < timeAt(low) - t) return low - 1;
   return low;
 }
 

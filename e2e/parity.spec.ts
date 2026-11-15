@@ -9,6 +9,8 @@
 
 import type { Locator, Page } from "@playwright/test";
 
+import { nth } from "../src/lib/test-utils";
+
 import { expect, test } from "./test";
 
 /** Sub-pixel rounding between engines and platforms. */
@@ -54,7 +56,9 @@ test.describe("measured parity with the source", () => {
     const columns = await page
       .locator("thead th")
       .evaluateAll((cells) => cells.slice(0, 6).map((cell) => cell.getBoundingClientRect().width));
-    [48, 56, 243, 64, 243, 243].forEach((width, index) => near(columns[index], width, `column ${index + 1}`));
+    [48, 56, 243, 64, 243, 243].forEach((width, index) =>
+      near(nth(columns, index, "column"), width, `column ${index + 1}`),
+    );
     near((await measure(page, "thead tr")).height, 53, "header row");
     near((await measure(page, "tbody tr:not([aria-hidden]) td:nth-child(2) > div")).width, 40, "avatar");
     near((await measure(page, "input[type=search]")).height, 30, "search height");
@@ -87,7 +91,9 @@ test.describe("measured parity with the source", () => {
           .filter((cell) => cell.getBoundingClientRect().width > 0)
           .map((cell) => cell.getBoundingClientRect().width),
       );
-    [24, 28, 105, 105, 105].forEach((width, index) => near(columns[index], width, `column ${index + 1}`));
+    [24, 28, 105, 105, 105].forEach((width, index) =>
+      near(nth(columns, index, "column"), width, `column ${index + 1}`),
+    );
     near((await measure(page, "button:text-is('1D')")).height, 24, "period button height");
     near((await measure(page, "h1")).fontSize, 20, "heading font size");
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);

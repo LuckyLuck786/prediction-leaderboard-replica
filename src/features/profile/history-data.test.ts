@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { nth } from "@/lib/test-utils";
 import { UpstreamError, fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";
 
 import {
@@ -120,7 +121,7 @@ describe("parsePolymarketPnl (D-035)", () => {
     ]);
     // The last day's change is the move since midnight: close to the trader
     // record's 1-day P&L (+$13,142), not +$2,987.
-    expect(series[2].v - series[1].v).toBeCloseTo(13_492.65, 2);
+    expect(nth(series, 2).v - nth(series, 1).v).toBeCloseTo(13_492.65, 2);
   });
 
   it("refuses a timestamp sent in milliseconds instead of seconds", () => {

@@ -4,6 +4,8 @@ import { act, cleanup, fireEvent, render, screen, within } from "@testing-librar
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { nth } from "@/lib/test-utils";
+
 import type { BoardPayload } from "../data";
 import { PAGE_SIZE, type LeaderboardPeriod, type Trader } from "../model";
 import { makeBoard, makeTrader } from "../test-helpers";
@@ -73,11 +75,12 @@ function renderView(
 }
 
 const bodyRows = () => screen.getAllByRole("row").slice(1);
+const bodyRow = (index: number) => nth(bodyRows(), index, "row");
 const cellsOf = (row: HTMLElement) => within(row).getAllByRole("cell");
 const firstNames = (count: number) =>
   bodyRows()
     .slice(0, count)
-    .map((row) => within(row).getAllByRole("link")[0].textContent);
+    .map((row) => within(row).getAllByRole("link")[0]?.textContent);
 const click = (name: string | RegExp) => fireEvent.click(screen.getByRole("button", { name }));
 
 describe("LeaderboardView", () => {
@@ -92,8 +95,8 @@ describe("LeaderboardView", () => {
   it("numbers rows from 1 and orders by P&L, highest first (HOME-14, HOME-18)", () => {
     renderView();
     expect(firstNames(3)).toEqual(["p01", "p02", "p03"]);
-    expect(cellsOf(bodyRows()[0])[0].textContent).toBe("1");
-    expect(cellsOf(bodyRows()[29])[0].textContent).toBe("30");
+    expect(cellsOf(bodyRow(0))[0]?.textContent).toBe("1");
+    expect(cellsOf(bodyRow(29))[0]?.textContent).toBe("30");
   });
 
   it("adds a page per click and removes the button at the end (HOME-19)", () => {
@@ -118,7 +121,7 @@ describe("LeaderboardView", () => {
   it("formats a loss the way the source does (FMT-01)", () => {
     renderView();
     click("P&L");
-    expect(cellsOf(bodyRows()[0]).at(-1)?.textContent).toContain("$-21,622.00");
+    expect(cellsOf(bodyRow(0)).at(-1)?.textContent).toContain("$-21,622.00");
   });
 
   it("filters by platform and returns to the first page (HOME-06)", () => {
@@ -214,12 +217,12 @@ describe("LeaderboardView", () => {
 
   it("opens the profile when a row is clicked, once (HOME-13)", () => {
     renderView();
-    const [firstRow] = bodyRows();
-    fireEvent.click(cellsOf(firstRow)[0]);
+    const firstRow = bodyRow(0);
+    fireEvent.click(nth(cellsOf(firstRow), 0, "cell"));
     expect(push).toHaveBeenCalledExactlyOnceWith("/account/p01");
 
     push.mockClear();
-    const nameLink = within(firstRow).getAllByRole("link")[0];
+    const nameLink = nth(within(firstRow).getAllByRole("link"), 0, "link");
     expect(nameLink.getAttribute("href")).toBe("/account/p01");
     fireEvent.click(nameLink);
     expect(push).not.toHaveBeenCalled();
@@ -259,7 +262,7 @@ describe("LeaderboardView", () => {
     const heading = screen.getByRole("columnheader", { name: "Win%" });
     expect(heading.className).toContain("hidden");
     expect(heading.className).toContain("sm:table-cell");
-    const winRateCell = cellsOf(bodyRows()[0]).at(-2);
+    const winRateCell = cellsOf(bodyRow(0)).at(-2);
     expect(winRateCell?.textContent).toBe("50%");
     expect(winRateCell?.className).toContain("hidden");
   });
@@ -267,14 +270,14 @@ describe("LeaderboardView", () => {
   it("names a platform for screen readers even when there is no page to link to (BUG-080)", () => {
     const unlinked = [makeTrader({ id: "no-page", pnl: 9, platform: "polymarket", polymarketUrl: null })];
     renderView({}, { "1d": unlinked });
-    const [row] = bodyRows();
+    const row = bodyRow(0);
     expect(within(row).queryByRole("link", { name: /on Polymarket/ })).toBeNull();
     expect(within(row).getByText("Polymarket").className).toContain("sr-only");
   });
 
   it("does not link a trader whose id our routes refuse (BUG-083)", () => {
     renderView({}, { "1d": [makeTrader({ id: "has space", pnl: 9, profileId: null })] });
-    const [row] = bodyRows();
+    const row = bodyRow(0);
     expect(within(row).queryByRole("link", { name: "has space" })).toBeNull();
     expect(within(row).getByText("has space")).toBeTruthy();
     fireEvent.click(row);
@@ -303,6 +306,6 @@ describe("LeaderboardView", () => {
 
     click("ALL");
     await screen.findByText("2 of 2 traders");
-    expect(cellsOf(bodyRows()[0]).at(-1)?.textContent).not.toContain("Politics");
+    expect(cellsOf(bodyRow(0)).at(-1)?.textContent).not.toContain("Politics");
   });
 });

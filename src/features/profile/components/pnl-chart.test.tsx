@@ -6,6 +6,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { formatChartDate, formatChartMoney } from "@/features/leaderboard/format";
+import { nth } from "@/lib/test-utils";
 
 import { PnlChart } from "./pnl-chart";
 
@@ -41,7 +42,7 @@ describe("PnlChart (PROF-04)", () => {
     render(<PnlChart series={series} />);
     const chart = screen.getByRole("img");
     expect(chart.getAttribute("aria-label")).toBe(
-      `Cumulative profit and loss from ${formatChartDate(series[0].t)} to ${formatChartDate(series[2].t)}, ending at ${formatChartMoney(series[2].v)}`,
+      `Cumulative profit and loss from ${formatChartDate(nth(series, 0).t)} to ${formatChartDate(nth(series, 2).t)}, ending at ${formatChartMoney(nth(series, 2).v)}`,
     );
     const path = chart.querySelector("path")?.getAttribute("d") ?? "";
     expect(path.match(/[ML]/g)).toHaveLength(series.length);
@@ -51,6 +52,6 @@ describe("PnlChart (PROF-04)", () => {
     const MIN_SPAN_SHARE = 0.85;
     expect(xs[0]).toBe(Math.min(...xs));
     expect(xs.at(-1)).toBe(Math.max(...xs));
-    expect((xs.at(-1) ?? 0) - xs[0]).toBeGreaterThan(CHART_WIDTH * MIN_SPAN_SHARE);
+    expect((xs.at(-1) ?? 0) - nth(xs, 0)).toBeGreaterThan(CHART_WIDTH * MIN_SPAN_SHARE);
   });
 });

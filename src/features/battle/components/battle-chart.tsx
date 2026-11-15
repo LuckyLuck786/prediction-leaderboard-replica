@@ -27,10 +27,15 @@ export interface ChartLine {
 }
 
 /** Each line's data point closest to the pointer, so a dot always sits on its line. */
-function pointsUnder(comparison: Comparison, lines: readonly ChartLine[], t: number): SeriesPoint[] {
-  return lines.map((line) => {
+function pointsUnder(
+  comparison: Comparison,
+  lines: readonly ChartLine[],
+  t: number,
+): Array<{ line: ChartLine; point: SeriesPoint }> {
+  return lines.flatMap((line) => {
     const series = comparison[line.key];
-    return series[nearestIndex(series, t)];
+    const point = series[nearestIndex(series, t)];
+    return point ? [{ line, point }] : [];
   });
 }
 
@@ -52,7 +57,9 @@ export function BattleChart({
   useEffect(() => {
     const element = container.current;
     if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setWidth(entry.contentRect.width);
+    });
     observer.observe(element);
     return () => observer.disconnect();
   }, []);
@@ -138,14 +145,8 @@ export function BattleChart({
                 y2={HEIGHT - MARGIN.bottom}
                 className="stroke-muted-foreground/40"
               />
-              {pointsUnder(comparison, lines, hoverT).map((point, index) => (
-                <circle
-                  key={lines[index].key}
-                  cx={x(point.t)}
-                  cy={y(point.v)}
-                  r={3}
-                  className={lines[index].fill}
-                />
+              {pointsUnder(comparison, lines, hoverT).map(({ line, point }) => (
+                <circle key={line.key} cx={x(point.t)} cy={y(point.v)} r={3} className={line.fill} />
               ))}
             </>
           ) : null}
@@ -158,9 +159,9 @@ export function BattleChart({
           style={{ left: Math.min(Math.max(x(hoverT) + 12, 0), width - TOOLTIP_WIDTH) }}
         >
           <p className="mb-1 text-xs text-muted-foreground">{formatChartDate(hoverT)}</p>
-          {pointsUnder(comparison, lines, hoverT).map((point, index) => (
-            <p key={lines[index].key} className="text-sm">
-              <span className="text-muted-foreground">{lines[index].name} </span>
+          {pointsUnder(comparison, lines, hoverT).map(({ line, point }) => (
+            <p key={line.key} className="text-sm">
+              <span className="text-muted-foreground">{line.name} </span>
               <span className="font-semibold">{formatBattleMoney(point.v)}</span>
             </p>
           ))}

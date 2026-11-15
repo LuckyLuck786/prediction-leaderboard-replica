@@ -36,8 +36,8 @@ describe("compare (BATTLE-03)", () => {
 
   it("starts both lines at zero, against the source's recorded baselines", () => {
     expect(comparison?.kalshi[0]).toEqual({ t: KALSHI_START, v: 0 });
-    expect(comparison?.polymarket[0].v).toBe(0);
-    expect(comparison?.polymarket[0].t).toBe(at("2025-09-27T23:59:59.999Z"));
+    expect(comparison?.polymarket[0]?.v).toBe(0);
+    expect(comparison?.polymarket[0]?.t).toBe(at("2025-09-27T23:59:59.999Z"));
     expect(comparison?.kalshi.at(-1)?.v).toBeCloseTo(675_134.8 - 45_200.28, 6);
     expect(comparison?.polymarket.at(-1)?.v).toBeCloseTo(114_987.150194 - 21_063.72247, 6);
   });

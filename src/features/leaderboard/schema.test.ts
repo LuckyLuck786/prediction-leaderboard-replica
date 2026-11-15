@@ -46,7 +46,7 @@ describe("parseLeaderboard", () => {
   it("picks the Sharpe figure that belongs to the period", () => {
     const sharpeFor = (period: (typeof LEADERBOARD_PERIODS)[number]) => {
       const result = parseLeaderboard(response([validTrader]), period);
-      return result.ok ? result.leaderboard.traders[0].sharpe : undefined;
+      return result.ok ? result.leaderboard.traders[0]?.sharpe : undefined;
     };
     expect(sharpeFor("1d")).toBe(0.37);
     expect(sharpeFor("30d")).toBe(-0.12);
@@ -57,10 +57,10 @@ describe("parseLeaderboard", () => {
     const result = parseLeaderboard(response([validTrader]), "1d");
     if (!result.ok) throw new Error(result.error);
     const [trader] = result.leaderboard.traders;
-    expect(trader.polymarketUrl).toBe(
+    expect(trader?.polymarketUrl).toBe(
       "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294",
     );
-    expect(trader.xUrl).toBe("https://x.com/someone");
+    expect(trader?.xUrl).toBe("https://x.com/someone");
   });
 
   it("treats empty strings and missing fields as absent (DATA-08)", () => {

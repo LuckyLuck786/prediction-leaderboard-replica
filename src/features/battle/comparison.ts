@@ -40,8 +40,10 @@ export function compare(
   polymarket: readonly SeriesPoint[],
   kalshi: readonly SeriesPoint[],
 ): Comparison | null {
-  if (polymarket.length === 0 || kalshi.length === 0) return null;
-  const start = Math.max(polymarket[0].t, kalshi[0].t);
+  const [firstPolymarket] = polymarket;
+  const [firstKalshi] = kalshi;
+  if (!firstPolymarket || !firstKalshi) return null;
+  const start = Math.max(firstPolymarket.t, firstKalshi.t);
   const lines = { polymarket: changeSince(polymarket, start), kalshi: changeSince(kalshi, start) };
   const lastPolymarket = lines.polymarket.at(-1);
   const lastKalshi = lines.kalshi.at(-1);

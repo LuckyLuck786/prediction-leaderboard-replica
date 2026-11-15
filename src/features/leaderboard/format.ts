@@ -247,6 +247,7 @@ export function initialsOf(name: string): string {
     .split(" ")
     .filter(Boolean)
     .map((word) => Array.from(word));
-  const letters = words.length > 1 ? [words[0][0], words[1][0]] : (words[0] ?? []).slice(0, 2);
+  const [first = [], second] = words;
+  const letters = second ? [first[0], second[0]] : first.slice(0, 2);
   return letters.join("").toUpperCase() || "?";
 }

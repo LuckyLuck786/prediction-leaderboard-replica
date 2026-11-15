@@ -11,7 +11,7 @@ import {
 } from "@/features/leaderboard/format";
 import { cn } from "@/lib/utils";
 
-import { summariseMonth, summariseYear, type DayCell } from "../history";
+import { parseDayKey, summariseMonth, summariseYear, type DayCell } from "../history";
 import { BAR_BACKGROUND, CELL_BACKGROUND, cellTextClass, signedTextClass } from "./tone-styles";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -27,10 +27,6 @@ const LEGEND = [
 
 /** Months counted from year 0, so two months compare with < and >. */
 const monthIndex = (year: number, month: number) => year * 12 + month;
-const parseKey = (key: string) => {
-  const [year, month] = key.split("-").map(Number);
-  return { year, month: month - 1 };
-};
 
 function DayTile({ cell }: { cell: DayCell }) {
   const title = cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
@@ -76,13 +72,13 @@ export function MonthStrip({
   accentBorder: string;
 }) {
   const changeMap = new Map(changes);
-  const current = parseKey(today);
+  const current = parseDayKey(today);
   // The earliest day with a result, wherever it sits in the list (BUG-082).
   const earliest = changes.reduce<string | null>(
     (min, [key]) => (min === null || key < min ? key : min),
     null,
   );
-  const first = earliest === null ? current : parseKey(earliest);
+  const first = earliest === null ? current : parseDayKey(earliest);
 
   const [cursor, setCursor] = useState(current);
   const [expanded, setExpanded] = useState(false);
@@ -244,7 +240,7 @@ export function MonthStrip({
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {year.months.map((entry) => {
-                  const name = MONTH_NAMES[entry.month].toUpperCase();
+                  const name = MONTH_NAMES[entry.month]?.toUpperCase();
                   return (
                     <div
                       key={entry.month}
