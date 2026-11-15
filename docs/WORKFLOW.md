@@ -273,6 +273,8 @@ work happens. It describes what was done, not what was planned.
    evidence claims narrowed, and a check that ties the API page's request
    list to the code, which fails if either changes alone.
 5. **Re-verified**: 434 unit tests, 211 end-to-end tests at three sizes.
+6. **Merged and deployed**: every route answers on the live site, the API
+   page lists the seven requests, and CI passed both jobs.
 
 ### Slips, recorded as they happened
 

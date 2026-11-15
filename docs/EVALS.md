@@ -254,7 +254,7 @@ further runs on the final build showed 0, and its cause was not found.
 | Lighthouse, deployed site | `npm run lighthouse` | performance 99 to 100, accessibility 100 on every page, 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
 | Asset check | `npm run check:assets` | pass, 163 files, 2026-11-15 |
-| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, phase 7 merge |
+| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, code audit merge |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |
