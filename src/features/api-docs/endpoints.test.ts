@@ -9,7 +9,7 @@ import { getProfile } from "@/features/profile/data";
 import { getCategories, loadKalshiHistory, loadPolymarketHistory } from "@/features/profile/history-data";
 import type { TraderProfile } from "@/features/profile/model";
 import { fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";
-import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/origins";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/settings";
 import source from "@/upstream/source.json";
 
 import { DATA_SOURCES } from "./endpoints";

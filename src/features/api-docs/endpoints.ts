@@ -4,8 +4,7 @@
 
 import { LEADERBOARD_PERIODS } from "@/features/leaderboard/model";
 import { KALSHI_BOARD_LIMIT, KALSHI_PERIODS } from "@/features/kalshi/model";
-import { UPSTREAM_REVALIDATE_SECONDS } from "@/upstream/client";
-import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/origins";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN, UPSTREAM_REVALIDATE_SECONDS } from "@/upstream/settings";
 import source from "@/upstream/source.json";
 
 export interface EndpointDoc {

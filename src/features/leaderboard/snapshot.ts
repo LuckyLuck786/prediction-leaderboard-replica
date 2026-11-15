@@ -1,6 +1,8 @@
 // The saved snapshot: what the site renders when live data is unavailable.
 // It goes through the same parser as a live response.
 
+import "server-only";
+
 import { z } from "zod";
 
 import { SAVED_SNAPSHOT, parseSnapshotFile } from "@/upstream/snapshot";

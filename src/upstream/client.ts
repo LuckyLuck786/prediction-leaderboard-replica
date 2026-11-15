@@ -2,15 +2,9 @@
 // Polymarket's documented Data API. Used on the server only: pages and route
 // handlers call it, visitors' browsers never do.
 
-import { POLYMARKET_DATA_ORIGIN, UPSTREAM_ORIGIN } from "./origins";
+import "server-only";
 
-/**
- * How long a rendered page or route reuses its upstream data, in seconds.
- * Every route that reads upstream exports this as `revalidate` (a test keeps
- * them equal). Upstream refreshes Polymarket P&L about every 5 minutes (spec
- * DATA-07), so asking more often would only cost its rate limit.
- */
-export const UPSTREAM_REVALIDATE_SECONDS = 300;
+import { POLYMARKET_DATA_ORIGIN, UPSTREAM_ORIGIN } from "./origins";
 
 /** A slow upstream must not hold a page render hostage. */
 const UPSTREAM_TIMEOUT_MS = 8_000;

@@ -7,6 +7,8 @@
 // Polymarket's profile chart shows, and it ends on the same all-time figure
 // the source prints.
 
+import "server-only";
+
 import { z } from "zod";
 
 import { fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";

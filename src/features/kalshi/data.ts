@@ -1,5 +1,7 @@
 // Live Kalshi board with the saved snapshot as the fallback. Server only.
 
+import "server-only";
+
 import { z } from "zod";
 
 import { fetchUpstreamJson } from "@/upstream/client";

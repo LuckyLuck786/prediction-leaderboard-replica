@@ -2,6 +2,8 @@
 // loader for the whole file; each board then parses its own part with the
 // same parser a live answer goes through.
 
+import "server-only";
+
 import { z } from "zod";
 
 import rawSnapshot from "./snapshot/leaderboard.json";

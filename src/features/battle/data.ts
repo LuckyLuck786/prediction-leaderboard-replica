@@ -5,6 +5,8 @@
 // promotion (D-014). Everything shown comes from documented endpoints: the
 // two trader records, the Kalshi history and Polymarket's P&L series.
 
+import "server-only";
+
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 import { getProfile } from "@/features/profile/data";

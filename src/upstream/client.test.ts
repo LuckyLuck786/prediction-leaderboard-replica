@@ -4,7 +4,7 @@ import { nth } from "@/lib/test-utils";
 
 import source from "./source.json";
 import { UpstreamError, fetchPolymarketJson, fetchUpstreamJson, isNotFound } from "./client";
-import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./origins";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./settings";
 
 afterEach(() => {
   vi.unstubAllGlobals();

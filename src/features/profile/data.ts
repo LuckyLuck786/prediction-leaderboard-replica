@@ -1,6 +1,8 @@
 // Live trader profile. Server only. There is no snapshot for profiles: an
 // unknown trader is a 404, and any other failure is shown as such.
 
+import "server-only";
+
 import { cache } from "react";
 
 import { fetchUpstreamJson, isNotFound } from "@/upstream/client";

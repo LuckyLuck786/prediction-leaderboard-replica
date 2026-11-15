@@ -8,6 +8,10 @@ export default defineConfig({
     include: ["src/**/*.test.{ts,tsx}", "scripts/**/*.test.mjs"],
     alias: {
       "@/": new URL("./src/", import.meta.url).pathname,
+      // Next swaps this guard for an empty module in server code and fails the
+      // build if client code imports it. Tests run as server code.
+      "server-only": new URL("./node_modules/next/dist/compiled/server-only/empty.js", import.meta.url)
+        .pathname,
     },
   },
 });
