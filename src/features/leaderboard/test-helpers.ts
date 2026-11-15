@@ -1,7 +1,6 @@
 // Builders for tests. Not imported by application code.
 
 import {
-  LEADERBOARD_PERIODS,
   type Leaderboard,
   type LeaderboardPeriod,
   type Trader,
@@ -32,16 +31,4 @@ export function makeTrader(overrides: Partial<Trader> & Pick<Trader, "id">): Tra
 
 export function makeBoard(period: LeaderboardPeriod, traders: Trader[]): Leaderboard {
   return { period, lastUpdated: "2026-11-13T19:38:16.611Z", traders, rejectedCount: 0 };
-}
-
-/** The same traders under every period, unless a period is given its own list. */
-export function makeBoards(
-  traders: Trader[],
-  perPeriod: Partial<Record<LeaderboardPeriod, Trader[]>> = {},
-): Record<LeaderboardPeriod, Leaderboard> {
-  const boards = {} as Record<LeaderboardPeriod, Leaderboard>;
-  for (const period of LEADERBOARD_PERIODS) {
-    boards[period] = makeBoard(period, perPeriod[period] ?? traders);
-  }
-  return boards;
 }

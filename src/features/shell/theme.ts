@@ -6,7 +6,7 @@ export const DARK_CLASS = "dark";
 export type Theme = "dark" | "light";
 
 /**
- * Runs inline at the top of <body>, before anything is painted, so a visitor
+ * Runs inline in <head>, before anything is painted (D-028), so a visitor
  * who chose the light theme never sees a dark flash. Kept as a string because
  * it must execute before React loads.
  */

@@ -214,12 +214,10 @@ describe("parseSnapshot", () => {
 
   it("accepts a well-formed file", () => {
     const parsed = parseSnapshot(file);
-    expect(parsed.dailyProfit).toBe(371386);
     expect(parsed.upstreamTotals.all).toBe(1);
   });
 
   it.each([
-    ["no daily profit", { ...file, dailyProfit: {} }],
     ["a bad capture date", { ...file, capturedAt: "recently" }],
     ["a missing period", { ...file, periods: { ...periods, ytd: undefined } }],
     ["a period without its upstream total", { ...file, periods: { ...periods, all: response([]) } }],

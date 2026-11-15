@@ -76,8 +76,8 @@ export function applyQuery(
     if (query.hideSports && (trader.sportsShare ?? 0) >= SPORTS_SHARE_HIDE_THRESHOLD) {
       return false;
     }
-    // The source's own tooltip for this toggle reads "Hiding esports traders
-    // without an X account", so a trader with an X account stays visible.
+    // The source's tooltip for this toggle says it hides only esports traders
+    // who have no X account, so a trader with one stays visible.
     if (
       query.hideEsports &&
       !trader.xUrl &&

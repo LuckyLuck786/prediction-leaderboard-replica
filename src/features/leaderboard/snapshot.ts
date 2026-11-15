@@ -11,8 +11,6 @@ import { parseLeaderboard } from "./schema";
 export interface LeaderboardSnapshot {
   /** ISO timestamp of when the snapshot was taken. */
   capturedAt: string;
-  /** Combined profit of all tracked traders on the snapshot day, in dollars. */
-  dailyProfit: number;
   boards: Record<LeaderboardPeriod, Leaderboard>;
   /**
    * How many traders upstream listed for each period when the snapshot was
@@ -23,7 +21,6 @@ export interface LeaderboardSnapshot {
 
 const snapshotSchema = z.object({
   capturedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)), "not a date"),
-  dailyProfit: z.object({ raw: z.number() }),
   periods: z.record(z.string(), z.unknown()),
 });
 
@@ -57,7 +54,6 @@ export function parseSnapshot(input: unknown): LeaderboardSnapshot {
 
   return {
     capturedAt: new Date(file.data.capturedAt).toISOString(),
-    dailyProfit: file.data.dailyProfit.raw,
     boards,
     upstreamTotals,
   };

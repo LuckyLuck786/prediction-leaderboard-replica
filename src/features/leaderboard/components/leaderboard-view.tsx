@@ -49,7 +49,7 @@ export function LeaderboardView({
   const payload = current.status === "ready" ? current.value : null;
   const traders = payload?.board.traders ?? EMPTY;
 
-  // Filtering and sorting a few hundred rows is cheap; the React Compiler memoizes it.
+  // Filtering and sorting a few hundred rows on every render is cheap, so it is not memoized.
   const matching = applyQuery(traders, state.query, state.period);
   const visible = matching.slice(0, state.visibleCount);
   // The day's total is live data; next to snapshot rows it would mix two moments.

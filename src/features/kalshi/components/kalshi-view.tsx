@@ -87,7 +87,7 @@ export function KalshiView({
   const current = boards.get(period);
   const payload = current.status === "ready" ? current.value : null;
   const traders = payload?.board.traders ?? EMPTY;
-  // Filtering a thousand rows is cheap; the React Compiler memoizes it.
+  // Filtering a thousand rows on every render is cheap, so it is not memoized.
   const matching = applyKalshiQuery(traders, query);
   const visible = matching.slice(0, visibleCount);
 

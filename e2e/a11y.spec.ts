@@ -1,5 +1,5 @@
 // Automated accessibility checks (docs/EVALS.md, "Accessibility"): axe-core
-// against every route, in both themes, at both test sizes. Any violation of
+// against every route, in both themes, at every test size. Any violation of
 // the WCAG 2.2 A and AA rules axe can test fails the test, with its rule,
 // impact and the elements involved.
 
