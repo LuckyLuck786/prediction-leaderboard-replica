@@ -18,7 +18,7 @@ import {
   formatScore,
   formatSharpe,
   formatTraderName,
-  formatWinRate,
+  formatWholePercent,
 } from "@/lib/format";
 import {
   EXTRA_COLUMN_LABELS,
@@ -43,7 +43,7 @@ const EXTRA_COLUMN_DEFS: Record<
   },
   winRate: {
     heading: () => EXTRA_COLUMN_LABELS.winRate,
-    cell: (trader) => formatWinRate(trader.winRate),
+    cell: (trader) => formatWholePercent(trader.winRate),
   },
   roi: { heading: () => EXTRA_COLUMN_LABELS.roi, cell: (trader) => formatRoi(trader.roi) },
 };

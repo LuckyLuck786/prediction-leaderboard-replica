@@ -236,9 +236,9 @@ export function formatScore(score: number | null): string {
   return score === null ? MISSING : String(Math.round(score * 10) / 10);
 }
 
-/** FMT-09. Win rate as a whole percent: `47%`. */
-export function formatWinRate(winRate: number | null): string {
-  return winRate === null ? MISSING : `${Math.round(winRate * 100)}%`;
+/** FMT-09. A share as a whole percent: win rate `47%`, R² `91%`. */
+export function formatWholePercent(share: number | null): string {
+  return share === null ? MISSING : `${Math.round(share * 100)}%`;
 }
 
 /** FMT-09. Sharpe with two decimals: `0.11`. */

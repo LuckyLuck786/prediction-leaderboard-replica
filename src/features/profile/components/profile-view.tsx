@@ -9,7 +9,7 @@ import {
   formatScore,
   formatSharpe,
   formatTraderName,
-  formatWinRate,
+  formatWholePercent,
 } from "@/lib/format";
 import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/trader/platforms";
 import { scoreBandClass } from "@/features/trader/score-band";
@@ -172,14 +172,14 @@ export function ProfileView({
               ) : null}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-5">
-              <Stat label="Win rate" value={formatWinRate(profile.score.winRate)} />
+              <Stat label="Win rate" value={formatWholePercent(profile.score.winRate)} />
               <Stat label="Sharpe" value={formatSharpe(profile.score.sharpe)} />
               <Stat label="Max drawdown" value={formatDrawdown(profile.score.maxDrawdown)} />
               <Stat
                 label="Profit factor"
                 value={profile.score.profitFactor === null ? MISSING : profile.score.profitFactor.toFixed(2)}
               />
-              <Stat label="R²" value={formatWinRate(profile.score.rSquared)} />
+              <Stat label="R²" value={formatWholePercent(profile.score.rSquared)} />
             </div>
           </>
         ) : (
