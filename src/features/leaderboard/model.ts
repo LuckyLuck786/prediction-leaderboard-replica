@@ -4,6 +4,7 @@
 export const LEADERBOARD_PERIODS = ["1d", "30d", "ytd", "all"] as const;
 export type LeaderboardPeriod = (typeof LEADERBOARD_PERIODS)[number];
 
+/** The period the board opens on, as on the source. */
 export const DEFAULT_PERIOD: LeaderboardPeriod = "1d";
 
 /** Order and labels of the period buttons, left to right. */
@@ -17,6 +18,7 @@ export const PERIOD_BUTTONS: ReadonlyArray<{
   { period: "1d", label: "1D" },
 ];
 
+/** Platforms a trader can be listed under, as upstream names them. */
 export const PLATFORMS = ["polymarket", "kalshi", "both", "hyperliquid"] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
@@ -25,6 +27,7 @@ export const FILTERABLE_PLATFORMS = ["polymarket", "kalshi", "hyperliquid"] as c
 export type FilterablePlatform = (typeof FILTERABLE_PLATFORMS)[number];
 export type PlatformFilter = FilterablePlatform | "all";
 
+/** Display names of the platforms. */
 export const PLATFORM_NAMES: Record<FilterablePlatform, string> = {
   polymarket: "Polymarket",
   kalshi: "Kalshi",
@@ -81,6 +84,7 @@ export const SHARPE_HEADINGS: Record<LeaderboardPeriod, string> = {
   all: "Sharpe",
 };
 
+/** Optional columns the board can switch on. */
 export const EXTRA_COLUMNS = ["sharpe", "winRate", "roi"] as const;
 export type ExtraColumn = (typeof EXTRA_COLUMNS)[number];
 
@@ -100,6 +104,7 @@ export const SCORE_WEIGHTS = [
   { part: "profit factor", percent: 15 },
 ] as const;
 
+/** Columns the board can sort by. */
 export const SORT_KEYS = ["joined", "score", "sharpe", "winRate", "roi", "pnl"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 export type SortDirection = "asc" | "desc";
@@ -121,6 +126,7 @@ export interface LeaderboardQuery {
   sort: SortState | null;
 }
 
+/** The board's filters when it opens, as on the source. */
 export const DEFAULT_QUERY: LeaderboardQuery = {
   bigMoversOnly: true,
   platform: "all",
@@ -131,6 +137,7 @@ export const DEFAULT_QUERY: LeaderboardQuery = {
   sort: null,
 };
 
+/** On the 1D board, the "$5+" chip hides traders who moved less than this many dollars. */
 export const MIN_DAILY_MOVE_USD = 5;
 /** Upstream documents that traders at or above this sports share are hidden by default. */
 export const SPORTS_SHARE_HIDE_THRESHOLD = 0.5;

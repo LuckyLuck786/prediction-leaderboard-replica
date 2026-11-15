@@ -190,6 +190,7 @@ function DayMoverLine({ trader }: { trader: Trader }) {
   );
 }
 
+/** The ranked rows with their sortable headings and optional columns; a row opens the trader's profile. */
 export function LeaderboardTable({
   traders,
   period,

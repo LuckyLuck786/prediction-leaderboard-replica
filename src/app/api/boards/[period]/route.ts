@@ -15,6 +15,7 @@ export function generateStaticParams() {
   return LEADERBOARD_PERIODS.map((period) => ({ period }));
 }
 
+/** One period of the home board as JSON: live, or the labelled snapshot (D-029). */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ period: string }> },

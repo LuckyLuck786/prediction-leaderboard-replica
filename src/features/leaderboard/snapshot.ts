@@ -59,6 +59,7 @@ export function parseSnapshot(input: unknown): LeaderboardSnapshot {
   };
 }
 
+/** The committed snapshot, validated; a broken snapshot fails loudly (D-026). */
 export function loadSnapshot(): LeaderboardSnapshot {
   return parseSnapshot(rawSnapshot);
 }

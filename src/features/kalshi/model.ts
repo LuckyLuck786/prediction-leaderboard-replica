@@ -3,6 +3,7 @@
 export const KALSHI_PERIODS = ["all", "30d", "7d", "1d"] as const;
 export type KalshiPeriod = (typeof KALSHI_PERIODS)[number];
 
+/** The period the Kalshi board opens on. */
 export const DEFAULT_KALSHI_PERIOD: KalshiPeriod = "all";
 
 /** Order and labels of the period buttons, left to right. */
@@ -50,4 +51,5 @@ export interface KalshiQuery {
   nonSportsOnly: boolean;
 }
 
+/** The Kalshi board's filters when it opens. */
 export const DEFAULT_KALSHI_QUERY: KalshiQuery = { search: "", nonSportsOnly: false };

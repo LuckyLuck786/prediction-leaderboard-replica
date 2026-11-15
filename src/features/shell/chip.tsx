@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const CHIP_ON = "bg-primary text-primary-foreground";
 const CHIP_OFF = "text-foreground hover:bg-accent";
 
+/** A toggle in the board controls; aria-pressed says whether it is on. */
 export function Chip({
   active,
   title,

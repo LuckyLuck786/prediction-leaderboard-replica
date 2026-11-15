@@ -11,6 +11,7 @@ const SCORE_BANDS = [
 
 const LOWEST_BAND_CLASS = "text-score-risky";
 
+/** The text colour class for a Smart Score's band. */
 export function scoreBandClass(score: number): string {
   return SCORE_BANDS.find((band) => score >= band.from)?.className ?? LOWEST_BAND_CLASS;
 }

@@ -3,6 +3,7 @@
 
 import source from "@/upstream/source.json";
 
+/** Our product name, tag and description: original on purpose (D-007). */
 export const PRODUCT_NAME = "Luqky's Prediction Leaderboard";
 export const PRODUCT_TAG = "demo";
 export const PRODUCT_DESCRIPTION =

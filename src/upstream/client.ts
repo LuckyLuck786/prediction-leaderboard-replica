@@ -16,7 +16,7 @@ export const UPSTREAM_REVALIDATE_SECONDS = 300;
 const UPSTREAM_TIMEOUT_MS = 8_000;
 
 /** HTTP status upstream uses for an unknown trader or page. */
-export const NOT_FOUND_STATUS = 404;
+const NOT_FOUND_STATUS = 404;
 
 export class UpstreamError extends Error {
   constructor(

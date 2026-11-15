@@ -51,6 +51,7 @@ const LINKS = [
   { label: "API", href: "/api-docs" },
 ] as const;
 
+/** R-03 Kalshi board (spec 4.3): the default period renders here; the others load when picked (D-034). */
 export default async function KalshiPage() {
   const initial = await getKalshiBoard(DEFAULT_KALSHI_PERIOD);
 

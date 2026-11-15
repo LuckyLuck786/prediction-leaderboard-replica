@@ -14,6 +14,7 @@ export function generateStaticParams() {
   return KALSHI_PERIODS.map((period) => ({ period }));
 }
 
+/** One period of the Kalshi board as JSON: live, or the labelled snapshot. */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ period: string }> },

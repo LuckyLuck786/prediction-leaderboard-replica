@@ -44,6 +44,7 @@ export function loadKalshiSnapshot(input: unknown = rawSnapshot) {
   return boards;
 }
 
+/** One Kalshi period: live when upstream answers with valid data, else the labelled snapshot. Server only. */
 export async function getKalshiBoard(period: KalshiPeriod): Promise<KalshiPayload> {
   try {
     const body = await fetchUpstreamJson(

@@ -27,6 +27,7 @@ const SECTIONS = [
   },
 ];
 
+/** Privacy page (D-015): the site collects nothing; pictures load from other hosts (D-033). */
 export default function PrivacyPage() {
   return (
     <TopBarShell width="narrow">

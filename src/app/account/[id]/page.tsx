@@ -21,6 +21,7 @@ export function generateStaticParams() {
 
 type Props = { params: Promise<{ id: string }> };
 
+/** Page title: the trader's name and all-time P&L (PROF-10). */
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const result = await getProfile(id);
@@ -32,6 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * R-04 trader profile (spec 4.4). An id that cannot exist, or that upstream
+ * does not know, is a 404; any other failure is thrown to error.tsx, so a
+ * failed render is never cached (BUG-023).
+ */
 export default async function ProfilePage({ params }: Props) {
   const { id } = await params;
   const result = await getProfile(id);

@@ -16,6 +16,7 @@ export const FOOTER_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "Privacy", href: "/privacy" },
 ];
 
+/** The footer of every page but the head-to-head one, which has its own: links, the disclaimer and the data credit. */
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border pt-8 text-sm text-muted-foreground">

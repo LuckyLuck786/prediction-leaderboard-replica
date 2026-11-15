@@ -3,6 +3,7 @@
 
 import type { Platform } from "@/features/leaderboard/model";
 
+/** The P&L periods a trader record carries. */
 export const PROFILE_PERIODS = ["1d", "7d", "30d", "all"] as const;
 export type ProfilePeriod = (typeof PROFILE_PERIODS)[number];
 

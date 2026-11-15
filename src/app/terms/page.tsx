@@ -28,6 +28,7 @@ const SECTIONS = [
   },
 ];
 
+/** Terms page: what the demo is, where its data comes from, what it does not promise. */
 export default function TermsPage() {
   return (
     <TopBarShell width="narrow">

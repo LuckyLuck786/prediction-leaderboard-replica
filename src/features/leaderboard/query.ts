@@ -61,6 +61,7 @@ export function nextSort(current: SortState | null, key: SortKey): SortState {
   return { key, direction: current.direction === "asc" ? "desc" : "asc" };
 }
 
+/** Filters, searches and sorts one period's traders as the controls say. Pure: same input, same output. */
 export function applyQuery(
   traders: readonly Trader[],
   query: LeaderboardQuery,

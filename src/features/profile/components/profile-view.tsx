@@ -64,6 +64,7 @@ function Stat({ label, value, className }: { label: string; value: string; class
   );
 }
 
+/** The profile page body (spec 4.4), rendered on the server; the month strip and chart are client components. */
 export function ProfileView({
   profile,
   history,

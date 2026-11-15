@@ -52,6 +52,7 @@ const LINKS = [
   { label: "API", href: "/api-docs" },
 ] as const;
 
+/** R-02 (spec 4.2): the home board preset to Polymarket, with an About section in our own words. */
 export default async function PolymarketPage() {
   const [initial, dailyProfit] = await Promise.all([getBoard(DEFAULT_PERIOD), getDailyProfit()]);
 

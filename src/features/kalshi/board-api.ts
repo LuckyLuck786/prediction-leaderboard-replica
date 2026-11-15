@@ -5,7 +5,7 @@ import { z } from "zod";
 import type { KalshiPayload } from "./data";
 import type { KalshiPeriod, KalshiTrader } from "./model";
 
-export const kalshiApiPath = (period: KalshiPeriod) => `/api/kalshi/${period}`;
+const kalshiApiPath = (period: KalshiPeriod) => `/api/kalshi/${period}`;
 
 /** Our own server builds this from validated data; the browser checks the outline. */
 const payloadOutline = z.object({
@@ -21,6 +21,7 @@ const payloadOutline = z.object({
   ]),
 });
 
+/** One Kalshi period from our own cached route, in the browser, checked before use. */
 export async function fetchKalshiBoard(period: KalshiPeriod): Promise<KalshiPayload> {
   const path = kalshiApiPath(period);
   const response = await fetch(path);

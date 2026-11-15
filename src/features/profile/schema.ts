@@ -63,6 +63,7 @@ function toJoined(value: string | null | undefined): string | null {
 export type ProfileParseResult =
   { ok: true; profile: TraderProfile } | { ok: false; error: string };
 
+/** Validates a trader record at the boundary and maps it to the app's profile type (DATA-04). */
 export function parseProfile(input: unknown, id: string): ProfileParseResult {
   const parsed = rawProfileSchema.safeParse(input);
   if (!parsed.success)

@@ -18,6 +18,7 @@ import { LocalStamp } from "./local-stamp";
 const EMPTY: never[] = [];
 const COUNT_LABELS = { loading: "Loading traders", failed: "No traders loaded" } as const;
 
+/** The whole board: controls, count, table and "Show more", loading other periods from our route (D-029). */
 export function LeaderboardView({
   heading,
   description,

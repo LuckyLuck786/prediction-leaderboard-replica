@@ -79,6 +79,7 @@ export type CategoriesResult =
 
 const byTime = (a: SeriesPoint, b: SeriesPoint) => a.t - b.t;
 
+/** Validates a Kalshi history answer and returns it as a time-sorted series. Throws on a bad shape. */
 export function parseKalshiHistory(input: unknown): SeriesPoint[] {
   const parsed = kalshiHistorySchema.safeParse(input);
   if (!parsed.success) throw new Error(`Kalshi history: ${z.prettifyError(parsed.error)}`);

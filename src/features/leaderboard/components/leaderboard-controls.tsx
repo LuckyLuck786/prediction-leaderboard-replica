@@ -30,6 +30,7 @@ const SCORE_LEGEND = `Score blends ${new Intl.ListFormat("en-GB", {
   type: "conjunction",
 }).format(SCORE_WEIGHTS.map((weight) => `${weight.part} ${weight.percent}%`))}.`;
 
+/** The board's controls: period, platform, filters, optional columns and search. Each dispatches to the board's reducer. */
 export function LeaderboardControls({
   state,
   dispatch,

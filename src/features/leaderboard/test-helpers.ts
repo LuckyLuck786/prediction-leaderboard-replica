@@ -6,6 +6,7 @@ import {
   type Trader,
 } from "./model";
 
+/** A trader for tests, with defaults for every field not given. */
 export function makeTrader(overrides: Partial<Trader> & Pick<Trader, "id">): Trader {
   return {
     name: overrides.id,
@@ -29,6 +30,7 @@ export function makeTrader(overrides: Partial<Trader> & Pick<Trader, "id">): Tra
   };
 }
 
+/** A one-period board for tests. */
 export function makeBoard(period: LeaderboardPeriod, traders: Trader[]): Leaderboard {
   return { period, lastUpdated: "2026-11-13T19:38:16.611Z", traders, rejectedCount: 0 };
 }

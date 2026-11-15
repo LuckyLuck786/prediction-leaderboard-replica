@@ -23,6 +23,7 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/** Root layout: dark by default; a saved light theme is applied before the first paint (D-028). */
 export default function RootLayout({
   children,
 }: Readonly<{

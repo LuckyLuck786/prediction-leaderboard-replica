@@ -27,6 +27,7 @@ export type LeaderboardAction =
   | { type: "toggleColumn"; column: ExtraColumn }
   | { type: "showMore" };
 
+/** The board's starting state: default period and filters, with the page's platform preselected. */
 export function createInitialState(platform: PlatformFilter): LeaderboardState {
   return {
     period: DEFAULT_PERIOD,
@@ -36,6 +37,7 @@ export function createInitialState(platform: PlatformFilter): LeaderboardState {
   };
 }
 
+/** Every change to the board's state, as a pure reducer. */
 export function reduceLeaderboard(
   state: LeaderboardState,
   action: LeaderboardAction,

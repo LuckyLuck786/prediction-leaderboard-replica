@@ -105,6 +105,7 @@ const LEVEL_FROM_USD: ReadonlyArray<[ToneLevel, number]> = [
   [2, 500],
 ];
 
+/** The calendar shade for one day's change, by fixed dollar steps (D-037). */
 export function toneFor(change: number): DayTone {
   const size = Math.abs(change);
   if (size < FLAT_BELOW_USD) return "flat";

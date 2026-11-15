@@ -63,6 +63,7 @@ function SkeletonRow() {
   );
 }
 
+/** R-03 board: period, search and the non-sports filter over the top 1,000, 100 rows at a time. */
 export function KalshiView({
   initial,
   fetchBoard = fetchKalshiBoardFromApi,

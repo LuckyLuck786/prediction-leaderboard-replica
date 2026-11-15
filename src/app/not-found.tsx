@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { TopBarShell } from "@/features/shell/top-bar-shell";
 
+/** The 404 page for unknown routes and traders, inside the site shell so the disclaimer stays. */
 export default function NotFound() {
   return (
     <TopBarShell width="narrow">

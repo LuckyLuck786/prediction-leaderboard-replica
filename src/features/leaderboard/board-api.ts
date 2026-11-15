@@ -6,7 +6,7 @@ import { z } from "zod";
 import type { BoardPayload } from "./data";
 import type { LeaderboardPeriod, Trader } from "./model";
 
-export const boardApiPath = (period: LeaderboardPeriod) => `/api/boards/${period}`;
+const boardApiPath = (period: LeaderboardPeriod) => `/api/boards/${period}`;
 
 /**
  * Our own server builds this payload from validated data with the same types,
@@ -25,6 +25,7 @@ const payloadOutline = z.object({
   ]),
 });
 
+/** One period of the board from our own cached route, in the browser, checked before use. */
 export async function fetchBoard(period: LeaderboardPeriod): Promise<BoardPayload> {
   const response = await fetch(boardApiPath(period));
   if (!response.ok) throw new Error(`${boardApiPath(period)} answered ${response.status}`);
