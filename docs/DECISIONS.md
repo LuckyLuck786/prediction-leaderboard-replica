@@ -347,5 +347,66 @@ would take away a working profile because of one card. Raised by the phase
 
 Both are listed as assumptions in `docs/EVALS.md`.
 
+### D-043 The head-to-head is rebuilt from documented histories (2026-11-15, phase 5)
+
+The source draws its battle chart from an undocumented route (Q-02). Its
+recorded answer showed how the chart is made: the start is the first point
+of the Kalshi history, 2025-09-27 09:23:39 UTC, where the Kalshi P&L was
+$45,200.28; the Polymarket line starts from its first daily point after
+that, $21,063.72247 on 2025-09-28; both lines show change since then. The
+documented Kalshi history and Polymarket's documented P&L series give
+exactly those figures, so the page computes the same comparison from them:
+the start is the later of the two histories' first points, and each line is
+its change since its first point at or after the start. The pair stays fixed
+(BATTLE-04), the host promotion is dropped (D-014).
+
+### D-044 Head-to-head axis: 15% padding, crowded top label left out
+
+The head-to-head chart pads its value range by 15% on each side, not the
+profile chart's 10%: computed from the pair's real histories cut at the
+moment the source was captured, 15% is what gives the source's labels
+exactly ($-96.0K, +$154.0K, +$404.0K, +$723.6K), and 10% does not
+(BUG-051). The same data also shows what the source's chart library does
+with a step label close to the top one: one 17.9 px below it was left out
+here, one 21.3 px below it was kept on the profile chart. Both charts now
+leave out a label closer than 20 px, a cut-off between the two.
+
+### D-045 What the head-to-head page adds and drops
+
+- In the slot of the host link: a link back to the leaderboard, the
+  disclaimer and the data credit. The source's bare page has no footer; ours
+  needs the disclaimer on every page (CLAUDE.md rule 6).
+- The site footer links to the page. The source links to it from nowhere
+  that was observed, so on ours it would be reachable only by URL.
+- During a build, if a trader record cannot be loaded, that side shows the
+  wallet or username the pair is defined by and links to our profile route;
+  if a history cannot be loaded, the chart card says so at the chart's
+  height. So a build never fails on this page. At any other time an
+  incomplete load throws: Next.js keeps serving the last complete page and
+  retries on the next request (BUG-055).
+
+### D-046 End-to-end fixtures are recorded only when missing
+
+`npm run fixtures:e2e` now records a fixture only if its file is not there,
+so adding the head-to-head pair did not change the profile fixtures the
+existing tests were written against. `-- --force` records all of them again.
+
+### D-047 Upstream requests skip the fetch cache
+
+Upstream data is cached once, as each route's rendered output, for five
+minutes, instead of also in Next.js's fetch cache. A stale fetch-cache entry
+is refreshed without the request's timeout, which hung builds during an
+upstream outage (BUG-050). Leaving out the fetch's cache options is not
+enough, because a build caches such fetches anyway (BUG-054). So every
+upstream fetch says `cache: "no-store"`, and every route that reads upstream
+exports `dynamic = "force-static"` next to `revalidate = 300`, which keeps it
+static instead of letting `no-store` make it dynamic. A test checks both on
+every such route; the build output shows each with a five-minute refresh.
+
+Trade-offs, accepted: during an outage a regenerated board shows the
+snapshot, where the fetch cache would have kept data a few minutes old; the
+dev server asks upstream on every reload (at most four requests a page); a
+profile render still makes one trader request, through a per-render memo.
+
 ## Open items
 

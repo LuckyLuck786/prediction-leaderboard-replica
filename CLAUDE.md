@@ -100,7 +100,15 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
   tests offline against `e2e/fixture-server.mjs`, at desktop and phone sizes.
   It needs the Chromium build of the pinned Playwright version
   (`npx playwright install chromium`).
-- `npm run fixtures:e2e` re-records the API answers in `e2e/fixtures/`.
+- `npm run fixtures:e2e` records the API answers in `e2e/fixtures/` that are
+  missing; `-- --force` records all of them again.
+- `npm run check:outage` builds once against the fixtures, then again with
+  the upstream silent and the fetch cache a day old. It must pass (BUG-050).
+- Every route that reads upstream exports `revalidate = 300` and
+  `dynamic = "force-static"`; upstream fetches use `cache: "no-store"`
+  (D-047). A test enforces this.
+- Prove a fix for a failure by reproducing the failure first, on the old
+  code, then running the same reproduction on the new code (BUG-054).
 - Restart the dev server after switching branches or running a production
   build; a stale one serves 404s for routes that exist.
 - Stop only processes whose command line contains this repository's path.

@@ -16,9 +16,10 @@ verified.
 **Status:** the home, Polymarket and Kalshi boards run on live data. Trader
 profiles show the header, a month strip that opens into a daily or monthly
 calendar, the P&L history chart, Kalshi P&L by category and the Smart Score.
-The terms, privacy, get-listed and API pages are in place, and end-to-end
-tests run in CI. Still to come: the head-to-head page and the full evals pass
-(accessibility and performance).
+A head-to-head page compares one Polymarket and one Kalshi trader since a
+common start. The terms, privacy, get-listed and API pages are in place, and
+end-to-end tests run in CI. Still to come: the full evals pass
+(accessibility and performance) and the final review.
 
 ## What is deliberately different
 
@@ -61,7 +62,10 @@ npx playwright install chromium   # once: the browser the tests drive
 npm run test:e2e                  # desktop and phone sizes
 ```
 
-`npm run fixtures:e2e` records those API answers again (five spaced requests).
+`npm run fixtures:e2e` records any of those API answers that are missing
+(`-- --force` records all again, nine spaced requests).
+`npm run check:outage` checks that a production build still passes while the
+upstream API is down.
 
 Results and the measured comparison with the source are in
 [docs/EVALS.md](docs/EVALS.md).

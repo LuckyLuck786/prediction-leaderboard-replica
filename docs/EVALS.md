@@ -36,7 +36,7 @@ Each cell is checked against the acceptance list for that route in
 | `/polymarket` | pass | pass | pass (3) | not run | not run | not run | pass, unit (6) | not run |
 | `/kalshi` | pass (7) | pass (7) | pass (7) | not run | not run | not run | pass, unit (6) | not run |
 | `/account/[id]` | pass (8) | pass (8, 11) | pass (8, 12) | ours only, e2e (13) | not run | ours only, e2e (13) | pass, unit and e2e (8) | not run |
-| `/battle` | not built | not built | not built | not built | not built | not built | not built | not built |
+| `/battle` | pass (14) | pass (14) | pass (15) | ours only, e2e (13) | not run | ours only, e2e (13) | pass, unit and live outage (16) | not run |
 | `/api-docs` | pass (9) | pass (9) | pass (9) | not run | not run | not run | not run | not run |
 | `/submit` | pass (10) | pass (10) | n/a | not run | not run | not run | n/a | not run |
 | `/terms`, `/privacy` | pass | n/a | n/a | not run | not run | not run | n/a | not run |
@@ -88,8 +88,22 @@ Notes, 2026-11-14 (items 2, 3, 6 updated at the end of phase 3):
     (elucidate): labels `-$110K +$190K +$490K +$790K +$1.0M` and
     `Aug 24 Mar 25 Sep 25 Apr 26 Nov 26` equal.
 13. End-to-end at 390 and 1440 px: every part renders and the page has no
-    horizontal scroll. The source was measured at 1024 px only (table
-    below).
+    horizontal scroll. The source was measured at 1024 px (profile) and
+    800 px (head to head) only (tables below).
+14. Head to head: both traders with ringed pictures, platform links without
+    query strings, X links, the legend, a two-line chart whose lines both
+    start on the zero line (end-to-end test), a readout of both values under
+    the pointer, the disclaimer. Linked from the footer of every page.
+15. **Against the source's recorded answer** (2026-11-13 19:58 UTC): same
+    start (2025-09-27 09:23:39 UTC), same baselines ($45,200.28 and
+    $21,063.72247), Kalshi line of 1,983 points ending at +$627,817.13, and
+    the same value labels `$-96.0K +$154.0K +$404.0K +$723.6K`, computed from
+    the documented histories cut at that moment (`comparison.test.ts`). The
+    date labels differ on purpose (DEV-28).
+16. While the upstream was really down (2026-11-15, from about 00:45 IST
+    until at least 01:22; it was back by 10:16): the page showed both traders by id and an "unavailable" chart card
+    of the chart's height. The production build then failed (BUG-050); it
+    passes since the fix, checked by `npm run check:outage`.
 
 ### Measured parity, home page
 
@@ -123,6 +137,27 @@ Known differences, all deliberate: the brand mark and "demo" tag beside the
 heading, the snapshot banner, letter badges in place of platform logos, no
 "our traders" filter, and our own colors and copy.
 
+### Measured parity, head-to-head page
+
+Same viewport as the source capture (800 px wide). Sizes in px.
+
+| Measure | Source | Ours |
+|---|---|---|
+| Column | 768 | 768 |
+| Heading | 768 x 32 | 768 x 32 |
+| Subtitle | 768 x 22 | 768 x 22 |
+| Trader card | 768 x 272 | 768 x 272 |
+| Picture with ring | 128 (96 below 768 px) | 128 (96 below 768 px) |
+| "VS" | 30 px bold | 30 px bold |
+| Chart card | 768 x 354 | 768 x 354 |
+| Chart heading row, chart, caption | 734 x 20, 734 x 256, 734 x 16 | 734 x 20, 734 x 256, 734 x 16 |
+
+Known differences: the host link at the bottom (72 px) is replaced by a back
+link, the disclaimer and the data credit (DEV-26); date labels (DEV-28); the
+source adds a live "current" point to the Polymarket line, ours ends on the
+latest point Polymarket's API returns. The inner layout of the trader card
+was not recorded, only its total height.
+
 ### Measured parity, profile page
 
 Same probe, same viewport (1024 px), same trader. Source on 2026-11-14 about
@@ -154,7 +189,9 @@ the code where it lives: the amount at which mobile rows switch to short money
 (100,000), the esports threshold (0.5), the Sharpe column heading for periods
 other than 1D, and the ROI format. Added in phase 4: Polymarket's 00:00 UTC
 points read as the previous day's close, and how a trader on both platforms
-is added up (D-042).
+is added up (D-042). Added in phase 5: the 20 px cut-off for a
+crowded top label (D-044), and the millions unit of the head-to-head labels,
+which the source's chart never needed.
 
 ## Rerun commands
 
@@ -163,9 +200,10 @@ is added up (D-042).
 | Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
 | Lint | `npm run lint` | pass, 2026-11-15 |
 | Type check | `npm run typecheck` | pass, 2026-11-15 |
-| Unit and component tests | `npm run test` | 355 of 355 pass, 2026-11-15 |
-| End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 48 pass, 2 skipped by design (hover-only checks on the phone), 2026-11-15 |
-| Asset check | `npm run check:assets` | pass, 134 files, 2026-11-15 |
+| Unit and component tests | `npm run test` | 382 of 382 pass, 2026-11-15 |
+| End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 55 pass, 3 skipped by design (hover-only checks on the phone), 2026-11-15 |
+| Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
+| Asset check | `npm run check:assets` | pass, 152 files, 2026-11-15 |
 | CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |

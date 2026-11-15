@@ -409,3 +409,62 @@ Not treated as defects, with the reason:
 - **Two symbols left unused by this phase, a hard-coded dash, a comment
   pointing at a note that did not exist yet.** Clean-ups, done in the same
   commit.
+
+## Phase 5 (2026-11-15, 00:35 to 10:30 IST)
+
+### BUG-050 A production build failed while the upstream API was down
+
+- **Time:** 2026-11-15, about 00:56
+- **Feature / file:** `src/upstream/client.ts`
+- **What the AI wrote (phase 3):** every upstream request used Next.js's
+  fetch cache (`next: { revalidate: 300 }`) and an 8-second abort signal.
+- **Symptom:** with the upstream unreachable, `npm run build` stopped after
+  three 60-second attempts on `/api/boards/30d` and `/api/kalshi/all`. A push
+  to `main` during an outage would have failed its Vercel deployment.
+- **How it was caught:** the upstream went down during this phase, so the
+  full check was run on purpose while it was unreachable.
+- **Root cause:** when a cached fetch is stale, Next.js serves it and
+  refreshes it in the background without passing the request's signal
+  (`patch-fetch.js`: "don't pass through signal when revalidating"). The
+  local build reused earlier builds' cache, and Vercel restores the same
+  cache between builds, so the refresh waited on a dead connection and the
+  build waited on the refresh. Confirmed by building once with the cache
+  moved aside: it passed in 16.5 s.
+- **Fix commit:** `8499c2b`. The first fix did not work; see BUG-054.
+- **Prevention:** upstream fetches use `cache: "no-store"` and every route
+  that reads upstream exports `dynamic = "force-static"` with its
+  five-minute `revalidate` (D-047); a test fails if a route lacks either.
+  `npm run check:outage` repeats the outage with a stale cache: it failed
+  (exit 1 after 185 s) before the fix and passes (20 s) after it.
+
+### BUG-051 to BUG-053 Head-to-head chart and layout
+
+| ID | Time | File | What was wrong | How caught | Fix commit |
+|---|---|---|---|---|---|
+| BUG-051 | 10:18 | `comparison.ts`, `history.test.ts` | The chart padded its value range by 10%, as the profile chart does, and its axis test fed in a data range worked backwards from the source's labels, so the test could not fail | Replacing the made-up range with the pair's real histories cut at the moment the source was captured: the labels came out $-64.5K to +$692.1K against the source's $-96.0K to +$723.6K. The gap on both ends is 15% of the range, so this chart pads 15% | `cf44af6`, test data in `292820f` |
+| BUG-052 | 00:51 | `battle-view.tsx` | When the comparison was unavailable, its message box was 212 px high, so the card would jump by 44 px when the chart returned | layout probe of the page while the upstream was down | `cf44af6` |
+| BUG-053 | 10:18 | `battle-view.tsx` | Subtitle 24 px high against 22 on the source; trader card 270 against 272 | layout probe at the source's viewport | `cf44af6` |
+
+### Found by the phase 5 independent review (2026-11-15, about 10:35)
+
+A reviewer subagent that had not written the code read the phase 5 diff: 6
+findings, 1 rated high. Each was checked; the high one was first reproduced.
+
+| ID | File | Defect | Fix |
+|---|---|---|---|
+| BUG-054 | `src/upstream/client.ts` | The first fix for BUG-050 only removed `next.revalidate`. During a build Next.js still caches a fetch with no cache option, under the route's revalidate time, and refreshes it without the signal, so the build would still have failed. The check that "proved" the fix copied the cache back with `cp -R`, which reset the files' times, so the entries looked fresh and the stale path never ran | Reproduced properly first (stale times kept, a server that never answers: exit 1 after 185 s), then `cache: "no-store"` plus `dynamic = "force-static"` on the seven routes; the same reproduction passes in 20 s and is now `npm run check:outage` |
+| BUG-055 | `src/features/battle/data.ts` | Outside a build, one failed request (a 429, a timeout) made the page cache a degraded version for five minutes | Degrades only during a build; otherwise it throws, so Next.js keeps serving the last complete page and retries; an error page covers the case of no complete page at all |
+| BUG-056 | `battle-chart.tsx` | The hover dot used the previous point's value at the pointer's time, so it could sit about 13 px off the drawn line on a day that moved a lot | Each dot and value now come from that line's nearest data point; one shared nearest-point search for both charts, tested |
+| BUG-057 | `e2e/battle.spec.ts` | The hover test only looked for the two names, which the readout prints even without values | It now requires an amount after each name |
+
+How they were caught: independent review. All four were caught before the
+code was first committed. Fix commits: BUG-054 in `8499c2b`; BUG-055 in
+`cf44af6`; BUG-056 in `a1ad1ac` and `cf44af6`; BUG-057 in `292820f`.
+
+Not treated as defects, with the reason:
+
+- **The pair was written in two places** (the app and the fixture script).
+  A one-source-of-truth clean-up: both now read `pair.json`.
+- **The dev server now asks upstream on every reload.** True and accepted:
+  a page makes at most four requests, well inside the documented limits.
+  Recorded in D-047.

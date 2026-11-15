@@ -174,6 +174,36 @@ work happens. It describes what was done, not what was planned.
    the Polymarket profile in the browser (its last day now matches the
    trader's own 1-day figure), then merged to `main`.
 
+### Phase 5: the head-to-head page (2026-11-15)
+
+1. **Recorded observations reread** instead of visiting the source again:
+   the battle page's layout tree, its links and the shape of its data were
+   already captured in phase 1. The pair's full wallet came from the saved
+   sitemap, because the captured link was cut short.
+2. **Checked the documented endpoints against the source's own numbers**
+   before building: the Kalshi history starts at the source's comparison
+   start and baseline to the cent, and Polymarket's first daily point after
+   it is the source's other baseline. So the page could be rebuilt without
+   the undocumented route (D-043).
+3. **Data, page and tests** as one slice: comparison maths, a loader that
+   never fails the page, the view, the chart, unit, component and
+   end-to-end tests.
+4. **The upstream went down** at about 00:45 IST and stayed down for over
+   half an hour. That was used as a test: the page degraded as designed, but
+   a production build failed (BUG-050), which was then diagnosed in the
+   Next.js source, fixed and re-run under the same outage. Work resumed
+   with live data at 10:16 IST.
+5. **Measured against the recorded source**: the axis test was rewritten to
+   use the real histories cut at the moment of capture, which exposed a
+   wrong padding (BUG-051); every recorded size now matches at 800 px.
+6. **Independent review** of the phase diff: 6 findings, 4 real defects
+   (BUG-054 to BUG-057). The worst was mine to own: the BUG-050 fix did not
+   work, and the check behind it was invalid. It was reproduced properly,
+   fixed, and the reproduction became a repeatable eval,
+   `npm run check:outage`.
+7. **Re-verified**: 382 unit tests, 55 end-to-end tests, the outage eval,
+   and the pages on the dev server with live data.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -195,6 +225,25 @@ work happens. It describes what was done, not what was planned.
   running again a few seconds later (a new process started at 23:57) and the
   owner was told. Since then only processes whose command line contains this
   repository's path are stopped.
+- **The same stale dev server, again** (phase 5, about 00:50 IST). After
+  four branch switches for the phase 4 push, the dev server served a module
+  from a half-finished hot reload ("is not a function" for an export that
+  existed). Restarted, as `CLAUDE.md` says, through the session's own task
+  control rather than by process name.
+- **A verification that could not fail** (phase 5, about 01:00 IST). To show
+  the BUG-050 fix worked, the old fetch cache was copied back with `cp -R`,
+  which gives the copies new timestamps; the entries then looked fresh, so
+  the build never took the path that hung. The review caught it (BUG-054).
+  Since then a fix for a failure is checked by reproducing the failure first
+  with the old code, then running the same reproduction on the new code.
+- **One commit that does not pass on its own** (phase 5, about 10:50 IST).
+  The head-to-head commit `cf44af6` has a test that reads recorded fixtures,
+  and the fixtures went into the next commit, `292820f`. Checked out alone,
+  that one test file fails to load; every other commit of phases 4 and 5
+  passes typecheck and all its tests on its own (checked commit by commit).
+  History is not rewritten here, so it stays. The per-commit check had also
+  read only the test count, which hides a file that fails to load; it now
+  reads the file count too.
 
 ## Tools used so far
 

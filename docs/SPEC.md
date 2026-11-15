@@ -424,6 +424,16 @@ and viewport, and each FMT rule into unit tests.
 - **DEV-24** Polymarket history comes from Polymarket's documented data API,
   not the source's undocumented history route (D-035). For the trader
   compared, the chart's labels are the same.
+- **DEV-25** The head-to-head comparison is computed from the documented
+  Kalshi history and Polymarket P&L series, not the source's undocumented
+  battle route. Start and both baselines equal the source's (D-043).
+- **DEV-26** The head-to-head page ends with a back link, the disclaimer and
+  the data credit where the source shows its host promotion (D-014, D-045).
+- **DEV-27** The site footer links to the head-to-head page (D-045).
+- **DEV-28** The head-to-head chart's six date labels are evenly spaced in
+  time. The source's six are unevenly spaced, by a rule we could not
+  derive from one chart, so its dates differ (it showed Sep 27, Dec 6,
+  Jan 2, Mar 12, Jun 22, Oct 28).
 
 ## 8. Questions resolved by the owner (2026-11-14)
 
