@@ -80,6 +80,19 @@ test.describe("response headers (D-054)", () => {
       expect(headers["x-powered-by"]).toBeUndefined();
     });
   }
+
+  test("no page breaks its content security policy", async ({ page }) => {
+    const violations: string[] = [];
+    page.on("console", (message) => {
+      if (/Content Security Policy/i.test(message.text())) violations.push(message.text());
+    });
+    for (const path of ["/", "/kalshi", "/account/ProbabilityDuck", "/battle", "/api-docs", "/submit"]) {
+      await page.goto(path);
+      // The home board fetches its other periods after the first paint.
+      await page.waitForLoadState("networkidle");
+    }
+    expect(violations).toEqual([]);
+  });
 });
 
 test.describe("API routes", () => {
