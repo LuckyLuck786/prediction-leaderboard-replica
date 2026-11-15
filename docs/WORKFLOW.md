@@ -252,6 +252,8 @@ work happens. It describes what was done, not what was planned.
 4. **Re-verified**: unit tests, the end-to-end suite at three sizes (which
    includes the layout, accessibility and keyboard checks, so removing the
    template's styles changed nothing they measure), the asset check.
+5. **Merged and deployed**: every route answers on the live site with the
+   new security headers, and CI passed both jobs.
 
 ### Slips, recorded as they happened
 
