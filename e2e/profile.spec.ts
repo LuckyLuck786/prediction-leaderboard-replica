@@ -49,8 +49,8 @@ test.describe("Kalshi trader profile (spec 4.4)", () => {
   test("labels the chart axes and shows a value under the pointer (PROF-04)", async ({ page }, testInfo) => {
     test.skip(testInfo.project.name === "mobile", "Hover is a pointer interaction");
     const chart = page.getByRole("img", { name: /^Cumulative profit and loss from/ });
-    const labels = await chart.locator("text").allTextContents();
-    expect(labels.filter((text) => VALUE_LABEL.test(text))).toHaveLength(5);
+    // The chart draws once it knows its width, after the page loads: wait for it.
+    await expect(chart.locator("text").filter({ hasText: VALUE_LABEL })).toHaveCount(5);
 
     const box = await chart.boundingBox();
     if (!box) throw new Error("chart has no box");

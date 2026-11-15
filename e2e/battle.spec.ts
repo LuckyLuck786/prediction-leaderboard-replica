@@ -29,6 +29,8 @@ test.describe("head to head (spec 4.5)", () => {
 
   test("starts both lines at zero (acceptance)", async ({ page }) => {
     const chart = page.getByRole("img", { name: CHART });
+    // The chart draws once it knows its width, after the page loads: wait for it.
+    await expect(chart.locator("path")).toHaveCount(2);
     const zeroY = Number(await chart.locator("line[stroke-dasharray]").getAttribute("y1"));
     const starts = await chart
       .locator("path")

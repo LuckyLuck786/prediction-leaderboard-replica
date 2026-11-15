@@ -468,3 +468,23 @@ Not treated as defects, with the reason:
 - **The dev server now asks upstream on every reload.** True and accepted:
   a page makes at most four requests, well inside the documented limits.
   Recorded in D-047.
+
+### BUG-058 An end-to-end test read the profile chart before it was drawn
+
+- **Time:** 2026-11-15, about 11:15
+- **Feature / file:** `e2e/profile.spec.ts` (written in phase 4)
+- **What the AI wrote:** the test read the chart's labels with
+  `allTextContents()`, which takes whatever is on the page at that instant.
+- **Symptom:** the CI end-to-end job failed on the phase 5 merge: 0 value
+  labels instead of 5, on both attempts. It had passed on CI before and
+  passes locally.
+- **How it was caught:** CI. The page snapshot saved with the failure,
+  taken a moment later, shows the chart with all five labels, so the test
+  had read the chart before it was drawn: the chart draws only once it knows
+  its width, after the page has loaded.
+- **Root cause:** a read that does not wait, racing a chart that renders
+  after load. Throttling the CPU 20 times locally did not make it fail, so
+  the race depends on the CI runner's timing.
+- **Fix commit:** FIX_E2E_WAIT
+- **Prevention:** chart checks use assertions that wait (`toHaveCount`), in
+  both chart tests.
