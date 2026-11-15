@@ -106,6 +106,18 @@ describe("parseLeaderboard", () => {
     });
   });
 
+  it("links a Kalshi username to a local profile only if our routes accept it", () => {
+    const result = parseLeaderboard(
+      response([
+        { ...validTrader, wallet: null, kalshi_username: "good.name" },
+        { ...validTrader, wallet: null, kalshi_username: "../history", name: "Odd" },
+      ]),
+      "1d",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.leaderboard.traders.map((trader) => trader.kalshiUsername)).toEqual(["good.name", null]);
+  });
+
   it("drops and counts traders that do not match, keeping the rest", () => {
     const broken = [
       { ...validTrader, stats: { pnl: "lots" } },

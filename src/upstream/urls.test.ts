@@ -28,4 +28,11 @@ describe("cleanLinkUrl", () => {
   it("refuses anything that is not https", () => {
     expect(cleanLinkUrl("javascript:alert(1)")).toBeNull();
   });
+
+  it.each(["theduckguesses", "/handle", "//evil.example/x", "x.com/someone"])(
+    "refuses %s: a link must be absolute, not resolved against the data source",
+    (value) => {
+      expect(cleanLinkUrl(value)).toBeNull();
+    },
+  );
 });

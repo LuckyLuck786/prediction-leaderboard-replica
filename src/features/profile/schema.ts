@@ -8,6 +8,7 @@ import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 import {
   PROFILE_PERIODS,
   WALLET,
+  isProfileId,
   type ProfilePeriod,
   type TraderProfile,
 } from "./model";
@@ -91,7 +92,9 @@ export function parseProfile(input: unknown, id: string): ProfileParseResult {
             .map((wallet) => wallet.toLowerCase()),
         ),
       ],
-      kalshiUsername: raw.kalshi_username || null,
+      // Only a username our routes accept: it becomes part of upstream request
+      // paths, where ".." would point somewhere else.
+      kalshiUsername: raw.kalshi_username && isProfileId(raw.kalshi_username) ? raw.kalshi_username : null,
       avatarUrl: safeHttpsUrl(raw.pfp),
       xUrl: cleanLinkUrl(raw.twitter),
       joined: toJoined(raw.join_date),

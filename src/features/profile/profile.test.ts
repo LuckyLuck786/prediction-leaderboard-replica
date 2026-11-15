@@ -137,6 +137,15 @@ describe("parseProfile (DATA-04)", () => {
     expect(result.profile.wallets).toEqual([main, "0x" + "1".repeat(40)]);
   });
 
+  it.each(["..", "a/b", "../history"])("drops a Kalshi username %s that our routes refuse", (username) => {
+    const result = parseProfile(
+      { trader: { ...kalshiTrader.trader, kalshi_username: username } },
+      "ProbabilityDuck",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.profile.kalshiUsername).toBeNull();
+  });
+
   it("rejects a body without a trader", () => {
     expect(parseProfile({ error: "nope" }, "x").ok).toBe(false);
   });

@@ -3,6 +3,7 @@
 
 import { z } from "zod";
 
+import { isProfileId } from "@/features/profile/model";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import {
@@ -78,8 +79,10 @@ function toDayMover(raw: RawTrader["day_mover"]): DayMover | null {
 
 function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
   const wallet = presentOrNull(raw.wallet);
-  const kalshiUsername = presentOrNull(raw.kalshi_username);
-  const id = wallet ?? kalshiUsername;
+  const rawUsername = presentOrNull(raw.kalshi_username);
+  // The username links to a local profile, so only one our routes accept.
+  const kalshiUsername = rawUsername && isProfileId(rawUsername) ? rawUsername : null;
+  const id = wallet ?? rawUsername;
   if (!id) return null;
 
   const joinDate = presentOrNull(raw.join_date);

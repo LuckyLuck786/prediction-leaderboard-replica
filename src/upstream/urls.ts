@@ -15,13 +15,15 @@ export function safeHttpsUrl(value: string | null | undefined): string | null {
 }
 
 /**
- * Like safeHttpsUrl, for outbound links: the query string and fragment are
- * removed, so no referral or tracking parameter is passed on (DEV-05).
+ * For outbound links: an absolute https URL only, never resolved against the
+ * upstream origin (a bare X handle must not become a link to the data
+ * source's site), with the query string and fragment removed, so no referral
+ * or tracking parameter is passed on (DEV-05).
  */
 export function cleanLinkUrl(value: string | null | undefined): string | null {
-  const safe = safeHttpsUrl(value);
-  if (!safe) return null;
-  const url = new URL(safe);
+  if (!value || !URL.canParse(value)) return null;
+  const url = new URL(value);
+  if (url.protocol !== "https:") return null;
   url.search = "";
   url.hash = "";
   return url.toString();
