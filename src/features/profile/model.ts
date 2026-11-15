@@ -40,3 +40,11 @@ export interface TraderProfile {
   kalshiUrl: string | null;
   hyperliquidUrl: string | null;
 }
+
+/**
+ * Most wallets one profile asks Polymarket about. Each wallet is one request
+ * per render, so a trader record listing hundreds must not turn one page view
+ * into hundreds of requests (D-058). No listed trader had more than one wallet
+ * in the snapshot of 2026-11-14, so this guards against bad data only.
+ */
+export const MAX_WALLETS = 10;

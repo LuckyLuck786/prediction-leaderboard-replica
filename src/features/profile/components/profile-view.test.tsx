@@ -30,13 +30,14 @@ const score: SmartScore = {
   rSquared: 0.912,
 };
 
-const history = (points: number): HistoryResult => ({
+const history = (points: number): Extract<HistoryResult, { kind: "ready" }> => ({
   kind: "ready",
   series: Array.from({ length: points }, (_, index) => ({
     t: Date.UTC(2026, 10, 1 + index),
     v: index * 100,
   })),
   changes: new Map([["2026-11-02", 100]]),
+  walletsLeftOut: 0,
 });
 
 function renderView(props: Partial<ComponentProps<typeof ProfileView>> = {}) {
@@ -114,6 +115,14 @@ describe("ProfileView history", () => {
   it("draws the chart from two points on", () => {
     renderView({ history: history(2) });
     expect(screen.getByRole("img", { name: /Cumulative profit and loss/ })).toBeTruthy();
+  });
+
+  it("says when wallets past the cap were left out (D-058)", () => {
+    renderView({ history: { ...history(2), walletsLeftOut: 2 } });
+    expect(screen.getByText("Adds up the first 10 of this trader's 12 wallets.")).toBeTruthy();
+    cleanup();
+    renderView({ history: history(2) });
+    expect(screen.queryByText(/Adds up the first/)).toBeNull();
   });
 
   it("explains where Kalshi history starts, for Kalshi traders only", () => {

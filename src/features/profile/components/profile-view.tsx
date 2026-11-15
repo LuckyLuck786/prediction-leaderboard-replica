@@ -16,7 +16,7 @@ import { scoreBandClass } from "@/features/trader/score-band";
 import { cn } from "@/lib/utils";
 
 import type { CategoriesResult, HistoryResult } from "../history-data";
-import type { TraderProfile } from "../model";
+import { MAX_WALLETS, type TraderProfile } from "../model";
 import { CategoryCard } from "./category-card";
 import { HistoryHeading } from "./history-heading";
 import { MonthStrip } from "./month-strip";
@@ -138,6 +138,12 @@ export function ProfileView({
 
       <section aria-labelledby="history-heading" className="mb-6 rounded-lg border border-border bg-card p-4">
         <HistoryHeading note={profile.platform === "kalshi" ? KALSHI_HISTORY_NOTE : null} />
+        {history.kind === "ready" && history.walletsLeftOut > 0 ? (
+          <p className="mb-2 text-xs text-muted-foreground">
+            Adds up the first {MAX_WALLETS} of this trader&apos;s {MAX_WALLETS + history.walletsLeftOut}{" "}
+            wallets.
+          </p>
+        ) : null}
         {history.kind === "ready" && history.series.length > 1 ? (
           <PnlChart series={history.series} />
         ) : (

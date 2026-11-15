@@ -10,6 +10,7 @@ import {
   parseKalshiHistory,
   parsePolymarketPnl,
 } from "./history-data";
+import { MAX_WALLETS } from "./model";
 import { makeProfile } from "./test-helpers";
 
 vi.mock("@/upstream/client", async (importOriginal) => {
@@ -138,7 +139,12 @@ describe("getProfileHistory", () => {
   it("reads Kalshi history for a Kalshi trader", async () => {
     upstream.mockResolvedValueOnce({ history: [{ timestamp: NOV_1, pnl: 7 }] });
     const result = await getProfileHistory(makeProfile({ kalshiUsername: "Some User" }));
-    expect(result).toEqual({ kind: "ready", series: [{ t: NOV_1, v: 7 }], changes: new Map() });
+    expect(result).toEqual({
+      kind: "ready",
+      series: [{ t: NOV_1, v: 7 }],
+      changes: new Map(),
+      walletsLeftOut: 0,
+    });
     expect(upstream).toHaveBeenCalledWith("/api/kalshi/Some%20User/history");
     expect(polymarket).not.toHaveBeenCalled();
   });
@@ -167,9 +173,22 @@ describe("getProfileHistory", () => {
       ],
       // The second wallet starts on 2 Nov: its starting total is not a gain.
       changes: new Map([["2026-11-02", 30]]),
+      walletsLeftOut: 0,
     });
     expect(polymarket).toHaveBeenCalledWith(`/v2/user-pnl?user=${WALLET_A}&interval=all&fidelity=1d`);
     expect(polymarket).toHaveBeenCalledTimes(2);
+  });
+
+  it("asks about at most MAX_WALLETS wallets and counts the rest (D-058)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    polymarket.mockResolvedValue({ data: { points: [{ timestamp: NOV_1_NOON / 1000, trade_pnl: 1 }] } });
+    const wallets = Array.from(
+      { length: MAX_WALLETS + 2 },
+      (_, index) => `0x${String(index).padStart(40, "0")}`,
+    );
+    const result = await getProfileHistory(makeProfile({ platform: "polymarket", wallets }));
+    expect(polymarket).toHaveBeenCalledTimes(MAX_WALLETS);
+    expect(result).toMatchObject({ kind: "ready", series: [{ v: MAX_WALLETS }], walletsLeftOut: 2 });
   });
 
   it("says unsupported when there is no documented history (DEV-22)", async () => {
