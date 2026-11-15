@@ -31,7 +31,9 @@ export function CategoryCard({ rows }: { rows: readonly CategoryRow[] }) {
           );
           return (
             // Rows are 17.5 px high on the source: 14 px text at a 1.25 line height.
-            <li key={row.category} className="flex items-center gap-3 text-sm leading-tight">
+            // Fixed, because the smaller market count on the same line makes some
+            // Chromium versions round the line up to 18 px (BUG-062).
+            <li key={row.category} className="flex h-[17.5px] items-center gap-3 text-sm leading-tight">
               <div className="w-1/4 truncate">
                 {row.category}
                 <span className="ml-1.5 text-xs tabular-nums text-muted-foreground">
