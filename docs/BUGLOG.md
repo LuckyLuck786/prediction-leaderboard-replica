@@ -485,6 +485,6 @@ Not treated as defects, with the reason:
 - **Root cause:** a read that does not wait, racing a chart that renders
   after load. Throttling the CPU 20 times locally did not make it fail, so
   the race depends on the CI runner's timing.
-- **Fix commit:** FIX_E2E_WAIT
+- **Fix commit:** `972e0bb`
 - **Prevention:** chart checks use assertions that wait (`toHaveCount`), in
   both chart tests.
