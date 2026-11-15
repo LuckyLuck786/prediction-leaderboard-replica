@@ -449,8 +449,9 @@ is 77 on the boards that show such pictures, for that header alone.
 ### D-051 Performance: measured, nothing to optimise
 
 Lighthouse, median of three runs per page, phone and desktop settings
-(`npm run lighthouse`): performance 95 to 100 on every page, cumulative
-layout shift 0, largest paint at most 1.2 s on the phone setting. The
+(`npm run lighthouse`), on the deployed site: performance 99 to 100 on
+every page, cumulative layout shift 0, largest paint at most 1.3 s on the
+phone setting. The
 largest cost is the home page's 3.9 MB, of which 3 MB is trader pictures at
 their full size (one 933 KB GIF shown at 40 px); that follows from loading
 pictures from the addresses the API gives, without a proxy (owner decision

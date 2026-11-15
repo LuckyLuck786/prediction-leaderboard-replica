@@ -207,24 +207,26 @@ which the source's chart never needed.
 
 ### Lighthouse
 
-`npm run lighthouse`: median of three runs per page, Lighthouse 13.6.0.
-Below, the branch's production build served locally on 2026-11-15 about
-12:35 IST, against the live upstream; the deployed site is measured again
-after each deploy. Scores out of 100; FCP, LCP and TBT are first paint,
-largest paint and total blocking time.
+`npm run lighthouse`: median of three runs per page, Lighthouse 13.6.0,
+on the deployed site after the phase 6 deploy (2026-11-15, about 13:25
+IST). Scores out of 100; FCP, LCP and TBT are first paint, largest paint and
+total blocking time.
 
 | Setting | Route | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
 |---|---|---|---|---|---|---|---|---|---|
-| phone | `/` | 95 | 100 | 77 | 63 | 1.2 s | 1.2 s | 250 ms | 0 |
+| phone | `/` | 99 | 100 | 77 | 63 | 1.3 s | 1.3 s | 100 ms | 0 |
 | phone | `/kalshi` | 100 | 100 | 77 | 63 | 1.1 s | 1.1 s | 60 ms | 0 |
-| phone | `/account/ProbabilityDuck` | 96 | 100 | 100 | 63 | 0.9 s | 0.9 s | 240 ms | 0 |
-| phone | `/battle` | 99 | 100 | 100 | 63 | 0.9 s | 0.9 s | 140 ms | 0 |
-| phone | `/api-docs` | 99 | 100 | 100 | 60 | 0.8 s | 0.8 s | 100 ms | 0 |
+| phone | `/account/ProbabilityDuck` | 100 | 100 | 100 | 63 | 1.0 s | 1.0 s | 50 ms | 0 |
+| phone | `/battle` | 100 | 100 | 100 | 63 | 1.0 s | 1.0 s | 60 ms | 0 |
+| phone | `/api-docs` | 99 | 100 | 100 | 60 | 0.8 s | 0.8 s | 90 ms | 0 |
 | desktop | `/` | 100 | 100 | 77 | 63 | 0.3 s | 0.3 s | 0 ms | 0 |
 | desktop | `/kalshi` | 100 | 100 | 77 | 63 | 0.3 s | 0.3 s | 0 ms | 0 |
-| desktop | `/account/ProbabilityDuck` | 100 | 100 | 100 | 63 | 0.2 s | 0.7 s | 0 ms | 0 |
-| desktop | `/battle` | 100 | 100 | 100 | 63 | 0.2 s | 0.2 s | 0 ms | 0 |
+| desktop | `/account/ProbabilityDuck` | 100 | 100 | 100 | 63 | 0.3 s | 0.6 s | 0 ms | 0 |
+| desktop | `/battle` | 100 | 100 | 100 | 63 | 0.3 s | 0.3 s | 0 ms | 0 |
 | desktop | `/api-docs` | 100 | 100 | 100 | 60 | 0.2 s | 0.2 s | 0 ms | 0 |
+
+The branch's production build served locally scored the same within a few
+points (phone performance 95 to 99) before the deploy.
 
 Before phase 6, on production: accessibility 96 on `/` (touch targets) and
 `/api-docs` (contrast); best practices 77 on both boards; 19 profile
@@ -246,10 +248,10 @@ further runs on the final build showed 0, and its cause was not found.
 | End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 193 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
 | Colour contrast of every token and calendar shade | part of `npm run test` (`src/app/contrast.test.ts`) | 34 of 34 pass, 2026-11-15 |
 | Accessibility (axe), keyboard and measured parity | part of `npm run test:e2e` | see the end-to-end row |
-| Lighthouse, deployed site | `npm run lighthouse` | see the Lighthouse table, 2026-11-15 |
+| Lighthouse, deployed site | `npm run lighthouse` | performance 99 to 100, accessibility 100 on every page, 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
 | Asset check | `npm run check:assets` | pass, 159 files, 2026-11-15 |
-| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 after BUG-058; the phase 5 merge first failed end-to-end |
+| CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, phase 6 merge |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
 | Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |
