@@ -18,8 +18,10 @@ profiles show the header, a month strip that opens into a daily or monthly
 calendar, the P&L history chart, Kalshi P&L by category and the Smart Score.
 A head-to-head page compares one Polymarket and one Kalshi trader since a
 common start. The terms, privacy, get-listed and API pages are in place, and
-end-to-end tests run in CI. Still to come: the full evals pass
-(accessibility and performance) and the final review.
+end-to-end tests run in CI at phone, tablet and desktop size, including
+automated accessibility checks (WCAG 2.2 AA), keyboard checks and the
+measured layout comparison with the source. Still to come: the final
+review.
 
 ## What is deliberately different
 
@@ -66,6 +68,8 @@ npm run test:e2e                  # desktop and phone sizes
 (`-- --force` records all again, nine spaced requests).
 `npm run check:outage` checks that a production build still passes while the
 upstream API is down.
+`npm run lighthouse` measures the deployed site (three runs per page, phone
+and desktop settings) and prints the median scores.
 
 Results and the measured comparison with the source are in
 [docs/EVALS.md](docs/EVALS.md).

@@ -4,11 +4,11 @@ How we verify that the replica matches the source in structure and behavior,
 and that it works correctly. Branding differences are expected and excluded:
 see `docs/DECISIONS.md`, D-007.
 
-**Status (2026-11-15, end of phase 4):** the three boards, full profiles
-and the simple pages are built and checked against live data in the
-browser, and an offline end-to-end suite runs in CI at desktop and phone
-sizes. Axe and Lighthouse are still to come. A cell stays "not run" until
-its check has actually been run.
+**Status (2026-11-15, end of phase 6):** every route is built and checked
+against live data. The offline end-to-end suite runs in CI at phone, tablet
+and desktop size and includes axe, keyboard and measured-parity checks;
+Lighthouse has been run on production. A cell says "not run" only if its
+check has not actually been run.
 
 ## Check groups
 
@@ -32,14 +32,14 @@ Each cell is checked against the acceptance list for that route in
 
 | Route | Structure | Function | Data | Layout 390 | Layout 768 | Layout 1440 | Robustness | A11y |
 |---|---|---|---|---|---|---|---|---|
-| `/` | pass (1) | pass (2) | pass (3) | pass (4) | ours only (5) | ours only (5) | pass, unit (6) | not run |
-| `/polymarket` | pass | pass | pass (3) | not run | not run | not run | pass, unit (6) | not run |
-| `/kalshi` | pass (7) | pass (7) | pass (7) | not run | not run | not run | pass, unit (6) | not run |
-| `/account/[id]` | pass (8) | pass (8, 11) | pass (8, 12) | ours only, e2e (13) | not run | ours only, e2e (13) | pass, unit and e2e (8) | not run |
-| `/battle` | pass (14) | pass (14) | pass (15) | ours only, e2e (13) | not run | ours only, e2e (13) | pass, unit and live outage (16) | not run |
-| `/api-docs` | pass (9) | pass (9) | pass (9) | not run | not run | not run | not run | not run |
-| `/submit` | pass (10) | pass (10) | n/a | not run | not run | not run | n/a | not run |
-| `/terms`, `/privacy` | pass | n/a | n/a | not run | not run | not run | n/a | not run |
+| `/` | pass (1) | pass (2) | pass (3) | pass (4, 19) | ours only, e2e (17) | ours only, e2e (17) | pass, unit (6) | pass (18) |
+| `/polymarket` | pass | pass | pass (3) | ours only, e2e (17) | ours only, e2e (17) | ours only, e2e (17) | pass, unit (6) | pass (18) |
+| `/kalshi` | pass (7) | pass (7) | pass (7) | ours only, e2e (17) | ours only, e2e (17) | ours only, e2e (17) | pass, unit (6) | pass (18) |
+| `/account/[id]` | pass (8) | pass (8, 11) | pass (8, 12) | ours only, e2e (13) | ours only, e2e (17) | pass at 1024 (19) | pass, unit and e2e (8) | pass (18) |
+| `/battle` | pass (14) | pass (14) | pass (15) | ours only, e2e (13) | pass at 800 (19) | ours only, e2e (13) | pass, unit and live outage (16) | pass (18) |
+| `/api-docs` | pass (9) | pass (9) | pass (9) | ours only, e2e (17) | ours only, e2e (17) | ours only, e2e (17) | n/a | pass (18) |
+| `/submit` | pass (10) | pass (10) | n/a | ours only, e2e (17) | ours only, e2e (17) | ours only, e2e (17) | n/a | pass (18) |
+| `/terms`, `/privacy` | pass | n/a | n/a | ours only, e2e (17) | ours only, e2e (17) | ours only, e2e (17) | n/a | pass (18) |
 
 Notes, 2026-11-14 (items 2, 3, 6 updated at the end of phase 3):
 
@@ -104,6 +104,18 @@ Notes, 2026-11-14 (items 2, 3, 6 updated at the end of phase 3):
     until at least 01:22; it was back by 10:16): the page showed both traders by id and an "unavailable" chart card
     of the chart's height. The production build then failed (BUG-050); it
     passes since the fix, checked by `npm run check:outage`.
+17. The whole end-to-end suite, axe included, runs at 390, 768 and 1440 px.
+    No sideways scroll is asserted on the home and Kalshi boards, profiles
+    and the head-to-head page. "Ours only": the source was not measured at
+    that size.
+18. axe (WCAG 2.2 A and AA) passes on every route and on the profile
+    calendar open in both views, in both themes, at all three sizes: 78
+    checks. Keyboard: Tab reaches every control on seven pages with a ring
+    that is drawn, opaque and not cut off. Colour tokens pass 4.6:1 for
+    text and 3.1:1 for the focus ring in both themes (`contrast.test.ts`).
+19. Measured parity now runs as `e2e/parity.spec.ts`: home at 1024 and 390
+    px, profile at 1024 px, head to head at 800 px, against the source's
+    numbers in the tables below.
 
 ### Measured parity, home page
 
@@ -193,6 +205,36 @@ is added up (D-042). Added in phase 5: the 20 px cut-off for a
 crowded top label (D-044), and the millions unit of the head-to-head labels,
 which the source's chart never needed.
 
+### Lighthouse
+
+`npm run lighthouse`: median of three runs per page, Lighthouse 13.6.0.
+Below, the branch's production build served locally on 2026-11-15 about
+12:35 IST, against the live upstream; the deployed site is measured again
+after each deploy. Scores out of 100; FCP, LCP and TBT are first paint,
+largest paint and total blocking time.
+
+| Setting | Route | Performance | Accessibility | Best practices | SEO | FCP | LCP | TBT | CLS |
+|---|---|---|---|---|---|---|---|---|---|
+| phone | `/` | 95 | 100 | 77 | 63 | 1.2 s | 1.2 s | 250 ms | 0 |
+| phone | `/kalshi` | 100 | 100 | 77 | 63 | 1.1 s | 1.1 s | 60 ms | 0 |
+| phone | `/account/ProbabilityDuck` | 96 | 100 | 100 | 63 | 0.9 s | 0.9 s | 240 ms | 0 |
+| phone | `/battle` | 99 | 100 | 100 | 63 | 0.9 s | 0.9 s | 140 ms | 0 |
+| phone | `/api-docs` | 99 | 100 | 100 | 60 | 0.8 s | 0.8 s | 100 ms | 0 |
+| desktop | `/` | 100 | 100 | 77 | 63 | 0.3 s | 0.3 s | 0 ms | 0 |
+| desktop | `/kalshi` | 100 | 100 | 77 | 63 | 0.3 s | 0.3 s | 0 ms | 0 |
+| desktop | `/account/ProbabilityDuck` | 100 | 100 | 100 | 63 | 0.2 s | 0.7 s | 0 ms | 0 |
+| desktop | `/battle` | 100 | 100 | 100 | 63 | 0.2 s | 0.2 s | 0 ms | 0 |
+| desktop | `/api-docs` | 100 | 100 | 100 | 60 | 0.2 s | 0.2 s | 0 ms | 0 |
+
+Before phase 6, on production: accessibility 96 on `/` (touch targets) and
+`/api-docs` (contrast); best practices 77 on both boards; 19 profile
+prefetches (424 KB) on the home page. Remaining, accepted with reasons: SEO
+60 to 63 because pages ask not to be indexed (D-020); best practices 77 on
+the boards, from a cookie-deleting header on the data source's picture
+routes (D-050); about 3 MB of trader pictures on the home page (D-051). One
+earlier median showed a layout shift of 0.8 on desktop `/battle`; three
+further runs on the final build showed 0, and its cause was not found.
+
 ## Rerun commands
 
 | Check | Command | Last result |
@@ -200,10 +242,13 @@ which the source's chart never needed.
 | Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
 | Lint | `npm run lint` | pass, 2026-11-15 |
 | Type check | `npm run typecheck` | pass, 2026-11-15 |
-| Unit and component tests | `npm run test` | 382 of 382 pass, 2026-11-15 |
-| End-to-end, desktop 1440 and phone 390 | `npm run test:e2e` | 55 pass, 3 skipped by design (hover-only checks on the phone), 2026-11-15 |
+| Unit and component tests | `npm run test` | 416 of 416 pass, 2026-11-15 |
+| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 193 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
+| Colour contrast of every token and calendar shade | part of `npm run test` (`src/app/contrast.test.ts`) | 34 of 34 pass, 2026-11-15 |
+| Accessibility (axe), keyboard and measured parity | part of `npm run test:e2e` | see the end-to-end row |
+| Lighthouse, deployed site | `npm run lighthouse` | see the Lighthouse table, 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
-| Asset check | `npm run check:assets` | pass, 152 files, 2026-11-15 |
+| Asset check | `npm run check:assets` | pass, 159 files, 2026-11-15 |
 | CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end), 2026-11-15 after BUG-058; the phase 5 merge first failed end-to-end |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |
@@ -217,7 +262,8 @@ Two checks were also run by hand to make sure the suite can fail:
   a click on a trader's name also trigger the row failed 1. Both were reverted.
 
 The layout numbers above come from a probe run in the browser console at the
-stated viewport. It will become a Playwright test in the evals phase.
+stated viewport. Since phase 6 the same numbers are asserted by
+`e2e/parity.spec.ts` (D-052).
 
 **Independent review.** A reviewer agent that had not written the code read
 the phase 2 diff: 19 findings, 10 real defects fixed with tests (BUG-006 to

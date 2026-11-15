@@ -408,5 +408,71 @@ snapshot, where the fetch cache would have kept data a few minutes old; the
 dev server asks upstream on every reload (at most four requests a page); a
 profile render still makes one trader request, through a per-render memo.
 
+### D-048 Boards do not prefetch profile pages (2026-11-15, phase 6)
+
+Next.js prefetches every link that scrolls into view. On a board that meant
+up to 19 profile pages per visit, each rendered on our server with its own
+upstream requests, for pages most visitors never open (BUG-063). The source
+loads a profile only when it is opened, so profile links now say
+`prefetch={false}`, and a loading skeleton shows at once while a profile
+that is not cached yet is built (BUG-070).
+
+### D-049 Accessibility target: WCAG 2.2 AA, checked three ways
+
+- **axe** on 13 page states (every route, plus the profile calendar open in
+  both views and the 404 page), in both themes, at phone, tablet and
+  desktop size: `e2e/a11y.spec.ts`.
+- **Keyboard**: Tab reaches every control on seven pages, each with a ring
+  that is drawn, opaque and not cut off; the main controls work by keyboard
+  alone: `e2e/keyboard.spec.ts`.
+- **Token contrast**: every text colour against every surface and its badge
+  tint, every calendar shade, the focus ring, in both themes, with a 0.1
+  margin for colour rounding: `src/app/contrast.test.ts`.
+
+What this changed in our own palette: light-theme accents about 12 to 17%
+darker, dark-theme muted text and loss red a little lighter, dark calendar
+shades at most 52%, one 2 px focus ring in the full ring colour. On phones
+the badges in a row sit 4 px apart instead of the source's 2 px, so each
+20 px link meets WCAG 2.5.8 (DEV-29).
+
+### D-050 Pictures stay plain image requests
+
+To avoid a third-party cookie, pictures from the hosts that allow it were
+briefly requested anonymously (CORS). That was dropped: such a request sends
+an `Origin` header, which tells the picture host which site shows the
+picture, and the privacy page promises it does not (BUG-067). It also broke
+the data source's wallet pictures, which do not allow it (BUG-066). The
+cookie in question is a header from the data source's picture routes that
+deletes a cookie (`Max-Age=0`). Accepted: Lighthouse's best-practices score
+is 77 on the boards that show such pictures, for that header alone.
+
+### D-051 Performance: measured, nothing to optimise
+
+Lighthouse, median of three runs per page, phone and desktop settings
+(`npm run lighthouse`): performance 95 to 100 on every page, cumulative
+layout shift 0, largest paint at most 1.2 s on the phone setting. The
+largest cost is the home page's 3.9 MB, of which 3 MB is trader pictures at
+their full size (one 933 KB GIF shown at 40 px); that follows from loading
+pictures from the addresses the API gives, without a proxy (owner decision
+Q-03, D-033). SEO scores 60 to 63 only because every page asks not to be
+indexed (D-020).
+
+### D-052 How the parity test measures
+
+The layout probe is now `e2e/parity.spec.ts`. It sets the viewport the source
+was measured at and a pixel density of 2, as in the measuring browser: at 1x
+Chrome rounds some text lines to whole pixels. Sizes set by CSS are checked
+on every platform; widths set by text depend on the system font (D-017) and
+are checked only on macOS, where they were measured. A tablet size (768 px)
+joins the phone and desktop sizes for every end-to-end test.
+
+### D-053 Lighthouse and axe as tools
+
+axe runs through `@axe-core/playwright` 4.14.0, a dev dependency pinned
+exactly (its only dependency is axe-core); no local code could replace the
+rule engine. Lighthouse 13.6.0 runs through `npx`, pinned, with install
+scripts off, against Playwright's Chromium, so nothing is added to the
+project or installed globally.
+
 ## Open items
 

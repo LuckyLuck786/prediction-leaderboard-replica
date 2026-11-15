@@ -109,6 +109,16 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
   (D-047). A test enforces this.
 - Prove a fix for a failure by reproducing the failure first, on the old
   code, then running the same reproduction on the new code (BUG-054).
+- `npm run lighthouse [-- <base URL>]` runs Lighthouse three times per page,
+  phone and desktop, and prints the median (default: production).
+- The end-to-end suite includes axe on every page state in both themes
+  (`e2e/a11y.spec.ts`), keyboard checks (`e2e/keyboard.spec.ts`) and the
+  measured parity with the source (`e2e/parity.spec.ts`). A new page or
+  state gets a line in each.
+- Colours must pass `src/app/contrast.test.ts` (WCAG AA with a margin). An
+  element inside a container that clips uses `INSET_FOCUS_RING` from
+  `src/lib/focus.ts`.
+- Board links to profiles keep `prefetch={false}` (D-048).
 - Restart the dev server after switching branches or running a production
   build; a stale one serves 404s for routes that exist.
 - Stop only processes whose command line contains this repository's path.

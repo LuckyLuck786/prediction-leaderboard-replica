@@ -488,3 +488,45 @@ Not treated as defects, with the reason:
 - **Fix commit:** `972e0bb`
 - **Prevention:** chart checks use assertions that wait (`toHaveCount`), in
   both chart tests.
+
+## Phase 6 (2026-11-15, 11:30 to 13:00 IST)
+
+Every phase 6 bug was caught before its code was first committed, so "Fix
+commit" names that first commit. IDs follow the order they were cited in
+code, which is close to the order they were found.
+
+### Found by the new evals
+
+| ID | Time | File | What was wrong | How caught | Fix commit |
+|---|---|---|---|---|---|
+| BUG-059 | 11:36 | `globals.css` | Light theme: platform badges and score chips at 4.13 to 4.45:1 against their backgrounds; dark theme: muted text at 4.3:1 on the lighter "secondary" surface (the API page's "JavaScript" label). WCAG AA needs 4.5:1 | axe | `e09b60f` |
+| BUG-060 | 11:36 | `leaderboard-table.tsx` | On phones the platform and X badge links in each row were 20 px and 2 px apart, below WCAG 2.5.8's 24 px target or spacing | axe | `e09b60f` |
+| BUG-061 | 11:36 | `api-docs/page.tsx` | The example code block scrolls sideways on a phone but could not be reached from the keyboard | axe | `e09b60f` |
+| BUG-062 | 11:41 | `category-card.tsx` | Category rows measured 18 px in Playwright's Chromium 156 against 17.5 px on the source and in the in-app browser: the 12 px market count on a 14 px line made some Chromium versions round the line up | the layout probe turned into a test | `e445ca8` |
+| BUG-063 | 11:49 | `leaderboard-table.tsx`, `kalshi-view.tsx` | Every profile link on a board was prefetched as it scrolled into view: 19 profile pages (424 KB) on one home visit, each rendered on our server with its upstream requests. The source loads a profile only when it is opened | Lighthouse's network list, then an end-to-end test that failed with 12 and 8 prefetches before the fix | `2863d1f` |
+| BUG-066 | 11:57 | `urls.ts`, `trader-avatar.tsx` | To avoid a third-party cookie, pictures from the data source were requested anonymously by host; its wallet pictures do not allow that, so those traders lost their picture | Lighthouse console errors on the local production build | change dropped (D-050) |
+
+### Found by the phase 6 independent review (2026-11-15, about 12:05)
+
+A reviewer subagent that had not written the code read the phase 6 diff: 10
+findings, 2 rated high. Each was checked against the code before fixing.
+
+| ID | File | Defect | Fix |
+|---|---|---|---|
+| BUG-064 | `tone-styles.ts`, `month-strip.tsx` | Calendar day amounts were drawn in their shade's colour on that shade's own tint: 1.8 to 2.6:1. The axe runs never opened the calendar, so they could not see it | Shaded cells use the plain text colour; dark-theme shades capped at 52%, light top shades at 65%; axe now audits the open calendar in both views; a token contrast test covers every shade (it failed at 3.28:1 when the old shade was put back) |
+| BUG-065 | `globals.css`, `focus.ts` | The focus ring was the browser default in a half-transparent colour (about 2.2 to 3:1), and inside containers that clip (board names and badges, the code block) it was cut off. The keyboard test only checked that a ring style was set | One 2 px ring in the full ring colour everywhere, drawn inside the element where its container clips; the test now fails on a missing, faint or cut-off ring |
+| BUG-067 | `privacy/page.tsx` | The anonymous picture requests of BUG-066 send an `Origin` header, so the privacy page's "sends no information about this site" was no longer true | Anonymous requests removed; the page's wording is true again (D-050) |
+| BUG-068 | `e2e/parity.spec.ts` | The expanded calendar's height was compared with a five-week month's, but the calendar opens on the current month: the test would fail in January 2027 with no code change | Everything but the day grid is compared |
+| BUG-069 | `e2e/leaderboard.spec.ts` | The no-prefetch test scrolled without waiting, so only the first screen of rows was checked, and the Kalshi board not at all | Scrolls to the last row, waits a named settle time, covers both boards |
+| BUG-070 | `account/[id]/loading.tsx` | With prefetch off, opening a profile that was not built yet showed nothing until the server answered | A loading skeleton shaped like the profile |
+| BUG-071 | `globals.css` | Darkening the light theme's "good" score colour left it 1.11:1 from "strong": the two bands looked the same | "Strong" darkened to stay apart; the contrast test checks the step |
+| BUG-072 | `e2e/a11y.spec.ts` | The light-theme runs copied the storage key and never checked the light theme was on screen, so a change could make them test dark and still pass | Key imported from the app; the theme is asserted before each run |
+| BUG-073 | `scripts/lighthouse.mjs` | Lighthouse's own packages were installed with install scripts on, against the project rule, and a missing score printed as 0 | Installs without scripts; a missing score stops the script |
+
+How they were caught: independent review. Fix commits: BUG-064, BUG-065
+and BUG-071 in `e09b60f`; BUG-070 in `2863d1f`; BUG-068, BUG-069 and BUG-072
+in `23178a7`; BUG-073 in `e736d6a`. BUG-067 never reached a commit: the
+change that caused it was dropped before committing.
+
+Not treated as a defect: the review's tenth point, code citing bug and
+decision numbers before the log had them. These entries are that fix.

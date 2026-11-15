@@ -434,6 +434,12 @@ and viewport, and each FMT rule into unit tests.
   time. The source's six are unevenly spaced, by a rule we could not
   derive from one chart, so its dates differ (it showed Sep 27, Dec 6,
   Jan 2, Mar 12, Jun 22, Oct 28).
+- **DEV-29** On phones the platform and X badges in a board row are 4 px
+  apart, not 2 px, so each 20 px link meets WCAG 2.5.8 (D-049).
+- **DEV-30** One visible focus ring on every control, drawn inside where a
+  container would cut it off (D-049). The source uses the browser default.
+- **DEV-31** A loading skeleton while a profile that is not cached yet is
+  built (D-048).
 
 ## 8. Questions resolved by the owner (2026-11-14)
 

@@ -208,6 +208,31 @@ work happens. It describes what was done, not what was planned.
    profile chart before it was drawn (BUG-058), which the CI page snapshot
    showed. Fixed with waiting assertions; CI then passed both jobs.
 
+### Phase 6: accessibility, performance and the evals (2026-11-15)
+
+1. **Tools first, pinned**: axe through `@axe-core/playwright` 4.14.0 as a
+   dev dependency (checked that none of the 21 existing dev-tool advisories
+   came from it), Lighthouse 13.6.0 through `npx` (D-053).
+2. **axe on every route, both themes, three sizes.** First run: 11 of 44
+   failed on contrast, touch-target size and a code block the keyboard could
+   not reach (BUG-059 to BUG-061). Colours were fixed by computing, for each
+   token, the smallest change that clears 4.5:1 on every surface.
+3. **Keyboard test**, checked that it can fail by removing one focus ring.
+4. **The layout probe became a test**, as the evals plan promised; it found
+   a row height that depends on the Chromium version (BUG-062). A tablet
+   size joined the end-to-end projects.
+5. **Lighthouse on production** for a baseline, then on a local production
+   build of the branch. The network list showed profile prefetching
+   (BUG-063); the third-party cookie led to an anonymous-picture change that
+   was later dropped (BUG-066, BUG-067).
+6. **Independent review**: 10 findings, 9 real defects (BUG-064, BUG-065,
+   BUG-067 to BUG-073). Two mattered most: the axe runs had never seen the
+   calendar, whose day amounts were unreadable, and the focus rings were
+   faint and cut off while the keyboard test passed. Both checks were made
+   stricter, then the code was fixed until they passed.
+7. **Re-verified**: unit tests including a token contrast test, the full
+   end-to-end suite at three sizes, Lighthouse median of three runs.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -248,6 +273,20 @@ work happens. It describes what was done, not what was planned.
   History is not rewritten here, so it stays. The per-commit check had also
   read only the test count, which hides a file that fails to load; it now
   reads the file count too.
+- **A privacy fix that broke privacy** (phase 6, about 11:55 IST). To get rid
+  of a third-party cookie flagged by Lighthouse, pictures were requested
+  anonymously, decided per host after checking one URL per host. That broke
+  one picture route on the same host (BUG-066) and made the privacy page
+  untrue, because anonymous requests carry an `Origin` header (BUG-067). The
+  first was caught by Lighthouse, the second by the review. The change was
+  dropped and the trade-off written down (D-050). Lesson: check every path
+  a rule applies to, and read the privacy page before changing what requests
+  send.
+- **Evals that passed for the wrong reason, again** (phase 6). The first
+  axe runs never opened the calendar and the first keyboard test only
+  checked that a ring style existed. Both were written in this phase and
+  both looked green. The review caught them; each check now has a
+  demonstration that it fails on the defect it is for.
 
 ## Tools used so far
 
@@ -274,5 +313,7 @@ work happens. It describes what was done, not what was planned.
 | Polymarket's OpenAPI contract | Exact parameters and fields of that endpoint, read before calling it |
 | Playwright 1.64 | End-to-end tests at desktop and phone sizes, offline, locally and in CI |
 | Context7 documentation server (MCP) | Current Playwright configuration docs |
+| axe-core (`@axe-core/playwright`) | WCAG 2.2 A and AA checks inside the end-to-end tests |
+| Lighthouse 13.6 (through `npx`) | Performance, accessibility and best-practice scores of the deployed site |
 
 Later phases add to this log and this table as tools are actually used.
