@@ -15,6 +15,7 @@ export function TraderAvatar({ name, url }: { name: string; url: string | null }
     return (
       <span
         aria-hidden
+        data-testid="trader-avatar"
         className="flex h-full w-full items-center justify-center rounded-full bg-secondary text-[9px] font-medium text-secondary-foreground sm:text-xs"
       >
         {initialsOf(name)}
@@ -25,6 +26,7 @@ export function TraderAvatar({ name, url }: { name: string; url: string | null }
   return (
     // eslint-disable-next-line @next/next/no-img-element -- plain image on purpose: docs/DECISIONS.md, D-013
     <img
+      data-testid="trader-avatar"
       src={url}
       alt=""
       loading="lazy"

@@ -102,7 +102,7 @@ test.describe("measured parity with the source", () => {
   test("profile at 1024 px", async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto("/account/ProbabilityDuck");
-    near((await measure(page, "main img, main .rounded-full")).width, 76, "avatar");
+    near((await measure(page, "main [data-testid=trader-avatar]")).width, 76, "avatar");
     expect((await measure(page, "h1")).fontSize).toBe(24);
     const strip = "section[aria-label='Results by month']";
     near((await measure(page, strip)).width, 864, "month strip width");
@@ -133,12 +133,12 @@ test.describe("measured parity with the source", () => {
     );
 
     await page.getByRole("button", { name: "Show the calendar" }).click();
-    near((await measure(page, `${strip} .aspect-square`)).width, 116.3, "day cell");
+    near((await measure(page, `${strip} [data-testid=calendar-day]`)).width, 116.3, "day cell");
     // The calendar opens on the current month, and its height depends on how
     // many weeks that month spans. Measured on a five-week month: 748.4 in
     // total (about 747 on the source, a known difference), of which the day
     // grid was 5 x 116.3 + 4 x 4 = 597.5. Everything but the grid is checked.
-    const days = page.locator(strip).locator(".grid-cols-7").nth(1);
+    const days = page.locator(strip).getByTestId("calendar-days");
     const grid = (await days.boundingBox())?.height ?? 0;
     near((await measure(page, strip)).height - grid, 748.4 - 597.5, "expanded calendar without its day grid");
   });

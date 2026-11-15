@@ -2,6 +2,9 @@ import { expect, hasHorizontalScroll, test } from "./test";
 
 const KALSHI_TRADER = "/account/ProbabilityDuck";
 const POLYMARKET_TRADER = "/account/0xec981ed70ae69c5cbcac08c1ba063e734f6bafcd";
+const BOTH_PLATFORMS_TRADER = "/account/0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1";
+const MS_PER_DAY = 86_400_000;
+const MONTH_YEAR = new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
 const VALUE_LABEL = /^[+-]\$[\d.]+[KM]?$/;
 
 test.describe("Kalshi trader profile (spec 4.4)", () => {
@@ -29,13 +32,16 @@ test.describe("Kalshi trader profile (spec 4.4)", () => {
 
   test("opens the calendar, switches views and steps back a month (PROF-02, PROF-03)", async ({ page }) => {
     const strip = page.getByRole("region", { name: "Results by month" });
-    const label = strip.locator("span.min-w-\\[80px\\]");
+    const label = strip.getByRole("status");
     const thisMonth = await label.textContent();
 
     await strip.getByRole("button", { name: "Show the calendar" }).click();
-    await expect(strip.locator(".grid-cols-7").first().locator("div")).toHaveCount(7);
+    await expect(strip.getByTestId("calendar-weekdays").locator("div")).toHaveCount(7);
     // Today's cell has an amount: the fixture server moves history up to today.
-    await expect(strip.locator(".aspect-square[title]").last()).toHaveAttribute("title", /^[+-]\$[\d,]+$/);
+    await expect(strip.locator("[data-testid=calendar-day][title]").last()).toHaveAttribute(
+      "title",
+      /^[+-]\$[\d,]+$/,
+    );
 
     await strip.getByRole("button", { name: "monthly" }).click();
     await expect(strip).toContainText(/\d{4} YTD/);
@@ -55,7 +61,8 @@ test.describe("Kalshi trader profile (spec 4.4)", () => {
     const box = await chart.boundingBox();
     if (!box) throw new Error("chart has no box");
     await page.mouse.move(box.x + box.width * 0.6, box.y + box.height / 2);
-    await expect(page.getByRole("status")).toContainText(/\w{3} \d{1,2}, \d{4}/);
+    const history = page.getByRole("region", { name: "P&L history" });
+    await expect(history.getByRole("status")).toContainText(/\w{3} \d{1,2}, \d{4}/);
   });
 });
 
@@ -86,5 +93,24 @@ test.describe("profile errors", () => {
     await page.goto("/account/e2e-rate-limited");
     await expect(page.getByRole("heading", { name: "This profile is unavailable right now" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+  });
+});
+
+test.describe("trader on both platforms", () => {
+  test("the calendar steps back to the month the chart starts in (BUG-082)", async ({ page }) => {
+    await page.goto(BOTH_PLATFORMS_TRADER);
+    const chart = page.getByRole("img", { name: /^Cumulative profit and loss from/ });
+    const from = /from (\w{3} \d{1,2}, \d{4}) to/.exec((await chart.getAttribute("aria-label")) ?? "")?.[1];
+    if (!from) throw new Error("the chart names no first date");
+    // A day's result is its change from the day before, so the calendar's first
+    // result is the day after the chart's first point.
+    const firstResult = MONTH_YEAR.format(Date.parse(`${from} UTC`) + MS_PER_DAY);
+
+    const strip = page.getByRole("region", { name: "Results by month" });
+    const previous = strip.getByRole("button", { name: "Previous month" });
+    // This trader's Polymarket history starts two years before the Kalshi one.
+    for (let step = 0; step < 60 && (await previous.isEnabled()); step += 1) await previous.click();
+    await expect(previous).toBeDisabled();
+    await expect(strip.getByRole("status")).toHaveText(firstResult);
   });
 });

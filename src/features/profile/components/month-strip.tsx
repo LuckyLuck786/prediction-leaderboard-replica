@@ -27,6 +27,7 @@ function DayTile({ cell }: { cell: DayCell }) {
   const title = cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
   return (
     <div
+      data-testid="calendar-day"
       title={title}
       className={cn(
         "flex aspect-square flex-col items-center justify-center rounded text-[10px]",
@@ -110,7 +111,10 @@ export function MonthStrip({
           >
             <ChevronLeft aria-hidden className="h-4 w-4 text-muted-foreground" />
           </button>
-          <span className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">{label}</span>
+          {/* A status, so stepping a month is announced to screen readers. */}
+          <span role="status" className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">
+            {label}
+          </span>
           <button
             type="button"
             onClick={step(1)}
@@ -194,14 +198,14 @@ export function MonthStrip({
 
           {view === "daily" ? (
             <>
-              <div aria-hidden className="mb-1 grid grid-cols-7 gap-1">
+              <div aria-hidden data-testid="calendar-weekdays" className="mb-1 grid grid-cols-7 gap-1">
                 {WEEKDAYS.map((weekday, index) => (
                   <div key={index} className="text-center text-[10px] font-medium text-muted-foreground">
                     {weekday}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div data-testid="calendar-days" className="grid grid-cols-7 gap-1">
                 {Array.from({ length: month.leadingBlanks }, (_, index) => (
                   <div key={`blank-${index}`} aria-hidden />
                 ))}

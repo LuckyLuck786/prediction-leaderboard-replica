@@ -2,8 +2,9 @@
 // offline and give the same result every time. Boards come from the saved
 // snapshot; this script records trader profiles and histories: one Kalshi
 // trader with history and categories, one Polymarket trader with
-// Polymarket's P&L series, and the head-to-head pair. Fields the app does not
-// read are dropped to keep the files small.
+// Polymarket's P&L series, one trader on both platforms, and the
+// head-to-head pair. Fields the app does not read are dropped to keep the
+// files small.
 //
 // Only fixtures not yet on disk are recorded, so adding one does not change
 // the others. Run with: npm run fixtures:e2e [-- --force to record all again]
@@ -19,6 +20,8 @@ const POLYMARKET_DATA_ORIGIN = "https://data-api.polymarket.com";
 
 export const KALSHI_TRADER = "ProbabilityDuck";
 export const POLYMARKET_WALLET = "0xec981ed70ae69c5cbcac08c1ba063e734f6bafcd";
+/** A trader on both platforms: a Polymarket wallet and a Kalshi account (aenews). */
+export const BOTH_PLATFORMS = { wallet: "0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1", kalshi: "aenews" };
 
 const REQUEST_GAP_MS = 2000;
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -85,6 +88,13 @@ async function main() {
   );
   await record(`trader-${POLYMARKET_WALLET}.json`, trader(POLYMARKET_WALLET));
   await record(`polymarket-pnl-${POLYMARKET_WALLET}.json`, polymarketPnl(POLYMARKET_WALLET));
+
+  await record(`trader-${BOTH_PLATFORMS.wallet}.json`, trader(BOTH_PLATFORMS.wallet));
+  await record(`polymarket-pnl-${BOTH_PLATFORMS.wallet}.json`, polymarketPnl(BOTH_PLATFORMS.wallet));
+  await record(`kalshi-history-${BOTH_PLATFORMS.kalshi}.json`, kalshiHistory(BOTH_PLATFORMS.kalshi));
+  await record(`kalshi-categories-${BOTH_PLATFORMS.kalshi}.json`, () =>
+    getJson(`${SOURCE.origin}/api/kalshi/${BOTH_PLATFORMS.kalshi}/categories`),
+  );
 
   await record(`trader-${BATTLE_PAIR.polymarket}.json`, trader(BATTLE_PAIR.polymarket));
   await record(`trader-${BATTLE_PAIR.kalshi}.json`, trader(BATTLE_PAIR.kalshi));
