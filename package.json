@@ -21,7 +21,9 @@
     "lighthouse": "node scripts/lighthouse.mjs",
     "snapshot": "node scripts/update-snapshot.mjs",
     "fixtures:e2e": "node scripts/record-e2e-fixtures.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -44,6 +46,7 @@
     "eslint": "9.39.4",
     "eslint-config-next": "16.4.6",
     "jsdom": "31.0.1",
+    "prettier": "3.10.1",
     "tailwindcss": "4.2.2",
     "typescript": "5.9.3",
     "vite": "8.3.8",
