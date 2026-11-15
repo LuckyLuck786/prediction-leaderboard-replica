@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UpstreamError, fetchUpstreamJson } from "@/upstream/client";
 import source from "@/upstream/source.json";
 
-import { getKalshiBoard, loadKalshiSnapshot } from "./data";
+import { getKalshiBoard, loadKalshiSnapshot, parseKalshiSnapshot } from "./data";
 import { KALSHI_BOARD_LIMIT, KALSHI_PERIODS, type KalshiTrader } from "./model";
 import { applyKalshiQuery } from "./query";
 import { parseKalshiBoard } from "./schema";
@@ -143,8 +143,12 @@ describe("saved Kalshi snapshot", () => {
     }
   });
 
+  it("is parsed once and kept", () => {
+    expect(loadKalshiSnapshot()).toBe(loadKalshiSnapshot());
+  });
+
   it("refuses a snapshot without Kalshi boards", () => {
-    expect(() => loadKalshiSnapshot({ capturedAt: "2026-11-14T00:00:00Z" })).toThrow(/Kalshi snapshot/);
+    expect(() => parseKalshiSnapshot({ capturedAt: "2026-11-14T00:00:00Z" })).toThrow(/Kalshi snapshot/);
   });
 
   it("lists the same periods as the upstream config", () => {

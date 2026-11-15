@@ -2,9 +2,9 @@
 
 import { z } from "zod";
 
-import rawSnapshot from "@/upstream/snapshot/leaderboard.json";
 import { fetchUpstreamJson } from "@/upstream/client";
 import type { DataSource } from "@/upstream/data-source";
+import { SAVED_SNAPSHOT, parseSnapshotFile } from "@/upstream/snapshot";
 
 import { KALSHI_BOARD_LIMIT, KALSHI_PERIODS, type KalshiBoard, type KalshiPeriod } from "./model";
 import { parseKalshiBoard } from "./schema";
@@ -14,36 +14,34 @@ export interface KalshiPayload {
   source: DataSource;
 }
 
-const snapshotSchema = z.object({
-  capturedAt: z.string(),
-  kalshi: z.record(z.string(), z.object({ upstreamTotal: z.number().int().nonnegative() }).loose()),
-});
+const periodMetaSchema = z.object({ upstreamTotal: z.number().int().nonnegative() });
 
-/** The saved Kalshi boards. A broken snapshot is a build-stopping defect (D-026). */
-export function loadKalshiSnapshot(input: unknown = rawSnapshot) {
-  const file = snapshotSchema.safeParse(input);
-  if (!file.success) {
-    throw new Error(`Saved Kalshi snapshot is invalid: ${z.prettifyError(file.error)}`);
-  }
+/** Parses the Kalshi boards out of a snapshot file; throws when it is broken (D-026). */
+export function parseKalshiSnapshot(input: unknown): Record<KalshiPeriod, KalshiPayload> {
+  const file = parseSnapshotFile(input);
   const boards = {} as Record<KalshiPeriod, KalshiPayload>;
   for (const period of KALSHI_PERIODS) {
-    const saved = file.data.kalshi[period];
+    const saved = file.kalshi[period];
+    const meta = periodMetaSchema.safeParse(saved);
     const parsed = parseKalshiBoard(saved, period);
-    if (!saved || !parsed.ok) {
-      throw new Error(
-        `Saved Kalshi snapshot for ${period} is invalid: ${parsed.ok ? "missing" : parsed.error}`,
-      );
+    if (!meta.success || !parsed.ok) {
+      const reason = parsed.ok ? "upstreamTotal is missing" : parsed.error;
+      throw new Error(`Saved Kalshi snapshot for ${period} is invalid: ${reason}`);
     }
     boards[period] = {
       board: parsed.board,
-      source: {
-        kind: "snapshot",
-        capturedAt: new Date(file.data.capturedAt).toISOString(),
-        upstreamTotal: saved.upstreamTotal,
-      },
+      source: { kind: "snapshot", capturedAt: file.capturedAt, upstreamTotal: meta.data.upstreamTotal },
     };
   }
   return boards;
+}
+
+let saved: Record<KalshiPeriod, KalshiPayload> | undefined;
+
+/** The committed Kalshi boards, parsed on first use and kept (D-026). */
+export function loadKalshiSnapshot(): Record<KalshiPeriod, KalshiPayload> {
+  saved ??= parseKalshiSnapshot(SAVED_SNAPSHOT);
+  return saved;
 }
 
 /** One Kalshi period: live when upstream answers with valid data, else the labelled snapshot. Server only. */

@@ -173,6 +173,10 @@ describe("parseLeaderboard", () => {
 describe("saved snapshot", () => {
   const snapshot = loadSnapshot();
 
+  it("is parsed once and kept", () => {
+    expect(loadSnapshot()).toBe(snapshot);
+  });
+
   it("covers every period with nothing rejected", () => {
     for (const period of LEADERBOARD_PERIODS) {
       const board = snapshot.boards[period];

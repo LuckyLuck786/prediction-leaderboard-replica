@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 
-import rawSnapshot from "@/upstream/snapshot/leaderboard.json";
+import { SAVED_SNAPSHOT, parseSnapshotFile } from "@/upstream/snapshot";
 
 import { LEADERBOARD_PERIODS, type Leaderboard, type LeaderboardPeriod } from "./model";
 import { parseLeaderboard } from "./schema";
@@ -19,29 +19,17 @@ export interface LeaderboardSnapshot {
   upstreamTotals: Record<LeaderboardPeriod, number>;
 }
 
-const snapshotSchema = z.object({
-  capturedAt: z.string().refine((value) => !Number.isNaN(Date.parse(value)), "not a date"),
-  periods: z.record(z.string(), z.unknown()),
-});
-
 const periodMetaSchema = z.object({ upstreamTotal: z.number().int().nonnegative() });
 
-/**
- * Parses a snapshot file. The snapshot is our own committed file, so a broken
- * one is a build-stopping defect: this throws, and the schema test and the
- * build both fail loudly rather than ship a blank page.
- */
+/** Parses the home boards out of a snapshot file; throws when it is broken (D-026). */
 export function parseSnapshot(input: unknown): LeaderboardSnapshot {
-  const file = snapshotSchema.safeParse(input);
-  if (!file.success) {
-    throw new Error(`Saved snapshot is invalid: ${z.prettifyError(file.error)}`);
-  }
+  const file = parseSnapshotFile(input);
 
   const boards = {} as Record<LeaderboardPeriod, Leaderboard>;
   const upstreamTotals = {} as Record<LeaderboardPeriod, number>;
 
   for (const period of LEADERBOARD_PERIODS) {
-    const rawPeriod = file.data.periods[period];
+    const rawPeriod = file.periods[period];
     const meta = periodMetaSchema.safeParse(rawPeriod);
     const board = parseLeaderboard(rawPeriod, period);
     if (!meta.success || !board.ok) {
@@ -53,13 +41,19 @@ export function parseSnapshot(input: unknown): LeaderboardSnapshot {
   }
 
   return {
-    capturedAt: new Date(file.data.capturedAt).toISOString(),
+    capturedAt: file.capturedAt,
     boards,
     upstreamTotals,
   };
 }
 
-/** The committed snapshot, validated; a broken snapshot fails loudly (D-026). */
+let saved: LeaderboardSnapshot | undefined;
+
+/**
+ * The committed snapshot, parsed on first use and kept: the file never changes
+ * while the server runs. A broken snapshot fails loudly (D-026).
+ */
 export function loadSnapshot(): LeaderboardSnapshot {
-  return parseSnapshot(rawSnapshot);
+  saved ??= parseSnapshot(SAVED_SNAPSHOT);
+  return saved;
 }
