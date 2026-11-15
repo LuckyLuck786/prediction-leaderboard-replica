@@ -52,10 +52,19 @@ Then open http://localhost:3000.
 ## Check it
 
 ```bash
-npm run check          # lint, typecheck, tests, asset check, production build
+npm run check          # format, lint, typecheck, tests, asset check, production build
 npm run test           # unit and component tests only
+npm run test:coverage  # the same, with coverage; fails under the thresholds
+npm run format         # rewrite files in the Prettier style
 npm run check:assets   # no source-site files or names where they do not belong
 npm audit --omit=dev   # must report 0 vulnerabilities
+```
+
+To run `npm run check` before every push, turn on the repository's hook once
+per clone:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 End-to-end tests build the app and run it against a local fixture server
@@ -67,7 +76,7 @@ npm run test:e2e                  # phone, tablet and desktop sizes
 ```
 
 `npm run fixtures:e2e` records any of those API answers that are missing
-(`-- --force` records all again, nine spaced requests).
+(`-- --force` records all again, thirteen spaced requests).
 `npm run check:outage` checks that a production build still passes while the
 upstream API is down.
 `npm run lighthouse` measures the deployed site (three runs per page, phone
