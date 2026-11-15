@@ -255,6 +255,25 @@ work happens. It describes what was done, not what was planned.
 5. **Merged and deployed**: every route answers on the live site with the
    new security headers, and CI passed both jobs.
 
+### Code audit at the owner's request (2026-11-15)
+
+1. **The code graph first**: graphify's report and `graph.json` gave the
+   structure, confirmed no import cycles, and listed functions nothing calls
+   from another file; a stricter script then checked every export for use
+   outside its file. Nothing was dead; three values were exported for no
+   reason.
+2. **Scripted checks** for debug output, lint suppressions, `any`, stale
+   phase talk in code and comment coverage. 62 exports had no comment; each
+   got one, written from the function's body.
+3. **Every spec acceptance item ticked against real evidence.** Two gaps:
+   the API page did not list the upstream requests (BUG-081), and four items
+   had no test (copy buttons, the About section, the chart's first and last
+   points, Kalshi paging), which now have one.
+4. **Independent review of the audit**: one real defect (BUG-080), four
+   evidence claims narrowed, and a check that ties the API page's request
+   list to the code, which fails if either changes alone.
+5. **Re-verified**: 434 unit tests, 211 end-to-end tests at three sizes.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the

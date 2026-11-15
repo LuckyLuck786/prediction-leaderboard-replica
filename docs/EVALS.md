@@ -10,6 +10,9 @@ and desktop size and includes axe, keyboard and measured-parity checks;
 Lighthouse has been run on production. A cell says "not run" only if its
 check has not actually been run.
 
+Every acceptance item in `docs/SPEC.md` section 4 is ticked, each block
+followed by the tests or notes that verify it.
+
 ## Check groups
 
 | Group | What it checks |
@@ -244,13 +247,13 @@ further runs on the final build showed 0, and its cause was not found.
 | Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
 | Lint | `npm run lint` | pass, 2026-11-15 |
 | Type check | `npm run typecheck` | pass, 2026-11-15 |
-| Unit and component tests | `npm run test` | 428 of 428 pass, 2026-11-15 |
-| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 202 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
+| Unit and component tests | `npm run test` | 434 of 434 pass, 2026-11-15 |
+| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 211 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
 | Colour contrast of every token and calendar shade | part of `npm run test` (`src/app/contrast.test.ts`) | 34 of 34 pass, 2026-11-15 |
 | Accessibility (axe), keyboard and measured parity | part of `npm run test:e2e` | see the end-to-end row |
 | Lighthouse, deployed site | `npm run lighthouse` | performance 99 to 100, accessibility 100 on every page, 2026-11-15 |
 | Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
-| Asset check | `npm run check:assets` | pass, 160 files, 2026-11-15 |
+| Asset check | `npm run check:assets` | pass, 163 files, 2026-11-15 |
 | CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, phase 7 merge |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
 | Production build | `npm run build` | pass, 2026-11-15 |

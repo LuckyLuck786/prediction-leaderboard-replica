@@ -571,3 +571,16 @@ packages (removed, D-055), version ranges (pinned, D-055), missing security
 headers (added, D-054), the shared upstream limit (accepted, D-056), the
 template's skill (kept, D-057), and an unused test helper and snapshot field
 (removed).
+
+## Code audit at the owner's request (2026-11-15, after phase 7)
+
+| ID | File | Defect | How caught | Fix commit |
+|---|---|---|---|---|
+| BUG-080 | `leaderboard-table.tsx` | A platform badge with no page to link to was shown with no text: the badge is hidden from assistive technology, so screen readers heard nothing there | independent review of the audit, after a new doc comment claimed "the link around it carries the name" | `24c9d75` |
+| BUG-081 | `api-docs/page.tsx` | The API page listed this site's two routes but not the seven upstream requests the site makes, which its acceptance item asks for | ticking every spec acceptance item against its evidence | `949ba45` |
+
+The audit also added doc comments to the exports that had none (now 176 of
+178), un-exported three values used only in their own file, named one
+number, and added tests for four acceptance items that had none. The
+review of the audit caught four evidence claims in the spec that said more
+than their tests show; they were narrowed.

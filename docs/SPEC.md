@@ -184,16 +184,19 @@ requests `1d` and the daily profit, then prefetches `30d`, `ytd` and `all`.
 
 Acceptance:
 
-- [ ] All of HOME-01 to HOME-21 present and working at 390, 768 and 1440 px.
-- [ ] No horizontal scroll at 390 px. Joined hidden below 768 px. Column
+- [x] All of HOME-01 to HOME-21 present and working at 390, 768 and 1440 px
+      (HOME-21 without the X account link, DEV-13).
+- [x] No horizontal scroll at 390 px. Joined hidden below 768 px. Column
       toggles hidden below 640 px.
-- [ ] Row count, order and values for the first 30 rows equal the API
+- [x] Row count, order and values for the first 30 rows equal the API
       response after applying the default filters.
-- [ ] Each filter changes the count to the value computed from the API data.
-- [ ] Sort cycle and arrows match HOME-18 for every sortable column.
-- [ ] Money, joined, wallet and score formats match section 3.3, including a
+- [x] Each filter changes the count to the value computed from the API data.
+- [x] Sort cycle and arrows match HOME-18 for every sortable column.
+- [x] Money, joined, wallet and score formats match section 3.3, including a
       negative value and a value under 1,000.
-- [ ] Clicking a row opens that trader's profile.
+- [x] Clicking a row opens that trader's profile.
+
+Verified (2026-11-15): component and query tests for every control, filter, sort cycle and format (FMT-01 to FMT-09, including negatives and values under 1,000); optional columns and their toggles kept off narrow screens (`leaderboard-view.test.tsx`, HOME-10); end-to-end at 390, 768 and 1440 px with axe, keyboard and no sideways scroll, and 30 rows on the first page; Joined absent at 390 px (`e2e/parity.spec.ts`); every trader's P&L and score equal to a live upstream response, and the top five in the same order (EVALS note 3). Row order beyond the top five rests on the sort tests, not on a live comparison.
 
 ### 4.2 Polymarket board `/polymarket` (R-02)
 
@@ -206,8 +209,10 @@ Acceptance:
 
 Acceptance:
 
-- [ ] Loads with Polymarket selected; every HOME control still works.
-- [ ] About section present with five Q&A blocks and four working links.
+- [x] Loads with Polymarket selected; every HOME control still works.
+- [x] About section present with five Q&A blocks and four working links.
+
+Verified: `e2e/leaderboard.spec.ts` (Polymarket preselected; period and search work there as on the home board, which shares every control and its tests) and `e2e/pages.spec.ts` (five questions, four links that load).
 
 ### 4.3 Kalshi board `/kalshi` (R-03)
 
@@ -234,10 +239,12 @@ A separate, simpler page.
 
 Acceptance:
 
-- [ ] 100 rows on load; `Show more` adds 100; count reads "1,000 traders".
-- [ ] Switching period reorders rows to match the API for that period.
-- [ ] Search narrows rows and keeps original rank numbers.
-- [ ] Layout holds at 390, 768 and 1440 px without horizontal scroll.
+- [x] 100 rows on load; `Show more` adds 100; count reads "1,000 traders".
+- [x] Switching period reorders rows to match the API for that period.
+- [x] Search narrows rows and keeps original rank numbers.
+- [x] Layout holds at 390, 768 and 1440 px without horizontal scroll.
+
+Verified: `kalshi-view.test.tsx` (100 rows, "Show more" adds 100, "1,000 traders"; ranks kept while searching; a period fetched only when picked); `kalshi.test.ts` (each period asks upstream for that period's top 1,000; searching and filtering keep upstream's ranks); end-to-end at three sizes. That 7D reorders the board was seen by hand on live data (EVALS note 7); the rows were not compared one by one with the API.
 
 ### 4.4 Trader profile `/account/[id]` (R-04)
 
@@ -270,13 +277,16 @@ endpoints for them, but the profile did not request them.
 
 Acceptance:
 
-- [ ] A Kalshi and a Polymarket profile both render PROF-01 to PROF-05 and
-      PROF-07 to PROF-10 with values equal to the API responses.
-- [ ] Unknown id returns a 404 page.
-- [ ] Month navigation changes the strip; expanding shows the calendar.
-- [ ] Chart renders the full history and its first and last points match the
+- [x] A Kalshi and a Polymarket profile both render PROF-01 to PROF-05 and
+      PROF-07 to PROF-10 with values equal to the API responses (PROF-05
+      without the Last-24h movers, DEV-20).
+- [x] Unknown id returns a 404 page.
+- [x] Month navigation changes the strip; expanding shows the calendar.
+- [x] Chart renders the full history and its first and last points match the
       API.
-- [ ] Layout holds at 390, 768 and 1440 px.
+- [x] Layout holds at 390, 768 and 1440 px.
+
+Verified: parse tests against recorded API shapes and a by-hand comparison with live data (EVALS notes 8 and 12); `e2e/profile.spec.ts` (404, month navigation, calendar, chart, no sideways scroll at three sizes); `pnl-chart.test.tsx` (first and last points, every point drawn).
 
 ### 4.5 Battle `/battle` (R-05)
 
@@ -291,8 +301,10 @@ Acceptance:
 
 Acceptance:
 
-- [ ] Both traders and the two-line chart render; lines start at zero.
-- [ ] Layout holds at 390 and 1440 px.
+- [x] Both traders and the two-line chart render; lines start at zero.
+- [x] Layout holds at 390 and 1440 px.
+
+Verified: `e2e/battle.spec.ts` (both traders, both lines start on the zero line, at three sizes) and `comparison.test.ts` (start and baselines equal the source's recorded answer).
 
 ### 4.6 API reference `/api-docs` (R-06)
 
@@ -307,8 +319,10 @@ upstream reference for the rest.
 
 Acceptance:
 
-- [ ] Every endpoint this demo calls is listed with its parameters.
-- [ ] Copy buttons copy; try links open.
+- [x] Every endpoint this demo calls is listed with its parameters.
+- [x] Copy buttons copy; try links open.
+
+Verified: the page lists this site's two routes and the seven upstream requests it makes (`e2e/pages.spec.ts` counts them and opens every Try link); `copy-button.test.tsx` (copies, and says when the browser refuses).
 
 ### 4.7 Submit `/submit` (R-07)
 
@@ -320,7 +334,9 @@ Acceptance:
 
 Acceptance:
 
-- [ ] No network request is made from this page. Fields cannot be submitted.
+- [x] No network request is made from this page. Fields cannot be submitted.
+
+Verified: `e2e/pages.spec.ts` (the button is disabled, the form has no action, and a forced click sends no request). The page itself loads like any other page; nothing is sent from the form.
 
 ### 4.8 Terms `/terms` (R-08)
 
