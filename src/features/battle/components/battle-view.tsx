@@ -2,6 +2,7 @@ import { XBadge } from "@/features/trader/components/platform-badge";
 import { TraderAvatar } from "@/features/trader/components/trader-avatar";
 import { formatChartDate, formatTraderName } from "@/lib/format";
 import { PLATFORM_NAMES } from "@/features/trader/platforms";
+import { profilePath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 import type { Battle, BattlePlatform, BattleSide } from "../data";
@@ -36,7 +37,7 @@ function displayName(side: BattleSide): string {
 /** Where a trader's name points: their page on the platform, or ours when that is unknown. */
 function platformHref(side: BattleSide): string {
   const url = side.platform === "polymarket" ? side.profile?.polymarketUrl : side.profile?.kalshiUrl;
-  return url ?? `/account/${encodeURIComponent(side.id)}`;
+  return url ?? profilePath(side.id);
 }
 
 function Trader({ side }: { side: BattleSide }) {

@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { LocalStamp } from "@/features/shell/local-stamp";
 import { TraderAvatar } from "@/features/trader/components/trader-avatar";
-import { MISSING, formatMoneyWhole, formatStamp } from "@/lib/format";
+import { MISSING, formatCount, formatMoneyWhole, formatStamp } from "@/lib/format";
 import { BRAND_MARK_PATH, PRODUCT_TAG } from "@/features/shell/brand";
 import { Chip } from "@/features/shell/chip";
 import { ThemeToggle } from "@/features/shell/theme-toggle";
@@ -26,7 +26,6 @@ import {
 import { applyKalshiQuery } from "../query";
 
 const EMPTY: never[] = [];
-const COUNT_FORMAT = new Intl.NumberFormat("en-US");
 
 function TraderName({ trader }: { trader: KalshiTrader }) {
   if (trader.profileId) {
@@ -134,7 +133,7 @@ export function KalshiView({
         >
           Live data is unavailable right now. Showing a saved snapshot from{" "}
           {formatStamp(payload.source.capturedAt, "UTC")} UTC: the top {payload.board.traders.length} of the{" "}
-          {COUNT_FORMAT.format(payload.source.upstreamTotal)} traders listed for this period.
+          {formatCount(payload.source.upstreamTotal)} traders listed for this period.
         </p>
       ) : null}
 
@@ -176,7 +175,7 @@ export function KalshiView({
           />
           <p className="whitespace-nowrap text-sm">
             {payload
-              ? `${COUNT_FORMAT.format(matching.length)} traders`
+              ? `${formatCount(matching.length)} traders`
               : current.status === "failed"
                 ? "No traders loaded"
                 : "Loading traders"}
@@ -256,7 +255,7 @@ export function KalshiView({
           onClick={() => setVisibleCount((count) => count + KALSHI_PAGE_SIZE)}
           className="mt-2 h-9 w-full text-sm text-muted-foreground hover:bg-accent/50 hover:text-foreground"
         >
-          Show more ({COUNT_FORMAT.format(matching.length - visible.length)} left)
+          Show more ({formatCount(matching.length - visible.length)} left)
         </button>
       ) : null}
 
