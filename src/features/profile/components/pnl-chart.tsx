@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 
-import { formatChartDate, formatChartMoney, formatChartTick } from "@/features/leaderboard/format";
+import { formatChartDate, formatChartMoney, formatChartTick } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { nearestIndex, roomyTicks, timeTicks, valueAxis, valueRange, type SeriesPoint } from "../history";

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 
+import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/trader/platforms";
 import { INSET_FOCUS_RING } from "@/lib/focus";
 import { profilePath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
@@ -18,21 +19,19 @@ import {
   formatSharpe,
   formatTraderName,
   formatWinRate,
-} from "../format";
+} from "@/lib/format";
 import {
   EXTRA_COLUMN_LABELS,
-  PLATFORM_NAMES,
   SHARPE_HEADINGS,
   type ExtraColumn,
-  type FilterablePlatform,
   type LeaderboardPeriod,
   type SortKey,
   type SortState,
   type Trader,
 } from "../model";
-import { scoreBandClass } from "../score-band";
-import { PlatformBadge, XBadge } from "./platform-badge";
-import { TraderAvatar } from "./trader-avatar";
+import { scoreBandClass } from "@/features/trader/score-band";
+import { PlatformBadge, XBadge } from "@/features/trader/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
 
 const EXTRA_COLUMN_DEFS: Record<
   ExtraColumn,

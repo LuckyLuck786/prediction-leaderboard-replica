@@ -5,7 +5,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { formatChartDate, formatChartMoney } from "@/features/leaderboard/format";
+import { formatChartDate, formatChartMoney } from "@/lib/format";
 import { nth } from "@/lib/test-utils";
 
 import { PnlChart } from "./pnl-chart";

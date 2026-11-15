@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import rawSnapshot from "@/upstream/snapshot/leaderboard.json";
 import { fetchUpstreamJson } from "@/upstream/client";
-import type { DataSource } from "@/features/leaderboard/data";
+import type { DataSource } from "@/upstream/data-source";
 
 import { KALSHI_BOARD_LIMIT, KALSHI_PERIODS, type KalshiBoard, type KalshiPeriod } from "./model";
 import { parseKalshiBoard } from "./schema";

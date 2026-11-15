@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { initialsOf } from "../format";
+import { initialsOf } from "@/lib/format";
 
 /**
  * A trader's picture, straight from the URL the API returns, with initials

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-import type { FilterablePlatform } from "../model";
+import type { FilterablePlatform } from "../platforms";
 
 // Our own letter marks. The platforms' logos are their trademarks and are not
 // used here.

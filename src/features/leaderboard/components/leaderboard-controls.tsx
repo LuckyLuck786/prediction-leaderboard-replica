@@ -4,20 +4,19 @@ import type { Dispatch } from "react";
 
 import { Chip } from "@/features/shell/chip";
 import { ThemeToggle } from "@/features/shell/theme-toggle";
+import { FILTERABLE_PLATFORMS, PLATFORM_NAMES } from "@/features/trader/platforms";
 import { cn } from "@/lib/utils";
 
 import {
   EXTRA_COLUMNS,
   EXTRA_COLUMN_LABELS,
-  FILTERABLE_PLATFORMS,
   MIN_DAILY_MOVE_USD,
   PERIOD_BUTTONS,
-  PLATFORM_NAMES,
   SCORE_WEIGHTS,
   type ExtraColumn,
 } from "../model";
 import type { LeaderboardAction, LeaderboardState } from "../state";
-import { PlatformBadge } from "./platform-badge";
+import { PlatformBadge } from "@/features/trader/components/platform-badge";
 
 /** Tooltips. The ROI definition is the one given in the upstream API reference. */
 const EXTRA_COLUMN_TITLES: Record<ExtraColumn, string> = {

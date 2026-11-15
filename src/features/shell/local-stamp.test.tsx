@@ -4,7 +4,7 @@ import { cleanup, render } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { formatStamp } from "../format";
+import { formatStamp } from "@/lib/format";
 import { LocalStamp } from "./local-stamp";
 
 afterEach(cleanup);

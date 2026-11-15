@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatChartMoney } from "@/features/leaderboard/format";
+import { formatChartMoney } from "@/lib/format";
 import { nth } from "@/lib/test-utils";
 
 import {

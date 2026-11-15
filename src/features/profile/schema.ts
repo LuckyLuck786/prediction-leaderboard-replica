@@ -2,10 +2,11 @@
 
 import { z } from "zod";
 
-import { PLATFORMS } from "@/features/leaderboard/model";
+import { PLATFORMS } from "@/features/trader/platforms";
+import { WALLET, isProfileId } from "@/features/trader/profile-id";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
-import { PROFILE_PERIODS, WALLET, isProfileId, type ProfilePeriod, type TraderProfile } from "./model";
+import { PROFILE_PERIODS, type ProfilePeriod, type TraderProfile } from "./model";
 
 const optionalString = z.string().nullish();
 const optionalNumber = z.number().nullish();

@@ -7,13 +7,13 @@ import { usePeriodData } from "@/lib/use-period-data";
 
 import { fetchBoard as fetchBoardFromApi } from "../board-api";
 import type { BoardPayload } from "../data";
-import { MISSING, formatMoneyWhole, formatStamp } from "../format";
+import { MISSING, formatMoneyWhole, formatStamp } from "@/lib/format";
 import { LEADERBOARD_PERIODS, PAGE_SIZE, type LeaderboardPeriod, type PlatformFilter } from "../model";
 import { applyQuery } from "../query";
 import { createInitialState, reduceLeaderboard } from "../state";
 import { LeaderboardControls } from "./leaderboard-controls";
 import { LeaderboardTable } from "./leaderboard-table";
-import { LocalStamp } from "./local-stamp";
+import { LocalStamp } from "@/features/shell/local-stamp";
 
 const EMPTY: never[] = [];
 const COUNT_LABELS = { loading: "Loading traders", failed: "No traders loaded" } as const;

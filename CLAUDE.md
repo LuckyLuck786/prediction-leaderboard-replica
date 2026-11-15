@@ -131,7 +131,11 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 
 - Structure follows the domain: feature code lives together in
   `src/features/<feature>/` (components, data access, schemas, tests).
-  Shared helpers live in `src/lib/`.
+  Shared helpers live in `src/lib/`. What every trader list shows (avatar,
+  platform badges, platform names, the profile id rule, score colours) lives
+  in `src/features/trader/`. A feature does not import another feature; the
+  ESLint rule `import/no-restricted-paths` in `eslint.config.mjs` holds the
+  boundaries and names the two exceptions.
 - One source of truth per fact. Formatters, constants and schemas are defined
   once and imported.
 - No magic numbers or strings. Name them.

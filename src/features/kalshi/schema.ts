@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 
-import { isProfileId } from "@/features/profile/model";
+import { isProfileId } from "@/features/trader/profile-id";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import type { KalshiBoard, KalshiPeriod, KalshiTrader } from "./model";

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { formatBattleMoney } from "@/features/leaderboard/format";
+import { formatBattleMoney } from "@/lib/format";
 import { roomyTicks } from "@/features/profile/history";
 import { parseKalshiHistory, parsePolymarketPnl } from "@/features/profile/history-data";
 

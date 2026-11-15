@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UpstreamError, fetchUpstreamJson } from "@/upstream/client";
 
 import { getProfile } from "./data";
-import { isProfileId } from "./model";
+import { isProfileId } from "@/features/trader/profile-id";
 import { parseProfile } from "./schema";
 
 vi.mock("@/upstream/client", async (importOriginal) => {

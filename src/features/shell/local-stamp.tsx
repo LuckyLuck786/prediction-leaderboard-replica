@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 
-import { formatStamp } from "../format";
+import { formatStamp } from "@/lib/format";
 
 const subscribeToNothing = () => () => {};
 

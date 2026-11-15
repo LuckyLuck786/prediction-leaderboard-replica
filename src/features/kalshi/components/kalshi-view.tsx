@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { LocalStamp } from "@/features/leaderboard/components/local-stamp";
-import { TraderAvatar } from "@/features/leaderboard/components/trader-avatar";
-import { MISSING, formatMoneyWhole, formatStamp } from "@/features/leaderboard/format";
+import { LocalStamp } from "@/features/shell/local-stamp";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
+import { MISSING, formatMoneyWhole, formatStamp } from "@/lib/format";
 import { BRAND_MARK_PATH, PRODUCT_TAG } from "@/features/shell/brand";
 import { Chip } from "@/features/shell/chip";
 import { ThemeToggle } from "@/features/shell/theme-toggle";

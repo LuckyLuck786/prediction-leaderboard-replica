@@ -1,7 +1,7 @@
-import { XBadge } from "@/features/leaderboard/components/platform-badge";
-import { TraderAvatar } from "@/features/leaderboard/components/trader-avatar";
-import { formatChartDate, formatTraderName } from "@/features/leaderboard/format";
-import { PLATFORM_NAMES } from "@/features/leaderboard/model";
+import { XBadge } from "@/features/trader/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
+import { formatChartDate, formatTraderName } from "@/lib/format";
+import { PLATFORM_NAMES } from "@/features/trader/platforms";
 import { cn } from "@/lib/utils";
 
 import type { Battle, BattlePlatform, BattleSide } from "../data";

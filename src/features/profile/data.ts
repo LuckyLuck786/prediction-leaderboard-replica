@@ -5,7 +5,9 @@ import { cache } from "react";
 
 import { fetchUpstreamJson, isNotFound } from "@/upstream/client";
 
-import { isProfileId, type TraderProfile } from "./model";
+import { isProfileId } from "@/features/trader/profile-id";
+
+import type { TraderProfile } from "./model";
 import { parseProfile } from "./schema";
 
 /** Upstream failed for a reason other than "no such trader". */

@@ -1,4 +1,4 @@
-import { formatCount, formatProfileMoney } from "@/features/leaderboard/format";
+import { formatCount, formatProfileMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import type { CategoryRow } from "../history-data";

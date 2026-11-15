@@ -3,12 +3,7 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 
-import {
-  MISSING,
-  formatSignedWhole,
-  formatMonthTotal,
-  formatProfileMoney,
-} from "@/features/leaderboard/format";
+import { MISSING, formatSignedWhole, formatMonthTotal, formatProfileMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { parseDayKey, summariseMonth, summariseYear, type DayCell } from "../history";

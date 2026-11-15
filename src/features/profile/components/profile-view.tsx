@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { TraderAvatar } from "@/features/leaderboard/components/trader-avatar";
-import { PlatformBadge, XBadge } from "@/features/leaderboard/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
+import { PlatformBadge, XBadge } from "@/features/trader/components/platform-badge";
 import {
   MISSING,
   formatCount,
@@ -10,9 +10,9 @@ import {
   formatSharpe,
   formatTraderName,
   formatWinRate,
-} from "@/features/leaderboard/format";
-import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/leaderboard/model";
-import { scoreBandClass } from "@/features/leaderboard/score-band";
+} from "@/lib/format";
+import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/trader/platforms";
+import { scoreBandClass } from "@/features/trader/score-band";
 import { cn } from "@/lib/utils";
 
 import type { CategoriesResult, HistoryResult } from "../history-data";

@@ -3,10 +3,11 @@
 
 import { z } from "zod";
 
-import { isProfileId } from "@/features/profile/model";
+import { PLATFORMS } from "@/features/trader/platforms";
+import { isProfileId } from "@/features/trader/profile-id";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
-import { PLATFORMS, type DayMover, type Leaderboard, type LeaderboardPeriod, type Trader } from "./model";
+import { type DayMover, type Leaderboard, type LeaderboardPeriod, type Trader } from "./model";
 
 const optionalNumber = z.number().nullish();
 const optionalString = z.string().nullish();

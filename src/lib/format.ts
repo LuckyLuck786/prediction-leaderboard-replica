@@ -1,4 +1,4 @@
-// Display formats for the leaderboard. Each rule mirrors a format observed on
+// Display formats for every page. Each rule mirrors a format observed on
 // the source site; the IDs refer to docs/SPEC.md, section 3.3.
 
 /** Shown wherever a value is missing. */
