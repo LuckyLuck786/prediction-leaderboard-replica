@@ -41,8 +41,13 @@ export interface DayMover {
 }
 
 export interface Trader {
-  /** Profile route segment: the wallet when there is one, else the Kalshi username. */
+  /** Unique key: the wallet when there is one, else the Kalshi username. */
   id: string;
+  /**
+   * The id as a profile route segment, or null when our routes would refuse it
+   * (BUG-083): such a row stays on the board but links nowhere.
+   */
+  profileId: string | null;
   name: string;
   platform: Platform;
   wallet: string | null;

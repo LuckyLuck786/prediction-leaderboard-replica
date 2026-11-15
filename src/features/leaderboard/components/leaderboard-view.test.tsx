@@ -274,6 +274,15 @@ describe("LeaderboardView", () => {
     expect(within(row).getByText("Polymarket").className).toContain("sr-only");
   });
 
+  it("does not link a trader whose id our routes refuse (BUG-083)", () => {
+    renderView({}, { "1d": [makeTrader({ id: "has space", pnl: 9, profileId: null })] });
+    const [row] = bodyRows();
+    expect(within(row).queryByRole("link", { name: "has space" })).toBeNull();
+    expect(within(row).getByText("has space")).toBeTruthy();
+    fireEvent.click(row);
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it("shows the day's biggest mover in 1D only (HOME-17)", async () => {
     const moved = [
       makeTrader({ id: "labelled", pnl: 3, dayMover: { label: "Politics", change: -11962, iconUrl: null } }),

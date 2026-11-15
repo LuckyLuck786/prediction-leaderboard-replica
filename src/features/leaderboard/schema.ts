@@ -84,12 +84,14 @@ function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
   const kalshiUsername = rawUsername && isProfileId(rawUsername) ? rawUsername : null;
   const id = wallet ?? rawUsername;
   if (!id) return null;
+  const profileId = isProfileId(id) ? id : null;
 
   const joinDate = presentOrNull(raw.join_date);
   const score = raw.smart_score ?? null;
 
   return {
     id,
+    profileId,
     name: raw.name,
     platform: raw.platform,
     wallet,
