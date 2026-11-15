@@ -23,6 +23,26 @@ automated accessibility checks (WCAG 2.2 AA), keyboard checks and the
 measured layout comparison with the source. The build is finished and
 reviewed; what remains is the submission itself.
 
+## Highlights
+
+- **Live data, fetched only by the server.** Every upstream answer is checked
+  with a Zod schema before use; a failed check falls back to a saved snapshot
+  that the page labels as such. A production build passes even while the
+  upstream API is down (`npm run check:outage`).
+- **Measured, not eyeballed.** Layout numbers recorded on the source (column
+  widths, row heights, chart sizes) are asserted in `e2e/parity.spec.ts` at
+  phone, tablet and desktop size.
+- **Tested.** Unit and component tests with coverage thresholds in CI, and
+  end-to-end tests that run offline against recorded API answers, with axe
+  accessibility checks in both themes and keyboard checks.
+- **87 real bugs logged** in [docs/BUGLOG.md](docs/BUGLOG.md), each with how
+  it was caught and the commit that fixed it.
+- **Guarded by tools.** Strict TypeScript (with checked index access),
+  type-aware lint rules, feature boundaries enforced by ESLint, `server-only`
+  on every server module, a partial content security policy, and an asset
+  check that fails CI if source-site files or the source's name appear where
+  they should not.
+
 ## What is deliberately different
 
 The layout, routes, components, spacing, responsive behavior and interactions

@@ -10,6 +10,5 @@ package-lock.json
 src/upstream/snapshot
 e2e/fixtures
 docs
-.agents
 .claude
 *.md

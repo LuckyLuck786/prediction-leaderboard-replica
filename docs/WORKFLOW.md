@@ -276,6 +276,51 @@ work happens. It describes what was done, not what was planned.
 6. **Merged and deployed**: every route answers on the live site, the API
    page lists the seven requests, and CI passed both jobs.
 
+### The owner's code review and the fix pass (2026-11-15 to 16)
+
+The owner reviewed the whole repository (scored 8 of 10) and listed bugs,
+performance, architecture, testing, security, tooling and repository items.
+The instruction: fix all of them, and say at the end which ones should not
+be fixed because they would make the site a less faithful copy.
+
+1. **Bugs first, each reproduced.** Five bugs (BUG-082 to BUG-086), one
+   commit each on branch `chore/review-fixes`; every new test failed on the
+   old code before the fix.
+2. **Tooling.** Prettier (width chosen by measuring which changed the fewest
+   lines), checked index access (86 type errors fixed in the code, not
+   silenced), type-aware lint rules (they found a promise passed where React
+   expects void, and a cast that did nothing), ES2022.
+3. **Architecture.** Shared code moved out of the leaderboard feature and an
+   ESLint rule now holds the feature boundaries; it caught one cross-feature
+   import on its first run. `server-only` on server modules, proven by
+   making the build fail. One snapshot loader, cached. Shared chart
+   geometry, memoised after measuring the cost per pointer move. One money
+   formatter, proven output-identical before the old code was deleted. Zod
+   taken out of the browser bundle, measured on builds of the same commit.
+4. **Tests.** Component tests for the profile view and category card;
+   fixtures for a trader on both platforms and an end-to-end test for the
+   case BUG-082 broke; coverage thresholds; selectors by role or test id.
+5. **Security.** A partial content security policy with a test shown to
+   fail on a violation, and a cap of ten wallets per profile.
+6. **Repository.** SHA-pinned actions, Dependabot, a pre-push hook, the
+   template's skill removed, README highlights, these docs.
+7. **Two review items deliberately not done** (D-062): loading other periods
+   only on hover, and sending fewer traders with the page. The source does
+   both the way this site does, so changing them would make the copy less
+   faithful. A firewall rate limit stays the owner's call (D-058).
+8. **Verified**: `npm run check`, 480 unit tests, 217 end-to-end tests at
+   three sizes, the outage build.
+9. **Independent review**: a reviewer agent that had not written the code
+   read the whole branch. No high-severity finding; it re-ran the old and new
+   money formatters on 311,000 values and found them equal. Five low
+   findings, each checked first: an unknown API period is now cached like
+   any other path (confirmed on a production server, accepted as D-064); the
+   BUG-084 test only covered the new helper (a head-to-head axis test was
+   added and shown to throw on the old code); one comment overstated the
+   wallet data; one test title said slightly more than it checks; two
+   comments were stale. An unlinked row still highlighted on hover; it no
+   longer does. 481 unit tests pass after the fixes.
+
 ### Slips, recorded as they happened
 
 - A staged file deletion (`docs/assets/star-history.png`) was swept into the
@@ -330,6 +375,17 @@ work happens. It describes what was done, not what was planned.
   checked that a ring style existed. Both were written in this phase and
   both looked green. The review caught them; each check now has a
   demonstration that it fails on the defect it is for.
+- **A build rewrote a config file, and it was committed** (review pass, the
+  evening of 15 November). Removing `allowJs` from `tsconfig.json` passed every check,
+  but `next build` adds back any suggested key that is missing, and that
+  rewrite went into the next commit unnoticed (BUG-087). Caught by reading
+  that commit's file list. Fixed by setting the key to `false`; a build now
+  leaves the file alone.
+- **A commit with a lint error** (review pass, around midnight). The profile
+  view test was committed after its tests and types passed, before lint
+  ran; the typed lint rules flagged a cast. Fixed in the next commit. Since
+  then lint runs before each commit, and the new pre-push hook runs the full
+  check.
 - **The zsh `path` variable, again** (phase 7). A loop variable named `path`
   replaced the shell's `PATH` a second time; the command failed loudly and
   was rerun with `route`. A leftover test server from that run was found by
@@ -362,5 +418,9 @@ work happens. It describes what was done, not what was planned.
 | Context7 documentation server (MCP) | Current Playwright configuration docs |
 | axe-core (`@axe-core/playwright`) | WCAG 2.2 A and AA checks inside the end-to-end tests |
 | Lighthouse 13.6 (through `npx`) | Performance, accessibility and best-practice scores of the deployed site |
+| Prettier 3.10 | One code format, checked in CI |
+| typescript-eslint (type-aware rules), `import/no-restricted-paths` | Unhandled promises, unsafe `any`, feature boundaries |
+| `@vitest/coverage-v8` | Coverage with thresholds in CI |
+| Dependabot | Weekly update pull requests for packages and pinned actions |
 
 Later phases add to this log and this table as tools are actually used.
