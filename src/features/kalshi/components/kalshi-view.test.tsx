@@ -5,7 +5,7 @@ import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { KalshiPayload } from "../data";
-import { KALSHI_SKELETON_ROWS, type KalshiPeriod, type KalshiTrader } from "../model";
+import { KALSHI_PAGE_SIZE, KALSHI_SKELETON_ROWS, type KalshiPeriod, type KalshiTrader } from "../model";
 import { KalshiView } from "./kalshi-view";
 
 vi.mock("next/link", () => ({
@@ -41,6 +41,18 @@ describe("KalshiView", () => {
     const external = screen.getByRole("link", { name: "final.lamb3899" });
     expect(external.getAttribute("href")).toBe("https://kalshi.com/ideas/profiles/final.lamb3899");
     expect(external.getAttribute("rel")).toContain("noopener");
+  });
+
+  it("shows 100 rows, adds 100 per \"Show more\", and counts the whole board (KAL-06)", () => {
+    const BOARD_SIZE = 1000;
+    const all = Array.from({ length: BOARD_SIZE }, (_, index) => trader(index + 1, `trader${index + 1}`));
+    render(<KalshiView initial={payload("all", all)} fetchBoard={vi.fn()} />);
+    const rows = () => screen.getAllByRole("row").length - 1; // minus the heading row
+    expect(rows()).toBe(KALSHI_PAGE_SIZE);
+    expect(screen.getByText("1,000 traders")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show more (900 left)" }));
+    expect(rows()).toBe(KALSHI_PAGE_SIZE * 2);
+    expect(screen.getByRole("button", { name: "Show more (800 left)" })).toBeTruthy();
   });
 
   it("fetches a period only when it is selected, showing placeholders meanwhile (KAL-07)", async () => {

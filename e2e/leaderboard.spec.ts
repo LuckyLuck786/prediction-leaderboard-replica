@@ -65,6 +65,18 @@ test.describe("Polymarket board (spec 4.2)", () => {
   });
 });
 
+test.describe("Polymarket board controls (spec 4.2)", () => {
+  test("period and search work as on the home board", async ({ page }) => {
+    await page.goto("/polymarket");
+    const firstName = page.locator(`${bodyRows} >> nth=0`).getByRole("link").first();
+    const before = await firstName.textContent();
+    await page.getByRole("button", { name: "ALL", exact: true }).click();
+    await expect(firstName).not.toHaveText(before ?? "");
+    await page.getByRole("searchbox").fill("zz-no-such-trader");
+    await expect(page.getByText("No traders match these filters.")).toBeVisible();
+  });
+});
+
 test.describe("Kalshi board (spec 4.3)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/kalshi");

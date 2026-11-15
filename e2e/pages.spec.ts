@@ -1,4 +1,5 @@
 import { SECURITY_HEADERS } from "../next.config";
+import { DATA_SOURCES, ENDPOINTS } from "../src/features/api-docs/endpoints";
 
 import { expect, test } from "./test";
 
@@ -36,6 +37,34 @@ test.describe("simple pages", () => {
     await expect(page.locator("html")).not.toHaveClass(/dark/);
     await page.reload();
     await expect(page.locator("html")).not.toHaveClass(/dark/);
+  });
+});
+
+test.describe("API page (spec 4.6)", () => {
+  test("every Try link answers with JSON, and the data sources are listed", async ({ page, request }) => {
+    await page.goto("/api-docs");
+    const tries = await page.getByRole("link", { name: /^\/api\// }).evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href") ?? ""),
+    );
+    expect(tries).toHaveLength(ENDPOINTS.length);
+    for (const href of tries) {
+      const response = await request.get(href);
+      expect(response.status(), href).toBe(200);
+      expect(response.headers()["content-type"], href).toContain("application/json");
+    }
+    const sources = page.getByRole("region", { name: "Where the data comes from" }).getByRole("listitem");
+    await expect(sources).toHaveCount(DATA_SOURCES.length);
+  });
+});
+
+test.describe("Polymarket About section (POLY-02)", () => {
+  test("has five questions and four links that load", async ({ page, request }) => {
+    await page.goto("/polymarket");
+    const about = page.locator("section").filter({ has: page.getByRole("heading", { name: "About this board" }) });
+    await expect(about.getByRole("heading", { level: 3 })).toHaveCount(5);
+    const links = await about.getByRole("link").evaluateAll((items) => items.map((item) => item.getAttribute("href") ?? ""));
+    expect(links).toHaveLength(4);
+    for (const href of links) expect((await request.get(href)).status(), href).toBe(200);
   });
 });
 
