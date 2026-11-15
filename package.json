@@ -23,7 +23,8 @@
     "fixtures:e2e": "node scripts/record-e2e-fixtures.mjs",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -43,6 +44,7 @@
     "@types/node": "24.12.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "5.1.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.4.6",
     "jsdom": "31.0.1",

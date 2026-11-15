@@ -64,3 +64,6 @@ MASTER_PROMPT.md
 
 # Knowledge graph output (graphify)
 graphify-out/
+
+# Unit test coverage report (npm run test:coverage)
+/coverage

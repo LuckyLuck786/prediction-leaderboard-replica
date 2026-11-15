@@ -5,6 +5,7 @@ node_modules
 graphify-out
 playwright-report
 test-results
+coverage
 package-lock.json
 src/upstream/snapshot
 e2e/fixtures

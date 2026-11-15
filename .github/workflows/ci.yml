@@ -37,8 +37,9 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
-      - name: Unit and component tests
-        run: npm run test
+      # Fails when coverage falls under the thresholds in vitest.config.mts.
+      - name: Unit and component tests, with coverage
+        run: npm run test:coverage
 
       # Hard rules from CLAUDE.md: no source-site captures, no source name
       # outside the files allowed to carry it.
