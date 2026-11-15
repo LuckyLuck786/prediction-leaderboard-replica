@@ -16,6 +16,7 @@ const ROUTES = {
   "polymarket/page.tsx": () => import("./polymarket/page"),
   "kalshi/page.tsx": () => import("./kalshi/page"),
   "account/[id]/page.tsx": () => import("./account/[id]/page"),
+  "battle/page.tsx": () => import("./battle/page"),
   "api/boards/[period]/route.ts": () => import("./api/boards/[period]/route"),
   "api/kalshi/[period]/route.ts": () => import("./api/kalshi/[period]/route"),
 };

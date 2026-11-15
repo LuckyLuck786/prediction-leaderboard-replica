@@ -9,6 +9,7 @@ import { DATA_CREDIT, DISCLAIMER } from "./brand";
 export const FOOTER_LINKS: ReadonlyArray<{ label: string; href: string }> = [
   { label: "Polymarket board", href: "/polymarket" },
   { label: "Kalshi board", href: "/kalshi" },
+  { label: "Head to head", href: "/battle" },
   { label: "Get listed", href: "/submit" },
   { label: "API", href: "/api-docs" },
   { label: "Terms", href: "/terms" },

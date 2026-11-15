@@ -117,13 +117,15 @@ export function parseCategories(input: unknown): CategoryRow[] {
     .sort((a, b) => b.pnl - a.pnl);
 }
 
-async function kalshiHistory(username: string): Promise<SeriesPoint[]> {
+/** One Kalshi trader's cumulative P&L series. Throws on any failure. */
+export async function loadKalshiHistory(username: string): Promise<SeriesPoint[]> {
   return parseKalshiHistory(
     await fetchUpstreamJson(`/api/kalshi/${encodeURIComponent(username)}/history`),
   );
 }
 
-async function polymarketHistory(wallet: string): Promise<SeriesPoint[]> {
+/** One Polymarket wallet's cumulative P&L series. Throws on any failure. */
+export async function loadPolymarketHistory(wallet: string): Promise<SeriesPoint[]> {
   return parsePolymarketPnl(
     await fetchPolymarketJson(`/v2/user-pnl?user=${wallet}&interval=all&fidelity=1d`),
   );
@@ -137,10 +139,10 @@ async function polymarketHistory(wallet: string): Promise<SeriesPoint[]> {
 export async function getProfileHistory(profile: TraderProfile): Promise<HistoryResult> {
   const loads: Array<Promise<SeriesPoint[]>> = [];
   if (profile.platform === "kalshi" || profile.platform === "both") {
-    if (profile.kalshiUsername) loads.push(kalshiHistory(profile.kalshiUsername));
+    if (profile.kalshiUsername) loads.push(loadKalshiHistory(profile.kalshiUsername));
   }
   if (profile.platform === "polymarket" || profile.platform === "both") {
-    for (const wallet of profile.wallets) loads.push(polymarketHistory(wallet));
+    for (const wallet of profile.wallets) loads.push(loadPolymarketHistory(wallet));
   }
   if (loads.length === 0) return { kind: "unsupported" };
 
