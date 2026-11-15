@@ -1,10 +1,12 @@
-// Asset check: enforces the hard rules in CLAUDE.md that a reviewer cannot
-// see by looking at the site.
+// Asset check: the parts of CLAUDE.md's hard rules 3 to 5 a script can
+// check. Whether an image, icon, font or sentence came from the source is
+// decided by review, not here.
 //
 //   1. No tracked file lives in a folder reserved for raw captures of the
 //      source site.
-//   2. No tracked file refers to those folders.
-//   3. The source site's name appears only in the files allowed to name it.
+//   2. No tracked file refers to those folders, except the few that
+//      describe them.
+//   3. The source site's name appears only where rule 5 allows it.
 //
 // Run with: npm run check:assets. Exits 1 and lists every violation.
 
@@ -24,16 +26,21 @@ export const CAPTURE_DIRS = [
   "src/components/sites/",
 ];
 
-/** The only places allowed to name the source site or the capture folders. */
+/** Rule 5: the only places allowed to name the source site. */
 export const ALLOWED_TO_NAME_SOURCE = [
   "README.md",
   "CLAUDE.md",
-  "AGENTS.md",
-  ".gitignore",
   "docs/",
   "src/upstream/",
   "scripts/check-assets.mjs",
   "scripts/check-assets.test.mjs",
+];
+
+/** Files that describe the capture folders (ignore rules, the template's guide). */
+export const ALLOWED_TO_NAME_CAPTURE_DIRS = [
+  ...ALLOWED_TO_NAME_SOURCE,
+  "AGENTS.md",
+  ".gitignore",
   ".agents/skills/clone-website/",
 ];
 
@@ -64,6 +71,7 @@ export function findViolations(files, sourceName) {
       continue;
     }
     if (isUnder(path, ALLOWED_TO_NAME_SOURCE)) continue;
+    const mayNameCaptureDirs = isUnder(path, ALLOWED_TO_NAME_CAPTURE_DIRS);
     // A file can name the source in its path as well as in its content.
     if (path.toLowerCase().includes(needle)) {
       violations.push(`${path}: file path names the source site`);
@@ -76,6 +84,7 @@ export function findViolations(files, sourceName) {
       if (lower.includes(needle)) {
         violations.push(`${path}:${index + 1}: names the source site`);
       }
+      if (mayNameCaptureDirs) return;
       for (const dir of CAPTURE_DIRS) {
         if (lower.includes(dir)) {
           violations.push(`${path}:${index + 1}: refers to capture folder ${dir}`);
