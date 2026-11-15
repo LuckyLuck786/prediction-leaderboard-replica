@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   MISSING,
+  formatBattleMoney,
   formatChartDate,
   formatChartMoney,
   formatChartTick,
   formatCount,
+  formatDayTick,
   formatDaysSince,
   formatDrawdown,
   formatProfileMoney,
@@ -148,6 +150,25 @@ describe("calendar and chart formats (PROF-02 to PROF-04)", () => {
   it("formats chart dates in UTC as seen", () => {
     expect(formatChartTick(Date.UTC(2025, 8, 26, 23, 30))).toBe("Sep 25");
     expect(formatChartDate(Date.UTC(2026, 4, 21))).toBe("May 21, 2026");
+  });
+});
+
+describe("head-to-head chart formats (BATTLE-03)", () => {
+  it.each([
+    [-96_000, "$-96.0K"], // seen
+    [154_000, "+$154.0K"], // seen
+    [404_000, "+$404.0K"], // seen
+    [723_600, "+$723.6K"], // seen
+    [0, "+$0.0K"],
+    [-40, "+$0.0K"], // a loss that rounds to nothing is not "$-0.0K"
+    [999_960, "+$1.0M"], // never "+$1000.0K"
+  ])("%d -> %s", (value, expected) => {
+    expect(formatBattleMoney(value)).toBe(expected);
+  });
+
+  it("writes dates as month and day in UTC, as seen", () => {
+    expect(formatDayTick(Date.UTC(2025, 8, 27, 23, 30))).toBe("Sep 27");
+    expect(formatDayTick(Date.UTC(2026, 9, 28))).toBe("Oct 28");
   });
 });
 

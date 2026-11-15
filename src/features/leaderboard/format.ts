@@ -154,6 +154,30 @@ export function formatChartDate(t: number): string {
   return CHART_TOOLTIP_DATE.format(new Date(t));
 }
 
+/**
+ * Head-to-head chart labels, as seen: `+$154.0K`, `$-96.0K`, `+$723.6K`, the
+ * dollar sign before the minus as on the boards. Millions (`+$1.2M`) were not
+ * seen there; that unit is an assumption (docs/EVALS.md).
+ */
+export function formatBattleMoney(value: number): string {
+  const amount = Math.abs(value);
+  const kText = (amount / THOUSAND).toFixed(1);
+  const short = Number(kText) >= THOUSAND ? `${(amount / MILLION).toFixed(1)}M` : `${kText}K`;
+  const isLoss = value < 0 && Number(short.slice(0, -1)) !== 0;
+  return isLoss ? `$-${short}` : `+$${short}`;
+}
+
+const DAY_TICK_DATE = new Intl.DateTimeFormat("en-US", {
+  month: "short",
+  day: "numeric",
+  timeZone: "UTC",
+});
+
+/** Head-to-head chart dates, as seen: `Sep 27`, in UTC. */
+export function formatDayTick(t: number): string {
+  return DAY_TICK_DATE.format(new Date(t));
+}
+
 /** Whole number with thousands separators: `3,000`. */
 export function formatCount(value: number): string {
   return COUNT_FORMAT.format(value);
