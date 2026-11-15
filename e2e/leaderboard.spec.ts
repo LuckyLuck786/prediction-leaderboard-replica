@@ -95,3 +95,24 @@ test.describe("Kalshi board (spec 4.3)", () => {
     expect(await hasHorizontalScroll(page)).toBe(false);
   });
 });
+
+test.describe("no profile prefetching (D-048)", () => {
+  /** Long enough for a prefetch started by scrolling to be requested. */
+  const SETTLE_MS = 1500;
+
+  for (const path of ["/", "/kalshi"]) {
+    test(`${path} requests no profile page until one is opened`, async ({ page }) => {
+      const prefetched: string[] = [];
+      page.on("request", (request) => {
+        if (new URL(request.url()).pathname.startsWith("/account/")) prefetched.push(request.url());
+      });
+      await page.goto(path);
+      const rows = page.locator("tbody tr:not([aria-hidden])");
+      await expect(rows.first()).toBeVisible();
+      // Every row's links pass through the viewport.
+      await rows.last().scrollIntoViewIfNeeded();
+      await page.waitForTimeout(SETTLE_MS);
+      expect(prefetched).toEqual([]);
+    });
+  }
+});
