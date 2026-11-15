@@ -45,10 +45,9 @@ describe("asset check", () => {
     expect(findViolations(allowed, NAME)).toEqual([]);
   });
 
-  it("lets the template's guide describe capture folders, but not name the source", () => {
-    expect(findViolations([file("AGENTS.md", "public/sites/<site>/")], NAME)).toEqual([]);
+  it("refuses capture folders and the source's name in AGENTS.md, which holds only Next's note", () => {
+    expect(findViolations([file("AGENTS.md", "public/sites/<site>/")], NAME)).toHaveLength(1);
     expect(findViolations([file("AGENTS.md", NAME)], NAME)).toHaveLength(1);
-    expect(findViolations([file(".agents/skills/clone-website/SKILL.md", NAME)], NAME)).toHaveLength(1);
   });
 
   it("does not treat a similarly named file as allowed", () => {

@@ -515,7 +515,19 @@ it is ever abused, and the owner would set it in Vercel.
 came with the template and were used in phase 1 for observing the source.
 Their steps for copying the source's assets and text are overridden by
 CLAUDE.md, which says so at its top. They stay as the template shipped them,
-credited in THIRD_PARTY_NOTICES.md.
+credited in THIRD_PARTY_NOTICES.md. Superseded by D-059.
+
+## 2026-11-16
+
+### D-059 The template's clone-website skill and agent guide removed
+
+The owner's code review asked for them to go, and they no longer earned
+their place: the skill's instructions to copy the source's assets and text
+were overridden by CLAUDE.md, so they only confused a reader. Removed:
+`.agents/skills/clone-website/`, `.claude/commands/clone-website.md` and the
+template's guide in `AGENTS.md`, which now holds only the block `next dev`
+writes. The asset check no longer allows them to describe capture folders.
+Git history keeps them; THIRD_PARTY_NOTICES.md says they were removed.
 
 ## Open items
 

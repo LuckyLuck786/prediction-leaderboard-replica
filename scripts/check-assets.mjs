@@ -36,13 +36,8 @@ export const ALLOWED_TO_NAME_SOURCE = [
   "scripts/check-assets.test.mjs",
 ];
 
-/** Files that describe the capture folders (ignore rules, the template's guide). */
-export const ALLOWED_TO_NAME_CAPTURE_DIRS = [
-  ...ALLOWED_TO_NAME_SOURCE,
-  "AGENTS.md",
-  ".gitignore",
-  ".agents/skills/clone-website/",
-];
+/** Files that describe the capture folders: the rules files and the ignore rules. */
+export const ALLOWED_TO_NAME_CAPTURE_DIRS = [...ALLOWED_TO_NAME_SOURCE, ".gitignore"];
 
 const BINARY_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp4|webm|pdf)$/i;
 

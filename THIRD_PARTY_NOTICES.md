@@ -10,10 +10,10 @@ This project started as a copy of that template. The first commit in this
 repository's history contains the template files unchanged. The parts that
 still derive from it are the Next.js and Tailwind CSS scaffold
 (`package.json`, `tsconfig.json`, `eslint.config.mjs`, `postcss.config.mjs`,
-`next.config.ts`, `src/app/globals.css`, `src/lib/utils.ts`), the agent
-instructions in `AGENTS.md`, and the `clone-website` skill under
-`.agents/skills/` and `.claude/commands/`. The template's shadcn/ui
-component and configuration were removed (docs/DECISIONS.md, D-055).
+`next.config.ts`, `src/app/globals.css`, `src/lib/utils.ts`). The template's
+shadcn/ui component and configuration were removed (docs/DECISIONS.md,
+D-055), and so were its agent instructions in `AGENTS.md` and its
+`clone-website` skill (D-059).
 
 Those portions remain under the MIT License, reproduced below.
 
