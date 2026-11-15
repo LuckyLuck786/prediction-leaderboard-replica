@@ -9,7 +9,8 @@ export const revalidate = 300;
 export const dynamic = "force-static";
 
 // The four periods are built ahead of time. Any other path reaches GET, which
-// answers with a JSON 404 (BUG-085).
+// answers with a JSON 404 (BUG-085),
+// which Next.js caches like any other path (accepted, D-064).
 
 export function generateStaticParams() {
   return KALSHI_PERIODS.map((period) => ({ period }));

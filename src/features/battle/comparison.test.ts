@@ -62,6 +62,13 @@ describe("changeSince", () => {
 });
 
 describe("comparisonAxis (BATTLE-03)", () => {
+  it("handles a long history, which spreading into Math.min would refuse (BUG-084)", () => {
+    const long = Array.from({ length: 300_000 }, (_, index) => ({ t: index, v: index % 1_000 }));
+    const axis = comparisonAxis({ start: 0, end: 299_999, polymarket: long, kalshi: [{ t: 0, v: -500 }] });
+    expect(axis.min).toBeLessThan(-500);
+    expect(axis.max).toBeGreaterThan(999);
+  });
+
   // The pair's real histories, recorded for the end-to-end tests, cut at the
   // moment the source's battle page was captured (2026-11-13 19:58:40 UTC).
   const CAPTURED_AT = 1_794_542_320_000;

@@ -275,7 +275,7 @@ export function LeaderboardTable({
             <tr
               key={trader.id}
               onClick={profileId ? () => router.push(profilePath(profileId)) : undefined}
-              className={cn("border-b border-border hover:bg-accent/50", profileId && "cursor-pointer")}
+              className={cn("border-b border-border", profileId && "cursor-pointer hover:bg-accent/50")}
             >
               <td className="p-1 text-sm sm:p-3 sm:text-lg">{index + 1}</td>
               <td className="p-0.5 sm:p-2">

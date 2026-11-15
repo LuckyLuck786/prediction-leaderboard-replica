@@ -1,5 +1,6 @@
-# Weekly update pull requests: npm packages (minor and patch grouped, so one
-# pull request a week at most) and the CI actions, which are pinned by SHA.
+# Weekly update pull requests: npm packages (minor and patch updates grouped
+# into one pull request; each major update gets its own) and the CI actions,
+# which are pinned by SHA.
 version: 2
 updates:
   - package-ecosystem: npm

@@ -282,6 +282,8 @@ describe("LeaderboardView", () => {
     expect(within(row).getByText("has space")).toBeTruthy();
     fireEvent.click(row);
     expect(push).not.toHaveBeenCalled();
+    // Nothing on the row suggests it can be clicked.
+    expect(row.className).not.toMatch(/cursor-pointer|hover:/);
   });
 
   it("shows the day's biggest mover in 1D only (HOME-17)", async () => {

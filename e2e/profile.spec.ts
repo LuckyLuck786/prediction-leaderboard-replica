@@ -97,7 +97,9 @@ test.describe("profile errors", () => {
 });
 
 test.describe("trader on both platforms", () => {
-  test("the calendar steps back to the month the chart starts in (BUG-082)", async ({ page }) => {
+  test("the calendar steps back to the first month the chart has a result for (BUG-082)", async ({
+    page,
+  }) => {
     await page.goto(BOTH_PLATFORMS_TRADER);
     const chart = page.getByRole("img", { name: /^Cumulative profit and loss from/ });
     const from = /from (\w{3} \d{1,2}, \d{4}) to/.exec((await chart.getAttribute("aria-label")) ?? "")?.[1];
