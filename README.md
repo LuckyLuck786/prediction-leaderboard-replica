@@ -23,6 +23,26 @@ automated accessibility checks (WCAG 2.2 AA), keyboard checks and the
 measured layout comparison with the source. The build is finished and
 reviewed; what remains is the submission itself.
 
+## Highlights
+
+- **Live data, fetched only by the server.** Every upstream answer is checked
+  with a Zod schema before use; a failed check falls back to a saved snapshot
+  that the page labels as such. A production build passes even while the
+  upstream API is down (`npm run check:outage`).
+- **Measured, not eyeballed.** Layout numbers recorded on the source (column
+  widths, row heights, chart sizes) are asserted in `e2e/parity.spec.ts` at
+  phone, tablet and desktop size.
+- **Tested.** Unit and component tests with coverage thresholds in CI, and
+  end-to-end tests that run offline against recorded API answers, with axe
+  accessibility checks in both themes and keyboard checks.
+- **87 real bugs logged** in [docs/BUGLOG.md](docs/BUGLOG.md), each with how
+  it was caught and the commit that fixed it.
+- **Guarded by tools.** Strict TypeScript (with checked index access),
+  type-aware lint rules, feature boundaries enforced by ESLint, `server-only`
+  on every server module, a partial content security policy, and an asset
+  check that fails CI if source-site files or the source's name appear where
+  they should not.
+
 ## What is deliberately different
 
 The layout, routes, components, spacing, responsive behavior and interactions
@@ -52,10 +72,19 @@ Then open http://localhost:3000.
 ## Check it
 
 ```bash
-npm run check          # lint, typecheck, tests, asset check, production build
+npm run check          # format, lint, typecheck, tests, asset check, production build
 npm run test           # unit and component tests only
+npm run test:coverage  # the same, with coverage; fails under the thresholds
+npm run format         # rewrite files in the Prettier style
 npm run check:assets   # no source-site files or names where they do not belong
 npm audit --omit=dev   # must report 0 vulnerabilities
+```
+
+To run `npm run check` before every push, turn on the repository's hook once
+per clone:
+
+```bash
+git config core.hooksPath .githooks
 ```
 
 End-to-end tests build the app and run it against a local fixture server
@@ -67,7 +96,7 @@ npm run test:e2e                  # phone, tablet and desktop sizes
 ```
 
 `npm run fixtures:e2e` records any of those API answers that are missing
-(`-- --force` records all again, nine spaced requests).
+(`-- --force` records all again, thirteen spaced requests).
 `npm run check:outage` checks that a production build still passes while the
 upstream API is down.
 `npm run lighthouse` measures the deployed site (three runs per page, phone

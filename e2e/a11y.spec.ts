@@ -45,7 +45,10 @@ const ROUTES: ReadonlyArray<{ name?: string; path: string; ready?: (page: Page) 
     path: "/account/0xec981ed70ae69c5cbcac08c1ba063e734f6bafcd",
     ready: (page) => expect(page.getByRole("img", { name: PROFILE_CHART })).toBeVisible(),
   },
-  { path: "/battle", ready: (page) => expect(page.getByRole("img", { name: /^P&L change from/ })).toBeVisible() },
+  {
+    path: "/battle",
+    ready: (page) => expect(page.getByRole("img", { name: /^P&L change from/ })).toBeVisible(),
+  },
   { path: "/api-docs" },
   { path: "/submit" },
   { path: "/terms" },

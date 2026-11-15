@@ -17,9 +17,7 @@ const MS_PER_DAY = 86_400_000;
 /** A trader id the server always answers 429 for, to exercise error states. */
 export const RATE_LIMITED_TRADER = "e2e-rate-limited";
 
-const snapshot = JSON.parse(
-  await readFile(new URL("src/upstream/snapshot/leaderboard.json", ROOT), "utf8"),
-);
+const snapshot = JSON.parse(await readFile(new URL("src/upstream/snapshot/leaderboard.json", ROOT), "utf8"));
 /** A fixture file name: one plain name, no folders, no "..". */
 const FIXTURE_NAME = /^[A-Za-z0-9._-]+\.json$/;
 /** Thrown for a request that cannot name a fixture; answered as 404. */

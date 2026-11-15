@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { PAGE_SIZE } from "./model";
-import { scoreBandClass } from "./score-band";
+import { scoreBandClass } from "@/features/trader/score-band";
 import { createInitialState, reduceLeaderboard } from "./state";
 
 describe("leaderboard state", () => {

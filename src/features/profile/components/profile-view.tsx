@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { TraderAvatar } from "@/features/leaderboard/components/trader-avatar";
-import { PlatformBadge, XBadge } from "@/features/leaderboard/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
+import { PlatformBadge, XBadge } from "@/features/trader/components/platform-badge";
 import {
   MISSING,
   formatCount,
@@ -9,14 +9,14 @@ import {
   formatScore,
   formatSharpe,
   formatTraderName,
-  formatWinRate,
-} from "@/features/leaderboard/format";
-import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/leaderboard/model";
-import { scoreBandClass } from "@/features/leaderboard/score-band";
+  formatWholePercent,
+} from "@/lib/format";
+import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/trader/platforms";
+import { scoreBandClass } from "@/features/trader/score-band";
 import { cn } from "@/lib/utils";
 
 import type { CategoriesResult, HistoryResult } from "../history-data";
-import type { TraderProfile } from "../model";
+import { MAX_WALLETS, type TraderProfile } from "../model";
 import { CategoryCard } from "./category-card";
 import { HistoryHeading } from "./history-heading";
 import { MonthStrip } from "./month-strip";
@@ -138,6 +138,12 @@ export function ProfileView({
 
       <section aria-labelledby="history-heading" className="mb-6 rounded-lg border border-border bg-card p-4">
         <HistoryHeading note={profile.platform === "kalshi" ? KALSHI_HISTORY_NOTE : null} />
+        {history.kind === "ready" && history.walletsLeftOut > 0 ? (
+          <p className="mb-2 text-xs text-muted-foreground">
+            Adds up the first {MAX_WALLETS} of this trader&apos;s {MAX_WALLETS + history.walletsLeftOut}{" "}
+            wallets.
+          </p>
+        ) : null}
         {history.kind === "ready" && history.series.length > 1 ? (
           <PnlChart series={history.series} />
         ) : (
@@ -172,14 +178,14 @@ export function ProfileView({
               ) : null}
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-5">
-              <Stat label="Win rate" value={formatWinRate(profile.score.winRate)} />
+              <Stat label="Win rate" value={formatWholePercent(profile.score.winRate)} />
               <Stat label="Sharpe" value={formatSharpe(profile.score.sharpe)} />
               <Stat label="Max drawdown" value={formatDrawdown(profile.score.maxDrawdown)} />
               <Stat
                 label="Profit factor"
                 value={profile.score.profitFactor === null ? MISSING : profile.score.profitFactor.toFixed(2)}
               />
-              <Stat label="R²" value={formatWinRate(profile.score.rSquared)} />
+              <Stat label="R²" value={formatWholePercent(profile.score.rSquared)} />
             </div>
           </>
         ) : (

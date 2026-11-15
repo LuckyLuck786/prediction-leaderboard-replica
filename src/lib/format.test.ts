@@ -23,7 +23,7 @@ import {
   formatSharpe,
   formatStamp,
   formatTraderName,
-  formatWinRate,
+  formatWholePercent,
   initialsOf,
 } from "./format";
 
@@ -235,8 +235,8 @@ describe("score, win rate, Sharpe and ROI (FMT-09)", () => {
   });
 
   it("formats win rate as a whole percent", () => {
-    expect(formatWinRate(0.471)).toBe("47%"); // seen
-    expect(formatWinRate(null)).toBe(MISSING);
+    expect(formatWholePercent(0.471)).toBe("47%"); // seen
+    expect(formatWholePercent(null)).toBe(MISSING);
   });
 
   it("formats Sharpe with two decimals", () => {

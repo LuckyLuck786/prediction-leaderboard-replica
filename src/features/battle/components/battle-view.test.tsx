@@ -88,7 +88,10 @@ describe("BattleView (spec 4.5)", () => {
     expect(traders.getByRole("link", { name: "25usdc on X" })).toBeTruthy();
     expect(traders.queryByRole("link", { name: "PredMTrader on X" })).toBeNull();
     const legend = within(screen.getByRole("list", { name: "Legend" }));
-    expect(legend.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["@25usdc", "@PredMTrader"]);
+    expect(legend.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "@25usdc",
+      "@PredMTrader",
+    ]);
     expect(screen.getByText(/since Sep 27, 2025, the first day both traders were tracked/)).toBeTruthy();
     expect(screen.getByText(DISCLAIMER)).toBeTruthy();
   });
@@ -109,7 +112,9 @@ describe("BattleView (spec 4.5)", () => {
     const wallet = traders.getByRole("link", { name: "@0x75e7…9080" });
     expect(wallet.getAttribute("href")).toBe(`/account/${BATTLE_PAIR.polymarket}`);
     expect(wallet.getAttribute("target")).toBeNull();
-    expect(traders.getByRole("link", { name: "@PredMTrader" }).getAttribute("href")).toBe("/account/PredMTrader");
+    expect(traders.getByRole("link", { name: "@PredMTrader" }).getAttribute("href")).toBe(
+      "/account/PredMTrader",
+    );
   });
 
   it("says so when the comparison is unavailable", () => {

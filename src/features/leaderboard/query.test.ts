@@ -90,24 +90,12 @@ describe("sorting (HOME-18)", () => {
   });
 
   it("sorts ascending and descending on request", () => {
-    expect(ids(sortTraders(traders, { key: "pnl", direction: "asc" }))).toEqual([
-      "low",
-      "mid",
-      "top",
-    ]);
+    expect(ids(sortTraders(traders, { key: "pnl", direction: "asc" }))).toEqual(["low", "mid", "top"]);
   });
 
   it("treats a missing value as the lowest", () => {
-    expect(ids(sortTraders(traders, { key: "score", direction: "asc" }))).toEqual([
-      "top",
-      "mid",
-      "low",
-    ]);
-    expect(ids(sortTraders(traders, { key: "score", direction: "desc" }))).toEqual([
-      "low",
-      "mid",
-      "top",
-    ]);
+    expect(ids(sortTraders(traders, { key: "score", direction: "asc" }))).toEqual(["top", "mid", "low"]);
+    expect(ids(sortTraders(traders, { key: "score", direction: "desc" }))).toEqual(["low", "mid", "top"]);
   });
 
   it("puts the earliest join date first when ascending", () => {

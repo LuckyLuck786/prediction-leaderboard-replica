@@ -38,10 +38,7 @@ export function createInitialState(platform: PlatformFilter): LeaderboardState {
 }
 
 /** Every change to the board's state, as a pure reducer. */
-export function reduceLeaderboard(
-  state: LeaderboardState,
-  action: LeaderboardAction,
-): LeaderboardState {
+export function reduceLeaderboard(state: LeaderboardState, action: LeaderboardAction): LeaderboardState {
   switch (action.type) {
     // Anything that changes which rows match starts again from the first page.
     case "setPeriod":

@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { nth } from "@/lib/test-utils";
 import { UpstreamError, fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";
 
 import {
@@ -9,7 +10,8 @@ import {
   parseKalshiHistory,
   parsePolymarketPnl,
 } from "./history-data";
-import type { TraderProfile } from "./model";
+import { MAX_WALLETS } from "./model";
+import { makeProfile } from "./test-helpers";
 
 vi.mock("@/upstream/client", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/upstream/client")>();
@@ -35,27 +37,6 @@ const DAY_MS = 86_400_000;
 const NOV_1 = Date.UTC(2026, 10, 1);
 /** Midday, so the midnight rule for Polymarket points does not apply. */
 const NOV_1_NOON = NOV_1 + DAY_MS / 2;
-
-function profile(overrides: Partial<TraderProfile>): TraderProfile {
-  return {
-    id: "someone",
-    name: "someone",
-    platform: "kalshi",
-    wallet: null,
-    wallets: [],
-    kalshiUsername: null,
-    avatarUrl: null,
-    xUrl: null,
-    joined: null,
-    views: null,
-    pnl: { "1d": null, "7d": null, "30d": null, all: null },
-    score: null,
-    polymarketUrl: null,
-    kalshiUrl: null,
-    hyperliquidUrl: null,
-    ...overrides,
-  };
-}
 
 describe("parseKalshiHistory (DATA-05)", () => {
   it("keeps time and value, sorted by time", () => {
@@ -120,7 +101,7 @@ describe("parsePolymarketPnl (D-035)", () => {
     ]);
     // The last day's change is the move since midnight: close to the trader
     // record's 1-day P&L (+$13,142), not +$2,987.
-    expect(series[2].v - series[1].v).toBeCloseTo(13_492.65, 2);
+    expect(nth(series, 2).v - nth(series, 1).v).toBeCloseTo(13_492.65, 2);
   });
 
   it("refuses a timestamp sent in milliseconds instead of seconds", () => {
@@ -142,11 +123,7 @@ describe("parseCategories (DATA-06)", () => {
         { category: "Elections", pnl: 271000, markets: 114 },
       ],
     };
-    expect(parseCategories(body).map((row) => row.category)).toEqual([
-      "Mentions",
-      "Elections",
-      "Sports",
-    ]);
+    expect(parseCategories(body).map((row) => row.category)).toEqual(["Mentions", "Elections", "Sports"]);
   });
 
   it.each([
@@ -161,8 +138,13 @@ describe("parseCategories (DATA-06)", () => {
 describe("getProfileHistory", () => {
   it("reads Kalshi history for a Kalshi trader", async () => {
     upstream.mockResolvedValueOnce({ history: [{ timestamp: NOV_1, pnl: 7 }] });
-    const result = await getProfileHistory(profile({ kalshiUsername: "Some User" }));
-    expect(result).toEqual({ kind: "ready", series: [{ t: NOV_1, v: 7 }], changes: new Map() });
+    const result = await getProfileHistory(makeProfile({ kalshiUsername: "Some User" }));
+    expect(result).toEqual({
+      kind: "ready",
+      series: [{ t: NOV_1, v: 7 }],
+      changes: new Map(),
+      walletsLeftOut: 0,
+    });
     expect(upstream).toHaveBeenCalledWith("/api/kalshi/Some%20User/history");
     expect(polymarket).not.toHaveBeenCalled();
   });
@@ -181,7 +163,7 @@ describe("getProfileHistory", () => {
       })
       .mockResolvedValueOnce({ data: { points: [{ timestamp: seconds + day, trade_pnl: -40 }] } });
     const result = await getProfileHistory(
-      profile({ platform: "polymarket", wallet: WALLET_A, wallets: [WALLET_A, WALLET_B] }),
+      makeProfile({ platform: "polymarket", wallet: WALLET_A, wallets: [WALLET_A, WALLET_B] }),
     );
     expect(result).toEqual({
       kind: "ready",
@@ -191,15 +173,26 @@ describe("getProfileHistory", () => {
       ],
       // The second wallet starts on 2 Nov: its starting total is not a gain.
       changes: new Map([["2026-11-02", 30]]),
+      walletsLeftOut: 0,
     });
-    expect(polymarket).toHaveBeenCalledWith(
-      `/v2/user-pnl?user=${WALLET_A}&interval=all&fidelity=1d`,
-    );
+    expect(polymarket).toHaveBeenCalledWith(`/v2/user-pnl?user=${WALLET_A}&interval=all&fidelity=1d`);
     expect(polymarket).toHaveBeenCalledTimes(2);
   });
 
+  it("asks about at most MAX_WALLETS wallets and counts the rest (D-058)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    polymarket.mockResolvedValue({ data: { points: [{ timestamp: NOV_1_NOON / 1000, trade_pnl: 1 }] } });
+    const wallets = Array.from(
+      { length: MAX_WALLETS + 2 },
+      (_, index) => `0x${String(index).padStart(40, "0")}`,
+    );
+    const result = await getProfileHistory(makeProfile({ platform: "polymarket", wallets }));
+    expect(polymarket).toHaveBeenCalledTimes(MAX_WALLETS);
+    expect(result).toMatchObject({ kind: "ready", series: [{ v: MAX_WALLETS }], walletsLeftOut: 2 });
+  });
+
   it("says unsupported when there is no documented history (DEV-22)", async () => {
-    const result = await getProfileHistory(profile({ platform: "hyperliquid" }));
+    const result = await getProfileHistory(makeProfile({ platform: "hyperliquid" }));
     expect(result).toEqual({ kind: "unsupported" });
     expect(upstream).not.toHaveBeenCalled();
     expect(polymarket).not.toHaveBeenCalled();
@@ -207,28 +200,28 @@ describe("getProfileHistory", () => {
 
   it("degrades to unavailable, and logs, when a load fails", async () => {
     upstream.mockRejectedValueOnce(new UpstreamError("rate limited", 429));
-    const result = await getProfileHistory(profile({ kalshiUsername: "someone" }));
+    const result = await getProfileHistory(makeProfile({ kalshiUsername: "someone" }));
     expect(result).toEqual({ kind: "unavailable" });
     expect(console.error).toHaveBeenCalled();
   });
 
   it("degrades to unavailable when the body does not parse", async () => {
     upstream.mockResolvedValueOnce({ unexpected: true });
-    const result = await getProfileHistory(profile({ kalshiUsername: "someone" }));
+    const result = await getProfileHistory(makeProfile({ kalshiUsername: "someone" }));
     expect(result).toEqual({ kind: "unavailable" });
   });
 });
 
 describe("getCategories (PROF-05)", () => {
   it("is not requested for a Polymarket trader", async () => {
-    const result = await getCategories(profile({ platform: "polymarket", wallets: [WALLET_A] }));
+    const result = await getCategories(makeProfile({ platform: "polymarket", wallets: [WALLET_A] }));
     expect(result).toEqual({ kind: "none" });
     expect(upstream).not.toHaveBeenCalled();
   });
 
   it("reads the rows for a Kalshi trader", async () => {
     upstream.mockResolvedValueOnce({ categories: [{ category: "Mentions", pnl: 5, markets: 2 }] });
-    const result = await getCategories(profile({ kalshiUsername: "someone" }));
+    const result = await getCategories(makeProfile({ kalshiUsername: "someone" }));
     expect(result).toEqual({
       kind: "ready",
       rows: [{ category: "Mentions", pnl: 5, markets: 2 }],
@@ -237,7 +230,7 @@ describe("getCategories (PROF-05)", () => {
 
   it("degrades to unavailable when upstream fails", async () => {
     upstream.mockRejectedValueOnce(new UpstreamError("timed out", null));
-    const result = await getCategories(profile({ kalshiUsername: "someone" }));
+    const result = await getCategories(makeProfile({ kalshiUsername: "someone" }));
     expect(result).toEqual({ kind: "unavailable" });
   });
 });

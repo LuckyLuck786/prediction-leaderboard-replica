@@ -2,9 +2,8 @@
 
 # Project rules: prediction leaderboard replica
 
-These rules are specific to this repository. Where they conflict with the
-template instructions imported above (for example "use actual text and assets
-from the target site" or "pixel-perfect emulation"), these rules win.
+These rules are specific to this repository. `AGENTS.md`, imported above,
+holds only Next.js's own note for coding agents.
 
 ## What this is
 
@@ -26,9 +25,8 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
    icons, SVGs, font files, videos or text from the source site. Use Lucide
    icons and openly licensed fonts loaded through `next/font`.
 4. **Raw captures stay local.** `docs/research/`, `docs/design-references/`
-   and `public/sites/` are gitignored and never pushed. Do not create
-   `src/components/sites/`; the skill suggests it for extracted SVGs, which
-   rule 3 forbids.
+   and `public/sites/` are gitignored and never pushed. There is no
+   `src/components/sites/`: extracted SVGs are forbidden by rule 3.
 5. **The source site's name appears only in** `README.md`, `CLAUDE.md`,
    `docs/`, `src/upstream/` (the API origin and the saved snapshot) and the
    asset check itself. Application code reads the name from
@@ -131,7 +129,11 @@ output is the working site plus `docs/EVALS.md`, `docs/BUGLOG.md` and
 
 - Structure follows the domain: feature code lives together in
   `src/features/<feature>/` (components, data access, schemas, tests).
-  Shared helpers live in `src/lib/`.
+  Shared helpers live in `src/lib/`. What every trader list shows (avatar,
+  platform badges, platform names, the profile id rule, score colours) lives
+  in `src/features/trader/`. A feature does not import another feature; the
+  ESLint rule `import/no-restricted-paths` in `eslint.config.mjs` holds the
+  boundaries and names the two exceptions.
 - One source of truth per fact. Formatters, constants and schemas are defined
   once and imported.
 - No magic numbers or strings. Name them.

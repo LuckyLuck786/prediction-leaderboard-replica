@@ -1,6 +1,8 @@
 // Leaderboard domain model: the shapes and constants the rest of the feature
 // builds on. Upstream objects are converted to `Trader` in `schema.ts`.
 
+import type { FilterablePlatform, Platform } from "@/features/trader/platforms";
+
 export const LEADERBOARD_PERIODS = ["1d", "30d", "ytd", "all"] as const;
 export type LeaderboardPeriod = (typeof LEADERBOARD_PERIODS)[number];
 
@@ -18,21 +20,8 @@ export const PERIOD_BUTTONS: ReadonlyArray<{
   { period: "1d", label: "1D" },
 ];
 
-/** Platforms a trader can be listed under, as upstream names them. */
-export const PLATFORMS = ["polymarket", "kalshi", "both", "hyperliquid"] as const;
-export type Platform = (typeof PLATFORMS)[number];
-
-/** Platforms a visitor can filter by. A `both` trader matches two of them. */
-export const FILTERABLE_PLATFORMS = ["polymarket", "kalshi", "hyperliquid"] as const;
-export type FilterablePlatform = (typeof FILTERABLE_PLATFORMS)[number];
+/** What the platform filter can be set to. */
 export type PlatformFilter = FilterablePlatform | "all";
-
-/** Display names of the platforms. */
-export const PLATFORM_NAMES: Record<FilterablePlatform, string> = {
-  polymarket: "Polymarket",
-  kalshi: "Kalshi",
-  hyperliquid: "Hyperliquid",
-};
 
 export interface DayMover {
   label: string;
@@ -41,8 +30,13 @@ export interface DayMover {
 }
 
 export interface Trader {
-  /** Profile route segment: the wallet when there is one, else the Kalshi username. */
+  /** Unique key: the wallet when there is one, else the Kalshi username. */
   id: string;
+  /**
+   * The id as a profile route segment, or null when our routes would refuse it
+   * (BUG-083): such a row stays on the board but links nowhere.
+   */
+  profileId: string | null;
   name: string;
   platform: Platform;
   wallet: string | null;

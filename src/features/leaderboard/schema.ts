@@ -3,16 +3,11 @@
 
 import { z } from "zod";
 
-import { isProfileId } from "@/features/profile/model";
+import { PLATFORMS } from "@/features/trader/platforms";
+import { isProfileId } from "@/features/trader/profile-id";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
-import {
-  PLATFORMS,
-  type DayMover,
-  type Leaderboard,
-  type LeaderboardPeriod,
-  type Trader,
-} from "./model";
+import { type DayMover, type Leaderboard, type LeaderboardPeriod, type Trader } from "./model";
 
 const optionalNumber = z.number().nullish();
 const optionalString = z.string().nullish();
@@ -38,9 +33,7 @@ const rawTraderSchema = z.object({
   roi: optionalNumber,
   sports_share: optionalNumber,
   esports_share: optionalNumber,
-  day_mover: z
-    .object({ label: z.string(), change: z.number(), icon: optionalString })
-    .nullish(),
+  day_mover: z.object({ label: z.string(), change: z.number(), icon: optionalString }).nullish(),
   polymarket_profile: optionalString,
   hyperliquid_profile: optionalString,
 });
@@ -84,20 +77,21 @@ function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
   const kalshiUsername = rawUsername && isProfileId(rawUsername) ? rawUsername : null;
   const id = wallet ?? rawUsername;
   if (!id) return null;
+  const profileId = isProfileId(id) ? id : null;
 
   const joinDate = presentOrNull(raw.join_date);
   const score = raw.smart_score ?? null;
 
   return {
     id,
+    profileId,
     name: raw.name,
     platform: raw.platform,
     wallet,
     kalshiUsername,
     avatarUrl: safeHttpsUrl(raw.pfp),
     xUrl: cleanLinkUrl(raw.twitter),
-    joinedAt:
-      joinDate && isDateString(joinDate) ? new Date(joinDate).toISOString() : null,
+    joinedAt: joinDate && isDateString(joinDate) ? new Date(joinDate).toISOString() : null,
     pnl: raw.stats.pnl,
     score: score?.score ?? null,
     winRate: score?.winRate ?? null,
@@ -111,9 +105,7 @@ function toTrader(raw: RawTrader, period: LeaderboardPeriod): Trader | null {
   };
 }
 
-export type ParseResult =
-  | { ok: true; leaderboard: Leaderboard }
-  | { ok: false; error: string };
+export type ParseResult = { ok: true; leaderboard: Leaderboard } | { ok: false; error: string };
 
 /**
  * Validates one upstream leaderboard response.
@@ -122,10 +114,7 @@ export type ParseResult =
  * dropped and counted, so one odd entry cannot blank the page. A response in
  * which no trader survives is an error.
  */
-export function parseLeaderboard(
-  input: unknown,
-  period: LeaderboardPeriod,
-): ParseResult {
+export function parseLeaderboard(input: unknown, period: LeaderboardPeriod): ParseResult {
   const envelope = envelopeSchema.safeParse(input);
   if (!envelope.success) {
     return { ok: false, error: z.prettifyError(envelope.error) };

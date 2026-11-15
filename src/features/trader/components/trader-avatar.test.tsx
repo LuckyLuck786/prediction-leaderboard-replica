@@ -15,9 +15,7 @@ describe("TraderAvatar (D-013)", () => {
   });
 
   it("loads the picture lazily and sends no referrer", () => {
-    const { container } = render(
-      <TraderAvatar name="Kenobi" url="https://example.com/kenobi.png" />,
-    );
+    const { container } = render(<TraderAvatar name="Kenobi" url="https://example.com/kenobi.png" />);
     const image = container.querySelector("img");
     expect(image?.getAttribute("src")).toBe("https://example.com/kenobi.png");
     expect(image?.getAttribute("loading")).toBe("lazy");
@@ -26,9 +24,7 @@ describe("TraderAvatar (D-013)", () => {
   });
 
   it("falls back to initials when the picture fails to load", () => {
-    const { container } = render(
-      <TraderAvatar name="Kenobi" url="https://example.com/broken.png" />,
-    );
+    const { container } = render(<TraderAvatar name="Kenobi" url="https://example.com/broken.png" />);
     const image = container.querySelector("img");
     if (!image) throw new Error("expected an image before the failure");
     fireEvent.error(image);

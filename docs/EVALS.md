@@ -244,20 +244,22 @@ further runs on the final build showed 0, and its cause was not found.
 
 | Check | Command | Last result |
 |---|---|---|
-| Everything below except the audit and end-to-end, in order | `npm run check` | pass, 2026-11-15 |
-| Lint | `npm run lint` | pass, 2026-11-15 |
-| Type check | `npm run typecheck` | pass, 2026-11-15 |
-| Unit and component tests | `npm run test` | 434 of 434 pass, 2026-11-15 |
-| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 211 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-15 |
+| Format, lint, types, unit tests, asset check and build, in order | `npm run check` | pass, 2026-11-16 |
+| Format | `npm run format:check` | pass, 2026-11-16 |
+| Lint, with type-aware rules and feature boundaries | `npm run lint` | pass, 2026-11-16 |
+| Type check, with checked index access | `npm run typecheck` | pass, 2026-11-16 |
+| Unit and component tests | `npm run test` | 481 of 481 pass in 37 files, 2026-11-16 |
+| Coverage, with thresholds (CI runs this) | `npm run test:coverage` | 90.6% statements, 89.1% branches, 83.4% functions, 91.3% lines, 2026-11-16 |
+| End-to-end, desktop 1440, tablet 768 and phone 390 | `npm run test:e2e` | 217 pass, 23 skipped by design (hover-only checks on the phone, checks that set their own size), 2026-11-16 |
 | Colour contrast of every token and calendar shade | part of `npm run test` (`src/app/contrast.test.ts`) | 34 of 34 pass, 2026-11-15 |
 | Accessibility (axe), keyboard and measured parity | part of `npm run test:e2e` | see the end-to-end row |
 | Lighthouse, deployed site | `npm run lighthouse` | performance 99 to 100, accessibility 100 on every page, 2026-11-15 |
-| Build during an upstream outage, stale cache | `npm run check:outage` | pass in 20 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-15 |
-| Asset check | `npm run check:assets` | pass, 163 files, 2026-11-15 |
+| Build during an upstream outage, stale cache | `npm run check:outage` | pass in 22 s (failed, exit 1 after 185 s, before BUG-050 and BUG-054), 2026-11-16 |
+| Asset check | `npm run check:assets` | pass, 186 files, 2026-11-16 |
 | CI on GitHub | push to `main` | pass, both jobs (quality, end-to-end at three sizes with axe, keyboard and parity), 2026-11-15, code audit merge |
 | Live data comparison | see note 3 above | 584 of 584 equal, 2026-11-14 |
-| Production build | `npm run build` | pass, 2026-11-15 |
-| Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-15 |
+| Production build | `npm run build` | pass, 2026-11-16 |
+| Production dependency audit | `npm audit --omit=dev` | 0 vulnerabilities, 2026-11-16 |
 
 Two checks were also run by hand to make sure the suite can fail:
 
@@ -265,6 +267,22 @@ Two checks were also run by hand to make sure the suite can fail:
   `npm run check:assets` exited 1 and named the file and line. Removed again.
 - **Mutations.** Making the first sort click descending failed 6 tests; letting
   a click on a trader's name also trigger the row failed 1. Both were reverted.
+
+The owner's code review pass (2026-11-16) added checks, each shown to fail
+on the defect it is for before it was trusted:
+
+- **Content security policy.** With `connect-src 'none'`, the new test that
+  visits every page reported the home board's period fetches. Restored.
+- **Coverage thresholds.** A 95% statement threshold made the run exit 1.
+- **Feature boundaries.** A probe file in `src/lib` importing a feature, and
+  one feature importing another, each failed lint. Removed.
+- **server-only.** Importing the board's data module into the board view
+  (browser code) made `next build` fail. Reverted.
+- **Bug fixes BUG-082 to BUG-086, the wallet cap and the snapshot cache.**
+  Each new test failed on the old code, then passed.
+- **One money formatter.** Before the old code was deleted, all ten money
+  formats gave the same text for 2,231 values, from 0.001 to 999,999,999
+  either side of zero, including every rounding boundary.
 
 The layout numbers above come from a probe run in the browser console at the
 stated viewport. Since phase 6 the same numbers are asserted by
@@ -284,8 +302,10 @@ unit tests and 48 end-to-end tests pass, and the Polymarket profile's last
 day reads +$13,493 against the trader record's 1-day P&L of +$13,142.
 
 **End-to-end suite** (`e2e/`): boards, filters, search, paging, profiles of
-both platforms with calendar, chart and categories, the head-to-head page,
-the 404 and error pages, the disabled form, the saved theme, the API routes,
-the security headers, no profile prefetching, axe, keyboard and measured
-parity, at phone, tablet and desktop size. It runs offline: every request to
+both platforms with calendar, chart and categories, a trader on both
+platforms whose calendar must reach the chart's first month, the head-to-head
+page, the 404 and error pages, the disabled form, the saved theme, the API
+routes, the security headers and content security policy, no profile
+prefetching, axe, keyboard and measured parity, at phone, tablet and desktop
+size. It runs offline: every request to
 another host is aborted.

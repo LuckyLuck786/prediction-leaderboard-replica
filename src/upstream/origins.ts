@@ -4,10 +4,10 @@
 // end-to-end tests use to point the app at a local fixture server. Nothing
 // sets them in production, where the defaults below apply.
 
-import source from "./source.json";
+import "server-only";
 
-/** Polymarket's documented Data API (docs.polymarket.com, "Data API v2"). */
-export const POLYMARKET_DATA_DEFAULT_ORIGIN = "https://data-api.polymarket.com";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./settings";
+import source from "./source.json";
 
 /** Plain http is accepted only for a server on this machine, such as the test fixtures. */
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
@@ -33,7 +33,4 @@ export function originFromEnv(
 /** Where the server reads the boards and trader records; a test can point it elsewhere. */
 export const UPSTREAM_ORIGIN = originFromEnv("UPSTREAM_ORIGIN", source.origin);
 /** Where the server reads Polymarket P&L series; a test can point it elsewhere. */
-export const POLYMARKET_DATA_ORIGIN = originFromEnv(
-  "POLYMARKET_DATA_ORIGIN",
-  POLYMARKET_DATA_DEFAULT_ORIGIN,
-);
+export const POLYMARKET_DATA_ORIGIN = originFromEnv("POLYMARKET_DATA_ORIGIN", POLYMARKET_DATA_DEFAULT_ORIGIN);

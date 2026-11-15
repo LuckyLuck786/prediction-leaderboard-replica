@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const RESET_AFTER_MS = 1500;
 
@@ -10,6 +10,9 @@ const LABELS: Record<CopyState, string> = { idle: "Copy", copied: "Copied", fail
 /** API-02 / API-03: copies a snippet. Clipboard access can be refused; it says so. */
 export function CopyButton({ text }: { text: string }) {
   const [state, setState] = useState<CopyState>("idle");
+  // One reset timer at a time, cleared when the button goes away (BUG-086).
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => clearTimeout(resetTimer.current ?? undefined), []);
 
   const copy = async () => {
     try {
@@ -19,13 +22,15 @@ export function CopyButton({ text }: { text: string }) {
       console.error("Copy to clipboard failed.", error);
       setState("failed");
     }
-    setTimeout(() => setState("idle"), RESET_AFTER_MS);
+    clearTimeout(resetTimer.current ?? undefined);
+    resetTimer.current = setTimeout(() => setState("idle"), RESET_AFTER_MS);
   };
 
   return (
     <button
       type="button"
-      onClick={copy}
+      // copy handles its own failure, so the promise never rejects.
+      onClick={() => void copy()}
       aria-live="polite"
       className="rounded bg-secondary px-2 py-1 text-xs text-secondary-foreground hover:bg-accent"
     >

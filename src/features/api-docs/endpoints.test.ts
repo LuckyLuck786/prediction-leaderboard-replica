@@ -9,7 +9,7 @@ import { getProfile } from "@/features/profile/data";
 import { getCategories, loadKalshiHistory, loadPolymarketHistory } from "@/features/profile/history-data";
 import type { TraderProfile } from "@/features/profile/model";
 import { fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";
-import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/origins";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "@/upstream/settings";
 import source from "@/upstream/source.json";
 
 import { DATA_SOURCES } from "./endpoints";
@@ -50,7 +50,10 @@ async function requestedPaths() {
   const paths = (mock: ReturnType<typeof vi.fn>) => mock.mock.calls.map(([path]) => String(path));
   return [
     ...paths(vi.mocked(fetchUpstreamJson)).map((path) => ({ origin: source.origin, path })),
-    ...paths(vi.mocked(fetchPolymarketJson)).map((path) => ({ origin: POLYMARKET_DATA_DEFAULT_ORIGIN, path })),
+    ...paths(vi.mocked(fetchPolymarketJson)).map((path) => ({
+      origin: POLYMARKET_DATA_DEFAULT_ORIGIN,
+      path,
+    })),
   ];
 }
 
@@ -65,7 +68,9 @@ describe("DATA_SOURCES (spec 4.6)", () => {
       expect(listed, `${request.origin}${request.path} is not on the API page`).toBe(true);
     }
     for (const entry of DATA_SOURCES) {
-      const used = made.some((request) => request.origin === entry.origin && patternOf(entry.path).test(request.path));
+      const used = made.some(
+        (request) => request.origin === entry.origin && patternOf(entry.path).test(request.path),
+      );
       expect(used, `${entry.origin}${entry.path} is listed but never requested`).toBe(true);
     }
   });

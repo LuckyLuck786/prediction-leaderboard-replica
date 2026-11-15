@@ -43,7 +43,7 @@ describe("KalshiView", () => {
     expect(external.getAttribute("rel")).toContain("noopener");
   });
 
-  it("shows 100 rows, adds 100 per \"Show more\", and counts the whole board (KAL-06)", () => {
+  it('shows 100 rows, adds 100 per "Show more", and counts the whole board (KAL-06)', () => {
     const BOARD_SIZE = 1000;
     const all = Array.from({ length: BOARD_SIZE }, (_, index) => trader(index + 1, `trader${index + 1}`));
     render(<KalshiView initial={payload("all", all)} fetchBoard={vi.fn()} />);

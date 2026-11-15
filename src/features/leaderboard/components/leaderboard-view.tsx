@@ -1,19 +1,19 @@
 "use client";
 
-import { useReducer, type Dispatch } from "react";
+import { useReducer } from "react";
 
 import { BRAND_MARK_PATH, PRODUCT_TAG } from "@/features/shell/brand";
 import { usePeriodData } from "@/lib/use-period-data";
 
 import { fetchBoard as fetchBoardFromApi } from "../board-api";
 import type { BoardPayload } from "../data";
-import { MISSING, formatMoneyWhole, formatStamp } from "../format";
+import { MISSING, formatMoneyWhole, formatStamp } from "@/lib/format";
 import { LEADERBOARD_PERIODS, PAGE_SIZE, type LeaderboardPeriod, type PlatformFilter } from "../model";
 import { applyQuery } from "../query";
-import { createInitialState, reduceLeaderboard, type LeaderboardAction } from "../state";
+import { createInitialState, reduceLeaderboard } from "../state";
 import { LeaderboardControls } from "./leaderboard-controls";
 import { LeaderboardTable } from "./leaderboard-table";
-import { LocalStamp } from "./local-stamp";
+import { LocalStamp } from "@/features/shell/local-stamp";
 
 const EMPTY: never[] = [];
 const COUNT_LABELS = { loading: "Loading traders", failed: "No traders loaded" } as const;
@@ -88,17 +88,19 @@ export function LeaderboardView({
       </header>
 
       {payload?.source.kind === "snapshot" ? (
-        <p role="status" className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm">
+        <p
+          role="status"
+          className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm"
+        >
           Live data is unavailable right now. Showing a saved snapshot from{" "}
-          {formatStamp(payload.source.capturedAt, "UTC")} UTC: {payload.board.traders.length} of
-          the {payload.source.upstreamTotal} traders listed for this period, the best and the
-          worst by P&amp;L.
+          {formatStamp(payload.source.capturedAt, "UTC")} UTC: {payload.board.traders.length} of the{" "}
+          {payload.source.upstreamTotal} traders listed for this period, the best and the worst by P&amp;L.
         </p>
       ) : null}
 
       <LeaderboardControls
         state={state}
-        dispatch={dispatch as Dispatch<LeaderboardAction>}
+        dispatch={dispatch}
         countLabel={
           payload
             ? `${matching.length} of ${traders.length} traders`
@@ -132,9 +134,7 @@ export function LeaderboardView({
       ) : null}
 
       {payload && matching.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          No traders match these filters.
-        </p>
+        <p className="py-8 text-center text-sm text-muted-foreground">No traders match these filters.</p>
       ) : null}
 
       {visible.length < matching.length ? (

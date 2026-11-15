@@ -1,13 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { nth } from "@/lib/test-utils";
+
 import source from "./source.json";
-import {
-  UpstreamError,
-  fetchPolymarketJson,
-  fetchUpstreamJson,
-  isNotFound,
-} from "./client";
-import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./origins";
+import { UpstreamError, fetchPolymarketJson, fetchUpstreamJson, isNotFound } from "./client";
+import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./settings";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -24,7 +21,7 @@ describe("fetchUpstreamJson", () => {
     const fetchMock = stubFetch(async () => Response.json({ ok: 1 }));
     await expect(fetchUpstreamJson("/api/daily-profit")).resolves.toEqual({ ok: 1 });
 
-    const [url, init] = fetchMock.mock.calls[0];
+    const [url, init] = nth(fetchMock.mock.calls, 0, "call");
     expect(url.toString()).toBe(`${source.origin}/api/daily-profit`);
     expect(init.signal).toBeInstanceOf(AbortSignal);
   });
@@ -32,7 +29,7 @@ describe("fetchUpstreamJson", () => {
   it("keeps nothing in the fetch cache, so the timeout always applies (BUG-050)", async () => {
     const fetchMock = stubFetch(async () => Response.json({ ok: 1 }));
     await fetchUpstreamJson("/api/daily-profit");
-    const init = fetchMock.mock.calls[0][1] as { next?: unknown; cache?: unknown };
+    const init = nth(fetchMock.mock.calls, 0, "call")[1] as { next?: unknown; cache?: unknown };
     expect(init.cache).toBe("no-store");
     expect(init.next).toBeUndefined();
   });
@@ -40,7 +37,7 @@ describe("fetchUpstreamJson", () => {
   it("asks Polymarket's Data API on its own origin", async () => {
     const fetchMock = stubFetch(async () => Response.json({ data: {} }));
     await fetchPolymarketJson("/v2/user-pnl?user=0xabc");
-    expect(fetchMock.mock.calls[0][0].toString()).toBe(
+    expect(nth(fetchMock.mock.calls, 0, "call")[0].toString()).toBe(
       `${POLYMARKET_DATA_DEFAULT_ORIGIN}/v2/user-pnl?user=0xabc`,
     );
   });
@@ -48,7 +45,7 @@ describe("fetchUpstreamJson", () => {
   it("keeps the query string", async () => {
     const fetchMock = stubFetch(async () => Response.json([]));
     await fetchUpstreamJson("/api/leaderboard?period=1d");
-    expect(fetchMock.mock.calls[0][0].toString()).toBe(
+    expect(nth(fetchMock.mock.calls, 0, "call")[0].toString()).toBe(
       `${source.origin}/api/leaderboard?period=1d`,
     );
   });
@@ -64,11 +61,9 @@ describe("fetchUpstreamJson", () => {
     stubFetch(async () => {
       throw new TypeError("fetch failed");
     });
-    await expect(fetchUpstreamJson("/api/x")).rejects.toMatchObject({
-      name: "UpstreamError",
-      status: null,
-      message: expect.stringContaining("fetch failed"),
-    });
+    const failure = fetchUpstreamJson("/api/x");
+    await expect(failure).rejects.toMatchObject({ name: "UpstreamError", status: null });
+    await expect(failure).rejects.toThrow("fetch failed");
   });
 
   it("reports a body that is not JSON", async () => {

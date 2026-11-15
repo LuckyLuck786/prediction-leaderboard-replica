@@ -490,7 +490,7 @@ a `Permissions-Policy` that asks for no device feature, and no longer says
 which framework serves it. No content security policy: the inline theme
 script would need a nonce per request, which would make every page dynamic
 (D-047); the site renders no HTML from upstream data, which only ever
-reaches the page as text. An end-to-end test checks the headers.
+reaches the page as text. An end-to-end test checks the headers. Amended by D-060: a partial policy is now sent.
 
 ### D-055 Unused template parts removed, versions pinned
 
@@ -515,7 +515,91 @@ it is ever abused, and the owner would set it in Vercel.
 came with the template and were used in phase 1 for observing the source.
 Their steps for copying the source's assets and text are overridden by
 CLAUDE.md, which says so at its top. They stay as the template shipped them,
-credited in THIRD_PARTY_NOTICES.md.
+credited in THIRD_PARTY_NOTICES.md. Superseded by D-059.
+
+## 2026-11-16
+
+### D-058 At most ten wallets per profile
+
+A trader record can list extra wallets, and each one is a request to
+Polymarket every time the profile renders. A record listing hundreds would
+turn one page view into hundreds of requests. A profile now sums at most ten
+wallets and says on the page how many it left out. In the snapshot of
+2026-11-14 the most wallets any listed trader had was two (`wallet_count`),
+so this only guards against bad data. (The commit message for this change
+said one; the review corrected it.) The review also suggested a firewall rate limit on `/account/*`;
+that stays the owner's call in the Vercel dashboard (D-056).
+
+### D-059 The template's clone-website skill and agent guide removed
+
+The owner's code review asked for them to go, and they no longer earned
+their place: the skill's instructions to copy the source's assets and text
+were overridden by CLAUDE.md, so they only confused a reader. Removed:
+`.agents/skills/clone-website/`, `.claude/commands/clone-website.md` and the
+template's guide in `AGENTS.md`, which now holds only the block `next dev`
+writes. The asset check no longer allows them to describe capture folders.
+Git history keeps them; THIRD_PARTY_NOTICES.md says they were removed.
+
+### D-060 A partial content security policy (amends D-054)
+
+Every response now carries `frame-ancestors 'none'; base-uri 'self';
+object-src 'none'; form-action 'none'; connect-src 'self'`. Scripts and
+images stay unrestricted, for the reasons in D-054 and D-013. An end-to-end
+test visits every page and fails on any policy violation; with
+`connect-src 'none'` it reported the board's period fetches, so it can fail.
+
+### D-061 Shared code lives outside any one feature
+
+Formatters, the avatar, platform badges and names, the profile id rule and
+score colours lived in the leaderboard feature, and the leaderboard imported
+back from the profile feature. They moved to `src/lib/` (formatters, the
+wallet pattern, the width hook, the board fetch) and to a new
+`src/features/trader/` (what every trader list shows). The ESLint rule
+`import/no-restricted-paths` now refuses an import from one feature into
+another, and from shared code into a feature. Two exceptions are named in
+`eslint.config.mjs`: the head-to-head page builds on the profile's history
+and chart geometry, and the API page documents every feature's data.
+Server modules import `server-only`, so importing one from browser code fails
+the build (checked by doing it).
+
+### D-062 Kept as on the source: period prefetch and the whole board in the page
+
+The review suggested loading the home board's other periods on hover, focus
+or click (P1), and sending fewer than all traders with the page (P2). Both
+would make the copy less faithful. The source loads its whole 1D board and
+then fetches 30D, YTD and ALL right after the first paint (recorded in phase
+1), which is why switching period is instant there. Its search, filters and
+counts ("421 of 584 traders") need every trader in the browser. Measured on
+the production build: the home page's HTML is 86 KB gzip, and the three
+prefetched periods add 80, 89 and 92 KB gzip. Kept as is; the owner can
+change it if the copy matters less than the bytes.
+
+### D-063 Stricter tooling
+
+Prettier at 110 columns (it changed the fewest lines of 100, 110 and 120),
+checked in `npm run check` and CI. `noUncheckedIndexedAccess`, so reading a
+list or record by index is possibly undefined; tests use `nth()`, which
+fails with a message. Type-aware typescript-eslint rules
+(`recommendedTypeCheckedOnly`, without `require-await`). TypeScript targets
+ES2022, and `allowJs` is set to `false` rather than removed, because
+`next build` writes back any key that is absent (BUG-087). Coverage runs in
+CI with thresholds a few points under the measured numbers. A pre-push hook
+runs `npm run check` once turned on. CI actions are pinned to commit SHAs,
+and Dependabot proposes weekly updates. The browser checks our own board
+route's answer by hand instead of with Zod, which took Zod out of the
+browser bundle: the home page's JavaScript fell from 236,298 to 205,437
+bytes gzip, measured on builds of the same commit.
+
+### D-064 Accepted: an unknown API period is cached too
+
+Answering an unknown period with JSON (BUG-085) means Next.js no longer
+refuses it before our handler runs, so each unknown path gets its own cache
+entry, refreshed every five minutes. The independent review of the fix pass
+found this; a production server confirmed it (the second request for
+`/api/boards/zzz-probe` was a cache hit). Refusing those paths earlier would
+need middleware on every board request. Accepted for a demo, for the same
+reason as D-056: `/account/*` already accepts any well-formed id, and a
+firewall rate limit is the remedy if either is abused.
 
 ## Open items
 

@@ -7,15 +7,7 @@ import type { Page } from "@playwright/test";
 
 import { expect, test } from "./test";
 
-const ROUTES = [
-  "/",
-  "/kalshi",
-  "/account/ProbabilityDuck",
-  "/battle",
-  "/api-docs",
-  "/submit",
-  "/terms",
-];
+const ROUTES = ["/", "/kalshi", "/account/ProbabilityDuck", "/battle", "/api-docs", "/submit", "/terms"];
 
 const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex="0"]';
 
@@ -46,15 +38,26 @@ function focusState(page: Page) {
     const style = getComputedStyle(element);
     const label = `${element.tagName.toLowerCase()} ${element.getAttribute("aria-label") ?? element.textContent?.trim().slice(0, 30) ?? ""}`;
     const outlineWidth = style.outlineStyle === "none" ? 0 : parseFloat(style.outlineWidth);
-    if (outlineWidth === 0 && style.boxShadow === "none") return { id: element.dataset.kbd ?? null, problem: "no ring", label };
+    if (outlineWidth === 0 && style.boxShadow === "none")
+      return { id: element.dataset.kbd ?? null, problem: "no ring", label };
     if (outlineWidth > 0) {
       const alpha = /rgba?\([^)]*?,\s*([\d.]+)\)$/.exec(style.outlineColor)?.[1];
-      if (alpha !== undefined && Number(alpha) < 1) return { id: element.dataset.kbd ?? null, problem: "faint ring", label };
+      if (alpha !== undefined && Number(alpha) < 1)
+        return { id: element.dataset.kbd ?? null, problem: "faint ring", label };
       // The ring's outer edge, and every ancestor that would cut it off.
       const reach = parseFloat(style.outlineOffset) + outlineWidth;
       const box = element.getBoundingClientRect();
-      const ring = { left: box.left - reach, top: box.top - reach, right: box.right + reach, bottom: box.bottom + reach };
-      for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+      const ring = {
+        left: box.left - reach,
+        top: box.top - reach,
+        right: box.right + reach,
+        bottom: box.bottom + reach,
+      };
+      for (
+        let parent = element.parentElement;
+        parent && parent !== document.body;
+        parent = parent.parentElement
+      ) {
         const parentStyle = getComputedStyle(parent);
         if (parentStyle.overflowX === "visible" && parentStyle.overflowY === "visible") continue;
         const clip = parent.getBoundingClientRect();
@@ -74,9 +77,10 @@ function focusState(page: Page) {
 }
 
 test.describe("keyboard", () => {
-
   for (const path of ROUTES) {
-    test(`${path}: Tab reaches every control, each with a ring that can be seen`, async ({ page }, testInfo) => {
+    test(`${path}: Tab reaches every control, each with a ring that can be seen`, async ({
+      page,
+    }, testInfo) => {
       test.skip(testInfo.project.name === "mobile", "Desktop only");
       await page.goto(path);
       // Charts draw after load; wait so their parts are counted.
@@ -129,7 +133,10 @@ test.describe("keyboard", () => {
     const toggle = strip.getByRole("button", { name: "Show the calendar" });
     await toggle.focus();
     await page.keyboard.press("Enter");
-    await expect(strip.getByRole("button", { name: "Hide the calendar" })).toHaveAttribute("aria-expanded", "true");
+    await expect(strip.getByRole("button", { name: "Hide the calendar" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
 
     await strip.getByRole("button", { name: "Previous month" }).focus();
     await page.keyboard.press("Space");

@@ -19,8 +19,7 @@ const validTrader = {
   smart_score: { score: 75.2, winRate: 0.685, sharpeRatio: 1.15, sharpe1d: 0.37, sharpe1m: -0.12 },
   roi: 0.2,
   sports_share: 1,
-  polymarket_profile:
-    "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294?via=someone",
+  polymarket_profile: "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294?via=someone",
 };
 
 const response = (traders: unknown[]) => ({
@@ -47,7 +46,7 @@ describe("parseLeaderboard", () => {
   it("picks the Sharpe figure that belongs to the period", () => {
     const sharpeFor = (period: (typeof LEADERBOARD_PERIODS)[number]) => {
       const result = parseLeaderboard(response([validTrader]), period);
-      return result.ok ? result.leaderboard.traders[0].sharpe : undefined;
+      return result.ok ? result.leaderboard.traders[0]?.sharpe : undefined;
     };
     expect(sharpeFor("1d")).toBe(0.37);
     expect(sharpeFor("30d")).toBe(-0.12);
@@ -58,10 +57,10 @@ describe("parseLeaderboard", () => {
     const result = parseLeaderboard(response([validTrader]), "1d");
     if (!result.ok) throw new Error(result.error);
     const [trader] = result.leaderboard.traders;
-    expect(trader.polymarketUrl).toBe(
+    expect(trader?.polymarketUrl).toBe(
       "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294",
     );
-    expect(trader.xUrl).toBe("https://x.com/someone");
+    expect(trader?.xUrl).toBe("https://x.com/someone");
   });
 
   it("treats empty strings and missing fields as absent (DATA-08)", () => {
@@ -118,6 +117,15 @@ describe("parseLeaderboard", () => {
     expect(result.leaderboard.traders.map((trader) => trader.kalshiUsername)).toEqual(["good.name", null]);
   });
 
+  it("keeps a trader whose id our routes refuse, without a profile to link to (BUG-083)", () => {
+    const result = parseLeaderboard(
+      response([{ ...validTrader, wallet: null, kalshi_username: "has space", name: "Odd" }]),
+      "1d",
+    );
+    if (!result.ok) throw new Error(result.error);
+    expect(result.leaderboard.traders[0]).toMatchObject({ id: "has space", profileId: null });
+  });
+
   it("drops and counts traders that do not match, keeping the rest", () => {
     const broken = [
       { ...validTrader, stats: { pnl: "lots" } },
@@ -164,6 +172,10 @@ describe("parseLeaderboard", () => {
 
 describe("saved snapshot", () => {
   const snapshot = loadSnapshot();
+
+  it("is parsed once and kept", () => {
+    expect(loadSnapshot()).toBe(snapshot);
+  });
 
   it("covers every period with nothing rejected", () => {
     for (const period of LEADERBOARD_PERIODS) {

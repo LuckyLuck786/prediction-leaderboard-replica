@@ -1,14 +1,11 @@
 // Builders for tests. Not imported by application code.
 
-import {
-  type Leaderboard,
-  type LeaderboardPeriod,
-  type Trader,
-} from "./model";
+import { type Leaderboard, type LeaderboardPeriod, type Trader } from "./model";
 
 /** A trader for tests, with defaults for every field not given. */
 export function makeTrader(overrides: Partial<Trader> & Pick<Trader, "id">): Trader {
   return {
+    profileId: overrides.id,
     name: overrides.id,
     platform: "polymarket",
     wallet: null,

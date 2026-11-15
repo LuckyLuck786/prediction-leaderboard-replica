@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 
 import { describe, expect, it } from "vitest";
 
-import { formatBattleMoney } from "@/features/leaderboard/format";
+import { formatBattleMoney } from "@/lib/format";
 import { roomyTicks } from "@/features/profile/history";
 import { parseKalshiHistory, parsePolymarketPnl } from "@/features/profile/history-data";
 
@@ -36,8 +36,8 @@ describe("compare (BATTLE-03)", () => {
 
   it("starts both lines at zero, against the source's recorded baselines", () => {
     expect(comparison?.kalshi[0]).toEqual({ t: KALSHI_START, v: 0 });
-    expect(comparison?.polymarket[0].v).toBe(0);
-    expect(comparison?.polymarket[0].t).toBe(at("2025-09-27T23:59:59.999Z"));
+    expect(comparison?.polymarket[0]?.v).toBe(0);
+    expect(comparison?.polymarket[0]?.t).toBe(at("2025-09-27T23:59:59.999Z"));
     expect(comparison?.kalshi.at(-1)?.v).toBeCloseTo(675_134.8 - 45_200.28, 6);
     expect(comparison?.polymarket.at(-1)?.v).toBeCloseTo(114_987.150194 - 21_063.72247, 6);
   });
@@ -62,6 +62,13 @@ describe("changeSince", () => {
 });
 
 describe("comparisonAxis (BATTLE-03)", () => {
+  it("handles a long history, which spreading into Math.min would refuse (BUG-084)", () => {
+    const long = Array.from({ length: 300_000 }, (_, index) => ({ t: index, v: index % 1_000 }));
+    const axis = comparisonAxis({ start: 0, end: 299_999, polymarket: long, kalshi: [{ t: 0, v: -500 }] });
+    expect(axis.min).toBeLessThan(-500);
+    expect(axis.max).toBeGreaterThan(999);
+  });
+
   // The pair's real histories, recorded for the end-to-end tests, cut at the
   // moment the source's battle page was captured (2026-11-13 19:58:40 UTC).
   const CAPTURED_AT = 1_794_542_320_000;

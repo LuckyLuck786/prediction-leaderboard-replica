@@ -1,7 +1,7 @@
 // Trader profile model (spec 4.4). The history behind PROF-02 to PROF-05
 // lives in history.ts and history-data.ts.
 
-import type { Platform } from "@/features/leaderboard/model";
+import type { Platform } from "@/features/trader/platforms";
 
 /** The P&L periods a trader record carries. */
 export const PROFILE_PERIODS = ["1d", "7d", "30d", "all"] as const;
@@ -42,15 +42,9 @@ export interface TraderProfile {
 }
 
 /**
- * A Polymarket wallet, or a Kalshi username as the source's sitemap uses them.
- * An id made only of dots is refused: "." and ".." would turn
- * /api/trader/{id} into another upstream path.
+ * Most wallets one profile asks Polymarket about. Each wallet is one request
+ * per render, so a trader record listing hundreds must not turn one page view
+ * into hundreds of requests (D-058). In the snapshot of 2026-11-14 the most
+ * wallets any listed trader had was two, so this guards against bad data.
  */
-const PROFILE_ID = /^(0x[0-9a-fA-F]{40}|(?!\.+$)[A-Za-z0-9._-]{1,64})$/;
-
-/** A Polymarket wallet address. */
-export const WALLET = /^0x[0-9a-fA-F]{40}$/;
-
-export function isProfileId(value: string): boolean {
-  return PROFILE_ID.test(value);
-}
+export const MAX_WALLETS = 10;

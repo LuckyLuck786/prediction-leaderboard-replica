@@ -28,6 +28,18 @@ describe("CopyButton (API-02, API-03)", () => {
     expect(screen.getByRole("button").textContent).toBe("Copied");
   });
 
+  it("keeps one reset timer, restarted by each click and cleared on unmount (BUG-086)", async () => {
+    vi.useFakeTimers();
+    stubClipboard(async () => {});
+    const { unmount } = render(<CopyButton text="x" />);
+    await act(async () => fireEvent.click(screen.getByRole("button")));
+    await act(async () => fireEvent.click(screen.getByRole("button")));
+    expect(vi.getTimerCount()).toBe(1);
+    unmount();
+    expect(vi.getTimerCount()).toBe(0);
+    vi.useRealTimers();
+  });
+
   it("says when the browser refuses, and logs why", async () => {
     stubClipboard(async () => {
       throw new Error("not allowed");

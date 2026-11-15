@@ -2,16 +2,12 @@
 
 import { z } from "zod";
 
-import { PLATFORMS } from "@/features/leaderboard/model";
+import { PLATFORMS } from "@/features/trader/platforms";
+import { isProfileId } from "@/features/trader/profile-id";
+import { WALLET } from "@/lib/wallet";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
-import {
-  PROFILE_PERIODS,
-  WALLET,
-  isProfileId,
-  type ProfilePeriod,
-  type TraderProfile,
-} from "./model";
+import { PROFILE_PERIODS, type ProfilePeriod, type TraderProfile } from "./model";
 
 const optionalString = z.string().nullish();
 const optionalNumber = z.number().nullish();
@@ -60,14 +56,12 @@ function toJoined(value: string | null | undefined): string | null {
   return MONTH_YEAR_FORMAT.format(new Date(value));
 }
 
-export type ProfileParseResult =
-  { ok: true; profile: TraderProfile } | { ok: false; error: string };
+export type ProfileParseResult = { ok: true; profile: TraderProfile } | { ok: false; error: string };
 
 /** Validates a trader record at the boundary and maps it to the app's profile type (DATA-04). */
 export function parseProfile(input: unknown, id: string): ProfileParseResult {
   const parsed = rawProfileSchema.safeParse(input);
-  if (!parsed.success)
-    return { ok: false, error: z.prettifyError(parsed.error) };
+  if (!parsed.success) return { ok: false, error: z.prettifyError(parsed.error) };
   const raw = parsed.data.trader;
   // DATA-08: any score field can be missing. Without a score there is no card.
   const score = raw.smart_score;

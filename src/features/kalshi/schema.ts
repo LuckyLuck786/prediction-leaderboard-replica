@@ -3,7 +3,7 @@
 
 import { z } from "zod";
 
-import { isProfileId } from "@/features/profile/model";
+import { isProfileId } from "@/features/trader/profile-id";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import type { KalshiBoard, KalshiPeriod, KalshiTrader } from "./model";
@@ -40,8 +40,7 @@ function toTrader(raw: z.infer<typeof rawTraderSchema>): KalshiTrader {
     pnl: raw.pnl,
     // Only trust the exact form upstream uses for its own profile pages, and
     // only for a username our profile route accepts (otherwise a 404).
-    profileId:
-      raw.profile_path === `/account/${username}` && isProfileId(username) ? username : null,
+    profileId: raw.profile_path === `/account/${username}` && isProfileId(username) ? username : null,
     kalshiUrl: cleanLinkUrl(raw.kalshi_url),
     xHandle: raw.x_handle && X_HANDLE.test(raw.x_handle) ? raw.x_handle : null,
     sportsShare: raw.sports_share ?? null,

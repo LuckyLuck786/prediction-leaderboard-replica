@@ -7,12 +7,14 @@
 // Polymarket's profile chart shows, and it ends on the same all-time figure
 // the source prints.
 
+import "server-only";
+
 import { z } from "zod";
 
 import { fetchPolymarketJson, fetchUpstreamJson } from "@/upstream/client";
 
 import { combineSeries, dayKey, sumDailyChanges, type SeriesPoint } from "./history";
-import type { TraderProfile } from "./model";
+import { MAX_WALLETS, type TraderProfile } from "./model";
 
 const MS_PER_SECOND = 1000;
 const SECONDS_PER_DAY = 86_400;
@@ -68,14 +70,14 @@ export type HistoryResult =
       series: SeriesPoint[];
       /** Each series' daily changes added up, for the month strip. */
       changes: Map<string, number>;
+      /** Wallets past MAX_WALLETS, left out of both; the page says so. */
+      walletsLeftOut: number;
     }
   | { kind: "unsupported" }
   | { kind: "unavailable" };
 
 export type CategoriesResult =
-  | { kind: "ready"; rows: CategoryRow[] }
-  | { kind: "none" }
-  | { kind: "unavailable" };
+  { kind: "ready"; rows: CategoryRow[] } | { kind: "none" } | { kind: "unavailable" };
 
 const byTime = (a: SeriesPoint, b: SeriesPoint) => a.t - b.t;
 
@@ -120,9 +122,7 @@ export function parseCategories(input: unknown): CategoryRow[] {
 
 /** One Kalshi trader's cumulative P&L series. Throws on any failure. */
 export async function loadKalshiHistory(username: string): Promise<SeriesPoint[]> {
-  return parseKalshiHistory(
-    await fetchUpstreamJson(`/api/kalshi/${encodeURIComponent(username)}/history`),
-  );
+  return parseKalshiHistory(await fetchUpstreamJson(`/api/kalshi/${encodeURIComponent(username)}/history`));
 }
 
 /** One Polymarket wallet's cumulative P&L series. Throws on any failure. */
@@ -134,22 +134,29 @@ export async function loadPolymarketHistory(wallet: string): Promise<SeriesPoint
 
 /**
  * The cumulative P&L behind the month strip and the chart. A trader with
- * several wallets, or on both platforms, gets the sum of all of them.
+ * several wallets, or on both platforms, gets the sum of all of them, up to
+ * MAX_WALLETS wallets.
  * "unsupported": no documented history for this trader (DEV-22).
  */
 export async function getProfileHistory(profile: TraderProfile): Promise<HistoryResult> {
   const loads: Array<Promise<SeriesPoint[]>> = [];
+  let walletsLeftOut = 0;
   if (profile.platform === "kalshi" || profile.platform === "both") {
     if (profile.kalshiUsername) loads.push(loadKalshiHistory(profile.kalshiUsername));
   }
   if (profile.platform === "polymarket" || profile.platform === "both") {
-    for (const wallet of profile.wallets) loads.push(loadPolymarketHistory(wallet));
+    const wallets = profile.wallets.slice(0, MAX_WALLETS);
+    walletsLeftOut = profile.wallets.length - wallets.length;
+    if (walletsLeftOut > 0) {
+      console.warn(`History for ${profile.id}: ${walletsLeftOut} wallets past ${MAX_WALLETS} left out.`);
+    }
+    for (const wallet of wallets) loads.push(loadPolymarketHistory(wallet));
   }
   if (loads.length === 0) return { kind: "unsupported" };
 
   try {
     const parts = await Promise.all(loads);
-    return { kind: "ready", series: combineSeries(parts), changes: sumDailyChanges(parts) };
+    return { kind: "ready", series: combineSeries(parts), changes: sumDailyChanges(parts), walletsLeftOut };
   } catch (error) {
     console.error(`History for ${profile.id}: unavailable.`, error);
     return { kind: "unavailable" };
@@ -179,9 +186,6 @@ export interface ProfileExtras {
 
 /** Everything a profile page shows beyond the trader record, loaded together. */
 export async function getProfileExtras(profile: TraderProfile): Promise<ProfileExtras> {
-  const [history, categories] = await Promise.all([
-    getProfileHistory(profile),
-    getCategories(profile),
-  ]);
+  const [history, categories] = await Promise.all([getProfileHistory(profile), getCategories(profile)]);
   return { history, categories, today: dayKey(Date.now()) };
 }

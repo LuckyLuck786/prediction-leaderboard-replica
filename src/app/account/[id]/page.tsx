@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { formatProfileTitleMoney, formatTraderName } from "@/features/leaderboard/format";
+import { formatProfileTitleMoney, formatTraderName } from "@/lib/format";
 import { ProfileView } from "@/features/profile/components/profile-view";
 import { ProfileUnavailableError, getProfile } from "@/features/profile/data";
 import { getProfileExtras } from "@/features/profile/history-data";

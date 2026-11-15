@@ -7,7 +7,7 @@ import { join, relative } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { UPSTREAM_REVALIDATE_SECONDS } from "@/upstream/client";
+import { UPSTREAM_REVALIDATE_SECONDS } from "@/upstream/settings";
 
 vi.mock("next/navigation", () => ({ notFound: vi.fn(), useRouter: vi.fn() }));
 

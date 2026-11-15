@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { UpstreamError, fetchUpstreamJson } from "@/upstream/client";
 
 import { getProfile } from "./data";
-import { isProfileId } from "./model";
+import { isProfileId } from "@/features/trader/profile-id";
 import { parseProfile } from "./schema";
 
 vi.mock("@/upstream/client", async (importOriginal) => {
@@ -128,7 +128,11 @@ describe("parseProfile (DATA-04)", () => {
           name: "elucidate",
           platform: "polymarket",
           wallet: main,
-          additional_wallets: [main.toUpperCase().replace("0X", "0x"), "0xnot-a-wallet", "0x" + "1".repeat(40)],
+          additional_wallets: [
+            main.toUpperCase().replace("0X", "0x"),
+            "0xnot-a-wallet",
+            "0x" + "1".repeat(40),
+          ],
         },
       },
       main,

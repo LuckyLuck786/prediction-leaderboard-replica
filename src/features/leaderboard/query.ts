@@ -47,9 +47,7 @@ function compareNullable(a: number | null, b: number | null): number {
 export function sortTraders(traders: readonly Trader[], sort: SortState | null): Trader[] {
   const valueOf = SORT_VALUE[sort?.key ?? "pnl"];
   const factor = (sort?.direction ?? "desc") === "asc" ? 1 : -1;
-  return [...traders].sort(
-    (a, b) => factor * compareNullable(valueOf(a), valueOf(b)),
-  );
+  return [...traders].sort((a, b) => factor * compareNullable(valueOf(a), valueOf(b)));
 }
 
 /**
@@ -79,11 +77,7 @@ export function applyQuery(
     }
     // The source's tooltip for this toggle says it hides only esports traders
     // who have no X account, so a trader with one stays visible.
-    if (
-      query.hideEsports &&
-      !trader.xUrl &&
-      (trader.esportsShare ?? 0) >= ESPORTS_SHARE_HIDE_THRESHOLD
-    ) {
+    if (query.hideEsports && !trader.xUrl && (trader.esportsShare ?? 0) >= ESPORTS_SHARE_HIDE_THRESHOLD) {
       return false;
     }
     return needle === "" || matchesSearch(trader, needle);

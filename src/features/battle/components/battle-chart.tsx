@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useMemo, useState, type PointerEvent } from "react";
 
-import { formatBattleMoney, formatChartDate, formatDayTick } from "@/features/leaderboard/format";
+import {
+  CHART_MARGIN,
+  TICK_GAP,
+  TIME_LABEL_OFFSET,
+  plotScales,
+  tooltipLeft,
+} from "@/features/profile/chart-geometry";
 import { nearestIndex, roomyTicks, timeTicks, type SeriesPoint } from "@/features/profile/history";
+import { formatBattleMoney, formatChartDate, formatDayTick } from "@/lib/format";
+import { useElementWidth } from "@/lib/use-element-width";
 
 import { comparisonAxis, type Comparison } from "../comparison";
 
-/** Plot geometry: 256 px high as measured on the source; margins as on the profile chart. */
+/** Chart height measured on the source: 256 px, labels included. */
 const HEIGHT = 256;
-const MARGIN = { top: 10, right: 19, bottom: 35, left: 65 };
-const TICK_GAP = 8;
-const TIME_LABEL_OFFSET = 12;
 /** The source labelled six dates along this chart. */
 const TIME_TICK_COUNT = 6;
 /** Plot height in pixels, which decides which value labels have room. */
-export const BATTLE_PLOT_HEIGHT = HEIGHT - MARGIN.top - MARGIN.bottom;
+export const BATTLE_PLOT_HEIGHT = HEIGHT - CHART_MARGIN.top - CHART_MARGIN.bottom;
+/** Room kept at the right edge for the hover box, which holds two lines. */
 const TOOLTIP_WIDTH = 170;
 
 export interface ChartLine {
@@ -27,10 +33,15 @@ export interface ChartLine {
 }
 
 /** Each line's data point closest to the pointer, so a dot always sits on its line. */
-function pointsUnder(comparison: Comparison, lines: readonly ChartLine[], t: number): SeriesPoint[] {
-  return lines.map((line) => {
+function pointsUnder(
+  comparison: Comparison,
+  lines: readonly ChartLine[],
+  t: number,
+): Array<{ line: ChartLine; point: SeriesPoint }> {
+  return lines.flatMap((line) => {
     const series = comparison[line.key];
-    return series[nearestIndex(series, t)];
+    const point = series[nearestIndex(series, t)];
+    return point ? [{ line, point }] : [];
   });
 }
 
@@ -45,38 +56,27 @@ export function BattleChart({
   comparison: Comparison;
   lines: readonly [ChartLine, ChartLine];
 }) {
-  const container = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number | null>(null);
+  const { ref: container, width } = useElementWidth<HTMLDivElement>();
   const [hoverT, setHoverT] = useState<number | null>(null);
 
-  useEffect(() => {
-    const element = container.current;
-    if (!element) return;
-    const observer = new ResizeObserver(([entry]) => setWidth(entry.contentRect.width));
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
   const { start, end } = comparison;
-  const axis = comparisonAxis(comparison);
+  // The pointer re-renders the chart on every move; the axis, scales and lines
+  // are worked out again only when the data or the width change.
+  const axis = useMemo(() => comparisonAxis(comparison), [comparison]);
+  const scales = useMemo(() => plotScales(width ?? 0, HEIGHT, start, end, axis), [width, start, end, axis]);
+  const paths = useMemo(
+    () => lines.map((line) => ({ line, d: scales.linePath(comparison[line.key]) })),
+    [lines, scales, comparison],
+  );
+
   const ends = lines.map((line) => `${line.name} ${formatBattleMoney(comparison[line.key].at(-1)?.v ?? 0)}`);
   const label = `P&L change from ${formatChartDate(start)} to ${formatChartDate(end)}: ${ends.join(", ")}`;
-
-  const plotWidth = (width ?? 0) - MARGIN.left - MARGIN.right;
-  const plotHeight = BATTLE_PLOT_HEIGHT;
-  const span = Math.max(end - start, 1);
+  const { x, y, plotHeight } = scales;
   const range = axis.max - axis.min;
-  const x = (t: number) => MARGIN.left + ((t - start) / span) * plotWidth;
-  const y = (v: number) => MARGIN.top + (1 - (v - axis.min) / range) * plotHeight;
-  const path = (key: ChartLine["key"]) =>
-    comparison[key]
-      .map((point, index) => `${index === 0 ? "M" : "L"}${x(point.t).toFixed(1)},${y(point.v).toFixed(1)}`)
-      .join("");
 
   const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
     const box = event.currentTarget.getBoundingClientRect();
-    const t = start + ((event.clientX - box.left - MARGIN.left) / plotWidth) * span;
-    setHoverT(Math.min(Math.max(t, start), end));
+    setHoverT(Math.min(Math.max(scales.timeAt(event.clientX - box.left), start), end));
   };
 
   return (
@@ -95,8 +95,8 @@ export function BattleChart({
         >
           {axis.min < 0 && axis.max > 0 ? (
             <line
-              x1={MARGIN.left}
-              x2={width - MARGIN.right}
+              x1={CHART_MARGIN.left}
+              x2={width - CHART_MARGIN.right}
               y1={y(0)}
               y2={y(0)}
               className="stroke-border"
@@ -106,7 +106,7 @@ export function BattleChart({
           {roomyTicks(axis.ticks, plotHeight / range).map((tick) => (
             <text
               key={`v-${tick}`}
-              x={MARGIN.left - TICK_GAP}
+              x={CHART_MARGIN.left - TICK_GAP}
               y={y(tick)}
               textAnchor="end"
               dominantBaseline="middle"
@@ -119,33 +119,27 @@ export function BattleChart({
             <text
               key={`t-${tick}`}
               x={x(tick)}
-              y={HEIGHT - MARGIN.bottom + TIME_LABEL_OFFSET}
+              y={HEIGHT - CHART_MARGIN.bottom + TIME_LABEL_OFFSET}
               textAnchor="middle"
               className="fill-muted-foreground text-[11px]"
             >
               {formatDayTick(tick)}
             </text>
           ))}
-          {lines.map((line) => (
-            <path key={line.key} d={path(line.key)} fill="none" className={line.stroke} strokeWidth={2} />
+          {paths.map(({ line, d }) => (
+            <path key={line.key} d={d} fill="none" className={line.stroke} strokeWidth={2} />
           ))}
           {hoverT !== null ? (
             <>
               <line
                 x1={x(hoverT)}
                 x2={x(hoverT)}
-                y1={MARGIN.top}
-                y2={HEIGHT - MARGIN.bottom}
+                y1={CHART_MARGIN.top}
+                y2={HEIGHT - CHART_MARGIN.bottom}
                 className="stroke-muted-foreground/40"
               />
-              {pointsUnder(comparison, lines, hoverT).map((point, index) => (
-                <circle
-                  key={lines[index].key}
-                  cx={x(point.t)}
-                  cy={y(point.v)}
-                  r={3}
-                  className={lines[index].fill}
-                />
+              {pointsUnder(comparison, lines, hoverT).map(({ line, point }) => (
+                <circle key={line.key} cx={x(point.t)} cy={y(point.v)} r={3} className={line.fill} />
               ))}
             </>
           ) : null}
@@ -155,12 +149,12 @@ export function BattleChart({
         <div
           role="status"
           className="pointer-events-none absolute top-2 rounded-lg border border-border bg-card px-3 py-2"
-          style={{ left: Math.min(Math.max(x(hoverT) + 12, 0), width - TOOLTIP_WIDTH) }}
+          style={{ left: tooltipLeft(x(hoverT), width, TOOLTIP_WIDTH) }}
         >
           <p className="mb-1 text-xs text-muted-foreground">{formatChartDate(hoverT)}</p>
-          {pointsUnder(comparison, lines, hoverT).map((point, index) => (
-            <p key={lines[index].key} className="text-sm">
-              <span className="text-muted-foreground">{lines[index].name} </span>
+          {pointsUnder(comparison, lines, hoverT).map(({ line, point }) => (
+            <p key={line.key} className="text-sm">
+              <span className="text-muted-foreground">{line.name} </span>
               <span className="font-semibold">{formatBattleMoney(point.v)}</span>
             </p>
           ))}

@@ -43,9 +43,9 @@ test.describe("simple pages", () => {
 test.describe("API page (spec 4.6)", () => {
   test("every Try link answers with JSON, and the data sources are listed", async ({ page, request }) => {
     await page.goto("/api-docs");
-    const tries = await page.getByRole("link", { name: /^\/api\// }).evaluateAll((links) =>
-      links.map((link) => link.getAttribute("href") ?? ""),
-    );
+    const tries = await page
+      .getByRole("link", { name: /^\/api\// })
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href") ?? ""));
     expect(tries).toHaveLength(ENDPOINTS.length);
     for (const href of tries) {
       const response = await request.get(href);
@@ -60,9 +60,13 @@ test.describe("API page (spec 4.6)", () => {
 test.describe("Polymarket About section (POLY-02)", () => {
   test("has five questions and four links that load", async ({ page, request }) => {
     await page.goto("/polymarket");
-    const about = page.locator("section").filter({ has: page.getByRole("heading", { name: "About this board" }) });
+    const about = page
+      .locator("section")
+      .filter({ has: page.getByRole("heading", { name: "About this board" }) });
     await expect(about.getByRole("heading", { level: 3 })).toHaveCount(5);
-    const links = await about.getByRole("link").evaluateAll((items) => items.map((item) => item.getAttribute("href") ?? ""));
+    const links = await about
+      .getByRole("link")
+      .evaluateAll((items) => items.map((item) => item.getAttribute("href") ?? ""));
     expect(links).toHaveLength(4);
     for (const href of links) expect((await request.get(href)).status(), href).toBe(200);
   });
@@ -76,17 +80,32 @@ test.describe("response headers (D-054)", () => {
       expect(headers["x-powered-by"]).toBeUndefined();
     });
   }
+
+  test("no page breaks its content security policy", async ({ page }) => {
+    const violations: string[] = [];
+    page.on("console", (message) => {
+      if (/Content Security Policy/i.test(message.text())) violations.push(message.text());
+    });
+    for (const path of ["/", "/kalshi", "/account/ProbabilityDuck", "/battle", "/api-docs", "/submit"]) {
+      await page.goto(path);
+      // The home board fetches its other periods after the first paint.
+      await page.waitForLoadState("networkidle");
+    }
+    expect(violations).toEqual([]);
+  });
 });
 
 test.describe("API routes", () => {
   test("serve boards as JSON and refuse unknown periods", async ({ request }) => {
     const board = await request.get("/api/boards/30d");
     expect(board.status()).toBe(200);
-    const body = await board.json();
+    const body = (await board.json()) as { source: { kind: string }; board: { traders: unknown[] } };
     expect(body.source.kind).toBe("live");
     expect(body.board.traders.length).toBeGreaterThan(0);
 
     expect((await request.get("/api/kalshi/7d")).status()).toBe(200);
-    expect((await request.get("/api/boards/2y")).status()).toBe(404);
+    const unknown = await request.get("/api/boards/2y");
+    expect(unknown.status()).toBe(404);
+    expect(((await unknown.json()) as { error: string }).error).toBe("Unknown period");
   });
 });

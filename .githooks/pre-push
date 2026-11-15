@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs the full check before anything leaves this machine: format, lint,
+# types, unit tests, the asset check and a production build.
+# Turn it on once per clone: git config core.hooksPath .githooks
+exec npm run check

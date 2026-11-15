@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-
+import { ErrorNotice } from "@/features/shell/error-notice";
 import { TopBarShell } from "@/features/shell/top-bar-shell";
 
 /**
@@ -10,23 +9,15 @@ import { TopBarShell } from "@/features/shell/top-bar-shell";
  * page have their own error pages.
  */
 export default function PageError({ error, retry }: { error: unknown; retry: () => void }) {
-  useEffect(() => {
-    console.error("Page failed.", error);
-  }, [error]);
-
   return (
     <TopBarShell width="narrow">
-      <div role="alert" className="py-16 text-center text-sm text-muted-foreground">
-        <h1 className="mb-2 text-xl text-foreground">Something went wrong on this page</h1>
-        <p>Try again in a moment.</p>
-        <button
-          type="button"
-          onClick={retry}
-          className="mt-4 border border-border px-3 py-1 text-foreground hover:bg-accent"
-        >
-          Try again
-        </button>
-      </div>
+      <ErrorNotice
+        error={error}
+        logMessage="Page failed."
+        title="Something went wrong on this page"
+        detail="Try again in a moment."
+        retry={retry}
+      />
     </TopBarShell>
   );
 }

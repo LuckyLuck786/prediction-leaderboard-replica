@@ -2,10 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type PeriodData<T> =
-  | { status: "loading" }
-  | { status: "ready"; value: T }
-  | { status: "failed" };
+export type PeriodData<T> = { status: "loading" } | { status: "ready"; value: T } | { status: "failed" };
 
 /**
  * Data that comes in one piece per period. The first period arrives with the

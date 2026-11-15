@@ -4,20 +4,19 @@ import type { Dispatch } from "react";
 
 import { Chip } from "@/features/shell/chip";
 import { ThemeToggle } from "@/features/shell/theme-toggle";
+import { FILTERABLE_PLATFORMS, PLATFORM_NAMES } from "@/features/trader/platforms";
 import { cn } from "@/lib/utils";
 
 import {
   EXTRA_COLUMNS,
   EXTRA_COLUMN_LABELS,
-  FILTERABLE_PLATFORMS,
   MIN_DAILY_MOVE_USD,
   PERIOD_BUTTONS,
-  PLATFORM_NAMES,
   SCORE_WEIGHTS,
   type ExtraColumn,
 } from "../model";
 import type { LeaderboardAction, LeaderboardState } from "../state";
-import { PlatformBadge } from "./platform-badge";
+import { PlatformBadge } from "@/features/trader/components/platform-badge";
 
 /** Tooltips. The ROI definition is the one given in the upstream API reference. */
 const EXTRA_COLUMN_TITLES: Record<ExtraColumn, string> = {
@@ -49,16 +48,12 @@ export function LeaderboardControls({
         <input
           type="search"
           value={query.search}
-          onChange={(event) =>
-            dispatch({ type: "patchQuery", patch: { search: event.target.value } })
-          }
+          onChange={(event) => dispatch({ type: "patchQuery", patch: { search: event.target.value } })}
           placeholder="Find a trader"
           aria-label="Find a trader by name or wallet"
           className="h-[30px] w-full border border-border bg-background px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-2 focus:outline-ring sm:w-48"
         />
-        <p className="text-sm">
-          {countLabel}
-        </p>
+        <p className="text-sm">{countLabel}</p>
         <div className="sm:ml-auto">
           <ThemeToggle />
         </div>
@@ -88,9 +83,7 @@ export function LeaderboardControls({
                 ? `Showing traders whose day moved $${MIN_DAILY_MOVE_USD} or more`
                 : `Show only traders whose day moved $${MIN_DAILY_MOVE_USD} or more`
             }
-            onClick={() =>
-              dispatch({ type: "patchQuery", patch: { bigMoversOnly: !query.bigMoversOnly } })
-            }
+            onClick={() => dispatch({ type: "patchQuery", patch: { bigMoversOnly: !query.bigMoversOnly } })}
             className="sm:px-2.5"
           >
             ${MIN_DAILY_MOVE_USD}+
@@ -123,12 +116,8 @@ export function LeaderboardControls({
 
             <Chip
               active={query.linkedOnly}
-              title={
-                query.linkedOnly ? "Showing only traders with an X account" : "Showing every trader"
-              }
-              onClick={() =>
-                dispatch({ type: "patchQuery", patch: { linkedOnly: !query.linkedOnly } })
-              }
+              title={query.linkedOnly ? "Showing only traders with an X account" : "Showing every trader"}
+              onClick={() => dispatch({ type: "patchQuery", patch: { linkedOnly: !query.linkedOnly } })}
               className="sm:h-6"
             >
               <span aria-hidden className="text-[10px] font-bold leading-none">
@@ -144,9 +133,7 @@ export function LeaderboardControls({
                   ? "Hiding traders who earn most of their profit on sports"
                   : "Showing sports traders too"
               }
-              onClick={() =>
-                dispatch({ type: "patchQuery", patch: { hideSports: !query.hideSports } })
-              }
+              onClick={() => dispatch({ type: "patchQuery", patch: { hideSports: !query.hideSports } })}
             >
               <span className="text-xs">No sports</span>
             </Chip>
@@ -158,9 +145,7 @@ export function LeaderboardControls({
                   ? "Hiding esports traders who have no X account"
                   : "Showing esports traders too"
               }
-              onClick={() =>
-                dispatch({ type: "patchQuery", patch: { hideEsports: !query.hideEsports } })
-              }
+              onClick={() => dispatch({ type: "patchQuery", patch: { hideEsports: !query.hideEsports } })}
             >
               <span className="text-xs">No esports</span>
             </Chip>

@@ -2,16 +2,12 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  DARK_CLASS,
-  THEME_INIT_SCRIPT,
-  THEME_STORAGE_KEY,
-  applySavedTheme,
-  toggleTheme,
-} from "./theme";
+import { DARK_CLASS, THEME_INIT_SCRIPT, THEME_STORAGE_KEY, applySavedTheme, toggleTheme } from "./theme";
 
 const root = document.documentElement;
-const runInitScript = () => new Function(THEME_INIT_SCRIPT)();
+// Runs the exact script the layout inlines, as the browser would.
+// eslint-disable-next-line @typescript-eslint/no-implied-eval
+const runInitScript = () => (new Function(THEME_INIT_SCRIPT) as () => void)();
 
 beforeEach(() => {
   localStorage.clear();

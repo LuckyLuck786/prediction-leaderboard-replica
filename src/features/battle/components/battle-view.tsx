@@ -1,7 +1,8 @@
-import { XBadge } from "@/features/leaderboard/components/platform-badge";
-import { TraderAvatar } from "@/features/leaderboard/components/trader-avatar";
-import { formatChartDate, formatTraderName } from "@/features/leaderboard/format";
-import { PLATFORM_NAMES } from "@/features/leaderboard/model";
+import { XBadge } from "@/features/trader/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
+import { formatChartDate, formatTraderName } from "@/lib/format";
+import { PLATFORM_NAMES } from "@/features/trader/platforms";
+import { profilePath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 
 import type { Battle, BattlePlatform, BattleSide } from "../data";
@@ -9,7 +10,10 @@ import { BattleFooter } from "./battle-footer";
 import { BattleChart, type ChartLine } from "./battle-chart";
 
 /** Platform colors for the ring, label, legend and line (BATTLE-02, BATTLE-03). */
-const PLATFORM_STYLE: Record<BattlePlatform, { ring: string; text: string; stroke: string; fill: string; dash: string }> = {
+const PLATFORM_STYLE: Record<
+  BattlePlatform,
+  { ring: string; text: string; stroke: string; fill: string; dash: string }
+> = {
   polymarket: {
     ring: "border-polymarket/50",
     text: "text-polymarket",
@@ -33,7 +37,7 @@ function displayName(side: BattleSide): string {
 /** Where a trader's name points: their page on the platform, or ours when that is unknown. */
 function platformHref(side: BattleSide): string {
   const url = side.platform === "polymarket" ? side.profile?.polymarketUrl : side.profile?.kalshiUrl;
-  return url ?? `/account/${encodeURIComponent(side.id)}`;
+  return url ?? profilePath(side.id);
 }
 
 function Trader({ side }: { side: BattleSide }) {
@@ -115,8 +119,8 @@ export function BattleView({ battle }: { battle: Battle }) {
           <>
             <BattleChart comparison={battle.comparison} lines={lines} />
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              Profit or loss since {formatChartDate(battle.comparison.start)}, the first day both
-              traders were tracked.
+              Profit or loss since {formatChartDate(battle.comparison.start)}, the first day both traders were
+              tracked.
             </p>
           </>
         ) : (

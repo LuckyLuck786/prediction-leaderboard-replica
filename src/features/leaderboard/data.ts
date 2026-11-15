@@ -1,22 +1,15 @@
 // Live leaderboard data, with the saved snapshot as the fallback. Server only.
 
+import "server-only";
+
 import { z } from "zod";
 
 import { fetchUpstreamJson } from "@/upstream/client";
+import type { DataSource } from "@/upstream/data-source";
 
 import type { Leaderboard, LeaderboardPeriod } from "./model";
 import { parseLeaderboard } from "./schema";
 import { loadSnapshot } from "./snapshot";
-
-export type DataSource =
-  | { kind: "live" }
-  | {
-      kind: "snapshot";
-      /** ISO timestamp of when the snapshot was taken. */
-      capturedAt: string;
-      /** How many traders upstream listed for this period at that time. */
-      upstreamTotal: number;
-    };
 
 export interface BoardPayload {
   board: Leaderboard;

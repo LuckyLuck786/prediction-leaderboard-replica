@@ -21,7 +21,10 @@
     "lighthouse": "node scripts/lighthouse.mjs",
     "snapshot": "node scripts/update-snapshot.mjs",
     "fixtures:e2e": "node scripts/record-e2e-fixtures.mjs",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run check:assets && npm run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "clsx": "2.1.1",
@@ -41,11 +44,14 @@
     "@types/node": "24.12.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "5.1.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.4.6",
     "jsdom": "31.0.1",
+    "prettier": "3.10.1",
     "tailwindcss": "4.2.2",
     "typescript": "5.9.3",
+    "typescript-eslint": "8.72.2",
     "vite": "8.3.8",
     "vitest": "5.1.0"
   }

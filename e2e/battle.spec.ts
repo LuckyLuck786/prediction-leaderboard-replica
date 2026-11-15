@@ -34,7 +34,9 @@ test.describe("head to head (spec 4.5)", () => {
     const zeroY = Number(await chart.locator("line[stroke-dasharray]").getAttribute("y1"));
     const starts = await chart
       .locator("path")
-      .evaluateAll((paths) => paths.map((path) => Number(/^M[\d.-]+,([\d.-]+)/.exec(path.getAttribute("d") ?? "")?.[1])));
+      .evaluateAll((paths) =>
+        paths.map((path) => Number(/^M[\d.-]+,([\d.-]+)/.exec(path.getAttribute("d") ?? "")?.[1])),
+      );
     expect(starts).toHaveLength(2);
     for (const y of starts) expect(Math.abs(y - zeroY)).toBeLessThanOrEqual(PIXEL_TOLERANCE);
   });

@@ -5,6 +5,8 @@
 // promotion (D-014). Everything shown comes from documented endpoints: the
 // two trader records, the Kalshi history and Polymarket's P&L series.
 
+import "server-only";
+
 import { PHASE_PRODUCTION_BUILD } from "next/constants";
 
 import { getProfile } from "@/features/profile/data";
@@ -70,11 +72,7 @@ export class BattleUnavailableError extends Error {
  * on the next request, instead of caching a degraded one for five minutes.
  */
 export async function getBattle(): Promise<Battle> {
-  const [polymarket, kalshi, lines] = await Promise.all([
-    side("polymarket"),
-    side("kalshi"),
-    comparison(),
-  ]);
+  const [polymarket, kalshi, lines] = await Promise.all([side("polymarket"), side("kalshi"), comparison()]);
   const complete = polymarket.profile !== null && kalshi.profile !== null && lines !== null;
   if (!complete && process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD) throw new BattleUnavailableError();
   return { sides: [polymarket, kalshi], comparison: lines };

@@ -3,15 +3,10 @@
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, type MouseEvent } from "react";
 
-import {
-  MISSING,
-  formatSignedWhole,
-  formatMonthTotal,
-  formatProfileMoney,
-} from "@/features/leaderboard/format";
+import { MISSING, formatSignedWhole, formatMonthTotal, formatProfileMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { summariseMonth, summariseYear, type DayCell } from "../history";
+import { parseDayKey, summariseMonth, summariseYear, type DayCell } from "../history";
 import { BAR_BACKGROUND, CELL_BACKGROUND, cellTextClass, signedTextClass } from "./tone-styles";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -27,32 +22,28 @@ const LEGEND = [
 
 /** Months counted from year 0, so two months compare with < and >. */
 const monthIndex = (year: number, month: number) => year * 12 + month;
-const parseKey = (key: string) => {
-  const [year, month] = key.split("-").map(Number);
-  return { year, month: month - 1 };
-};
 
 function DayTile({ cell }: { cell: DayCell }) {
-  const title =
-    cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
+  const title = cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
   return (
     <div
+      data-testid="calendar-day"
       title={title}
       className={cn(
         "flex aspect-square flex-col items-center justify-center rounded text-[10px]",
         CELL_BACKGROUND[cell.tone],
       )}
     >
-      <span className={cn("text-xs font-medium", cell.future ? "text-muted-foreground" : cellTextClass(cell.tone))}>
+      <span
+        className={cn(
+          "text-xs font-medium",
+          cell.future ? "text-muted-foreground" : cellTextClass(cell.tone),
+        )}
+      >
         {cell.day}
       </span>
       {cell.future ? null : (
-        <span
-          className={cn(
-            "text-[10px] font-bold leading-none",
-            cellTextClass(cell.tone),
-          )}
-        >
+        <span className={cn("text-[10px] font-bold leading-none", cellTextClass(cell.tone))}>
           {cell.change === null ? MISSING : formatProfileMoney(cell.change)}
         </span>
       )}
@@ -77,8 +68,13 @@ export function MonthStrip({
   accentBorder: string;
 }) {
   const changeMap = new Map(changes);
-  const current = parseKey(today);
-  const first = changes.length > 0 ? parseKey(changes[0][0]) : current;
+  const current = parseDayKey(today);
+  // The earliest day with a result, wherever it sits in the list (BUG-082).
+  const earliest = changes.reduce<string | null>(
+    (min, [key]) => (min === null || key < min ? key : min),
+    null,
+  );
+  const first = earliest === null ? current : parseDayKey(earliest);
 
   const [cursor, setCursor] = useState(current);
   const [expanded, setExpanded] = useState(false);
@@ -115,7 +111,8 @@ export function MonthStrip({
           >
             <ChevronLeft aria-hidden className="h-4 w-4 text-muted-foreground" />
           </button>
-          <span className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">
+          {/* A status, so stepping a month is announced to screen readers. */}
+          <span role="status" className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">
             {label}
           </span>
           <button
@@ -130,7 +127,12 @@ export function MonthStrip({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className={cn("text-sm font-bold", month.total === null ? "text-muted-foreground" : signedTextClass(month.total))}>
+          <span
+            className={cn(
+              "text-sm font-bold",
+              month.total === null ? "text-muted-foreground" : signedTextClass(month.total),
+            )}
+          >
             {month.total === null ? MISSING : formatSignedWhole(month.total)}
           </span>
           <span className="text-xs text-muted-foreground">
@@ -171,7 +173,11 @@ export function MonthStrip({
       {expanded ? (
         <div className="px-3 pb-3">
           <div className="mb-2 mt-3 flex items-center justify-between">
-            <div role="group" aria-label="Calendar view" className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+            <div
+              role="group"
+              aria-label="Calendar view"
+              className="inline-flex overflow-hidden rounded-md border border-border text-xs"
+            >
               {(["daily", "monthly"] as const).map((option, index) => (
                 <button
                   key={option}
@@ -192,14 +198,14 @@ export function MonthStrip({
 
           {view === "daily" ? (
             <>
-              <div aria-hidden className="mb-1 grid grid-cols-7 gap-1">
+              <div aria-hidden data-testid="calendar-weekdays" className="mb-1 grid grid-cols-7 gap-1">
                 {WEEKDAYS.map((weekday, index) => (
                   <div key={index} className="text-center text-[10px] font-medium text-muted-foreground">
                     {weekday}
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-7 gap-1">
+              <div data-testid="calendar-days" className="grid grid-cols-7 gap-1">
                 {Array.from({ length: month.leadingBlanks }, (_, index) => (
                   <div key={`blank-${index}`} aria-hidden />
                 ))}
@@ -233,7 +239,7 @@ export function MonthStrip({
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {year.months.map((entry) => {
-                  const name = MONTH_NAMES[entry.month].toUpperCase();
+                  const name = MONTH_NAMES[entry.month]?.toUpperCase();
                   return (
                     <div
                       key={entry.month}

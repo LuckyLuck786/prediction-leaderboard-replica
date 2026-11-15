@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { formatChartMoney } from "@/features/leaderboard/format";
+import { formatChartMoney } from "@/lib/format";
+import { nth } from "@/lib/test-utils";
 
 import {
+  valueRange,
   combineSeries,
   nearestIndex,
   roomyTicks,
   dailyChanges,
   dayKey,
+  parseDayKey,
   summariseMonth,
   sumDailyChanges,
   summariseYear,
@@ -18,6 +21,13 @@ import {
 } from "./history";
 
 const at = (iso: string) => Date.parse(iso);
+
+describe("parseDayKey", () => {
+  it("reads the year and the month, January as 0", () => {
+    expect(parseDayKey("2026-01-31")).toEqual({ year: 2026, month: 0 });
+    expect(parseDayKey("2025-12-01")).toEqual({ year: 2025, month: 11 });
+  });
+});
 
 describe("dailyChanges", () => {
   it("measures each UTC day against the previous day's last value", () => {
@@ -70,6 +80,19 @@ describe("sumDailyChanges", () => {
     });
   });
 
+  it("lists days oldest first, whichever series starts first (BUG-082)", () => {
+    // Kalshi loads first but starts late; Polymarket starts two years earlier.
+    const kalshi = [
+      { t: at("2025-12-01T12:00:00Z"), v: 10 },
+      { t: at("2025-12-02T12:00:00Z"), v: 20 },
+    ];
+    const polymarket = [
+      { t: at("2024-01-14T12:00:00Z"), v: 1 },
+      { t: at("2024-01-15T12:00:00Z"), v: 3 },
+    ];
+    expect([...sumDailyChanges([kalshi, polymarket]).keys()]).toEqual(["2024-01-15", "2025-12-02"]);
+  });
+
   it("equals dailyChanges for a single series", () => {
     const a = [
       { t: at("2026-11-01T12:00:00Z"), v: 1 },
@@ -106,7 +129,7 @@ describe("combineSeries", () => {
     ];
     const kalshi = [{ t: at("2025-09-26T14:25:32Z"), v: 90_139 }];
     const combined = combineSeries([polymarket, kalshi]);
-    expect(combined[0].v).toBe(91_139);
+    expect(combined[0]?.v).toBe(91_139);
     expect(combined.at(-1)?.v).toBe(91_339);
   });
 
@@ -119,8 +142,20 @@ describe("combineSeries", () => {
 
 // The source's November 2026 for one trader, as recorded on 2026-11-14.
 const NOVEMBER: Record<number, number> = {
-  1: 2152, 2: 7069, 3: -10863, 4: 145139, 5: 2433, 6: 3901, 7: 0,
-  8: -827, 9: 7324, 10: -1500, 11: -4900, 12: 4700, 13: 1300, 14: 5200,
+  1: 2152,
+  2: 7069,
+  3: -10863,
+  4: 145139,
+  5: 2433,
+  6: 3901,
+  7: 0,
+  8: -827,
+  9: 7324,
+  10: -1500,
+  11: -4900,
+  12: 4700,
+  13: 1300,
+  14: 5200,
 };
 const novemberChanges = new Map(
   Object.entries(NOVEMBER).map(([day, change]) => [`2026-11-${day.padStart(2, "0")}`, change]),
@@ -140,14 +175,14 @@ describe("summariseMonth (PROF-02, PROF-03)", () => {
   });
 
   it("marks the month's best gain on its own", () => {
-    expect(month.days[3].tone).toBe("best");
+    expect(month.days[3]?.tone).toBe("best");
     expect(month.days.filter((cell) => cell.tone === "best")).toHaveLength(1);
   });
 
   it("counts a small loss as a loss even though it is shaded flat", () => {
     const small = summariseMonth(new Map([["2026-09-19", -78]]), 2026, 8, "2026-11-14");
     expect(small.losses).toBe(1);
-    expect(small.days[18].tone).toBe("flat");
+    expect(small.days[18]?.tone).toBe("flat");
   });
 
   it("leaves future days and days without data empty", () => {
@@ -167,17 +202,44 @@ describe("summariseMonth (PROF-02, PROF-03)", () => {
 // except each month's best day: the dollar change and the shade it had.
 describe("toneFor (PROF-03)", () => {
   it.each([
-    [0, "flat"], [-78, "flat"],
+    [0, "flat"],
+    [-78, "flat"],
     [-208, "loss-1"],
-    [603, "gain-2"], [625, "gain-2"], [765, "gain-2"], [914, "gain-2"], [1300, "gain-2"],
-    [1571, "gain-2"], [-827, "loss-2"], [-909, "loss-2"], [-1500, "loss-2"],
-    [2152, "gain-3"], [2250, "gain-3"], [2433, "gain-3"], [2695, "gain-3"], [3901, "gain-3"],
-    [4223, "gain-3"], [4700, "gain-3"], [-2873, "loss-3"], [-4366, "loss-3"], [-4563, "loss-3"],
+    [603, "gain-2"],
+    [625, "gain-2"],
+    [765, "gain-2"],
+    [914, "gain-2"],
+    [1300, "gain-2"],
+    [1571, "gain-2"],
+    [-827, "loss-2"],
+    [-909, "loss-2"],
+    [-1500, "loss-2"],
+    [2152, "gain-3"],
+    [2250, "gain-3"],
+    [2433, "gain-3"],
+    [2695, "gain-3"],
+    [3901, "gain-3"],
+    [4223, "gain-3"],
+    [4700, "gain-3"],
+    [-2873, "loss-3"],
+    [-4366, "loss-3"],
+    [-4563, "loss-3"],
     [-4900, "loss-3"],
-    [5200, "gain-4"], [6087, "gain-4"], [6799, "gain-4"], [7069, "gain-4"], [7324, "gain-4"],
-    [9035, "gain-4"], [-7582, "loss-4"],
-    [10553, "gain-5"], [12420, "gain-5"], [15205, "gain-5"], [20535, "gain-5"],
-    [28525, "gain-5"], [38031, "gain-5"], [-10863, "loss-5"], [-28045, "loss-5"],
+    [5200, "gain-4"],
+    [6087, "gain-4"],
+    [6799, "gain-4"],
+    [7069, "gain-4"],
+    [7324, "gain-4"],
+    [9035, "gain-4"],
+    [-7582, "loss-4"],
+    [10553, "gain-5"],
+    [12420, "gain-5"],
+    [15205, "gain-5"],
+    [20535, "gain-5"],
+    [28525, "gain-5"],
+    [38031, "gain-5"],
+    [-10863, "loss-5"],
+    [-28045, "loss-5"],
   ])("%d -> %s", (change, expected) => {
     expect(toneFor(change)).toBe(expected);
   });
@@ -195,8 +257,8 @@ describe("summariseYear", () => {
       "2026-11-14",
     );
     expect(year.months).toHaveLength(11);
-    expect(year.months[0].total).toBe(100);
-    expect(year.months[1].total).toBeNull();
+    expect(year.months[0]?.total).toBe(100);
+    expect(year.months[1]?.total).toBeNull();
     expect(year.total).toBe(70);
   });
 
@@ -211,7 +273,7 @@ describe("chart ticks (PROF-04)", () => {
     // running from about $89.6K to $1.105M.
     const axis = valueAxis(89_600, 1_104_963);
     expect(axis.ticks.map(formatChartMoney)).toEqual(["-$12K", "+$338K", "+$688K", "+$1.0M", "+$1.2M"]);
-    expect(axis.ticks[1] - axis.ticks[0]).toBeCloseTo(350_000);
+    expect(nth(axis.ticks, 1) - nth(axis.ticks, 0)).toBeCloseTo(350_000);
   });
 
   it("reproduces the step of a recorded Polymarket chart", () => {
@@ -243,6 +305,13 @@ describe("chart ticks (PROF-04)", () => {
     const axis = valueAxis(89_600, 1_104_963);
     const pixelsPerUnit = 147 / (axis.max - axis.min);
     expect(roomyTicks(axis.ticks, pixelsPerUnit)).toHaveLength(5);
+  });
+
+  it("finds the range of any number of series, however long (BUG-084)", () => {
+    const LONG = 300_000;
+    const long = Array.from({ length: LONG }, (_, index) => ({ t: index, v: index % 1000 }));
+    expect(valueRange(long, [{ t: 0, v: -5 }])).toEqual({ min: -5, max: 999 });
+    expect(valueRange()).toEqual({ min: 0, max: 0 });
   });
 
   it("finds the point nearest in time for the pointer", () => {

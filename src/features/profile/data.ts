@@ -1,11 +1,15 @@
 // Live trader profile. Server only. There is no snapshot for profiles: an
 // unknown trader is a 404, and any other failure is shown as such.
 
+import "server-only";
+
 import { cache } from "react";
 
 import { fetchUpstreamJson, isNotFound } from "@/upstream/client";
 
-import { isProfileId, type TraderProfile } from "./model";
+import { isProfileId } from "@/features/trader/profile-id";
+
+import type { TraderProfile } from "./model";
 import { parseProfile } from "./schema";
 
 /** Upstream failed for a reason other than "no such trader". */
@@ -17,9 +21,7 @@ export class ProfileUnavailableError extends Error {
 }
 
 export type ProfileResult =
-  | { kind: "found"; profile: TraderProfile }
-  | { kind: "not-found" }
-  | { kind: "unavailable" };
+  { kind: "found"; profile: TraderProfile } | { kind: "not-found" } | { kind: "unavailable" };
 
 /**
  * One trader record. Memoized for the length of one render, because a

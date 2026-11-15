@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-import {
-  BRAND_MARK_PATH,
-  PRODUCT_DESCRIPTION,
-  PRODUCT_NAME,
-} from "@/features/shell/brand";
+import { BRAND_MARK_PATH, PRODUCT_DESCRIPTION, PRODUCT_NAME } from "@/features/shell/brand";
 import { DARK_CLASS } from "@/features/shell/theme";
 import { ThemeScript } from "@/features/shell/theme-script";
 

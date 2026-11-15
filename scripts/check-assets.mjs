@@ -36,13 +36,8 @@ export const ALLOWED_TO_NAME_SOURCE = [
   "scripts/check-assets.test.mjs",
 ];
 
-/** Files that describe the capture folders (ignore rules, the template's guide). */
-export const ALLOWED_TO_NAME_CAPTURE_DIRS = [
-  ...ALLOWED_TO_NAME_SOURCE,
-  "AGENTS.md",
-  ".gitignore",
-  ".agents/skills/clone-website/",
-];
+/** Files that describe the capture folders: the rules files and the ignore rules. */
+export const ALLOWED_TO_NAME_CAPTURE_DIRS = [...ALLOWED_TO_NAME_SOURCE, ".gitignore"];
 
 const BINARY_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|ico|woff2?|ttf|otf|mp4|webm|pdf)$/i;
 
@@ -98,11 +93,9 @@ export function findViolations(files, sourceName) {
 
 /** Tracked files plus new files that are not ignored: what a commit could contain. */
 function candidatePaths() {
-  const listing = execFileSync(
-    "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-    { encoding: "utf8" },
-  );
+  const listing = execFileSync("git", ["ls-files", "-z", "--cached", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  });
   return [...new Set(listing.split("\0").filter(Boolean))];
 }
 
@@ -112,10 +105,12 @@ function candidatePaths() {
  * @param {string[]} paths
  */
 export function loadFiles(paths) {
-  return paths.filter((path) => existsSync(path)).map((path) => ({
-    path,
-    content: BINARY_EXTENSIONS.test(path) ? null : readFileSync(path, "utf8"),
-  }));
+  return paths
+    .filter((path) => existsSync(path))
+    .map((path) => ({
+      path,
+      content: BINARY_EXTENSIONS.test(path) ? null : readFileSync(path, "utf8"),
+    }));
 }
 
 function main() {

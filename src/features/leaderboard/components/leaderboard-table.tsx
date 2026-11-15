@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent, ReactNode } from "react";
 
+import { PLATFORM_NAMES, type FilterablePlatform } from "@/features/trader/platforms";
 import { INSET_FOCUS_RING } from "@/lib/focus";
 import { profilePath } from "@/lib/routes";
 import { cn } from "@/lib/utils";
@@ -17,22 +18,20 @@ import {
   formatScore,
   formatSharpe,
   formatTraderName,
-  formatWinRate,
-} from "../format";
+  formatWholePercent,
+} from "@/lib/format";
 import {
   EXTRA_COLUMN_LABELS,
-  PLATFORM_NAMES,
   SHARPE_HEADINGS,
   type ExtraColumn,
-  type FilterablePlatform,
   type LeaderboardPeriod,
   type SortKey,
   type SortState,
   type Trader,
 } from "../model";
-import { scoreBandClass } from "../score-band";
-import { PlatformBadge, XBadge } from "./platform-badge";
-import { TraderAvatar } from "./trader-avatar";
+import { scoreBandClass } from "@/features/trader/score-band";
+import { PlatformBadge, XBadge } from "@/features/trader/components/platform-badge";
+import { TraderAvatar } from "@/features/trader/components/trader-avatar";
 
 const EXTRA_COLUMN_DEFS: Record<
   ExtraColumn,
@@ -44,7 +43,7 @@ const EXTRA_COLUMN_DEFS: Record<
   },
   winRate: {
     heading: () => EXTRA_COLUMN_LABELS.winRate,
-    cell: (trader) => formatWinRate(trader.winRate),
+    cell: (trader) => formatWholePercent(trader.winRate),
   },
   roi: { heading: () => EXTRA_COLUMN_LABELS.roi, cell: (trader) => formatRoi(trader.roi) },
 };
@@ -58,6 +57,9 @@ const EXTRA_COLUMN_VISIBILITY = "hidden sm:table-cell";
 
 const SORT_ARROWS = { asc: "↓", desc: "↑" } as const;
 const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
+/** A trader's name in a row, linked or not. */
+const NAME_CLASS = "min-w-0 max-w-[60px] truncate text-sm text-foreground sm:max-w-none sm:text-lg";
 
 const BADGE_LINK = cn("flex shrink-0 items-center justify-center hover:opacity-70", INSET_FOCUS_RING);
 
@@ -260,12 +262,7 @@ export function LeaderboardTable({
               {EXTRA_COLUMN_DEFS[column].heading(period)}
             </SortableHeader>
           ))}
-          <SortableHeader
-            sortKey="pnl"
-            sort={sort}
-            onSort={onSort}
-            className="text-right text-sm sm:text-lg"
-          >
+          <SortableHeader sortKey="pnl" sort={sort} onSort={onSort} className="text-right text-sm sm:text-lg">
             P&amp;L
           </SortableHeader>
         </tr>
@@ -273,11 +270,12 @@ export function LeaderboardTable({
       <tbody>
         {traders.map((trader, index) => {
           const displayName = formatTraderName(trader.name);
+          const { profileId } = trader;
           return (
             <tr
               key={trader.id}
-              onClick={() => router.push(profilePath(trader.id))}
-              className="cursor-pointer border-b border-border hover:bg-accent/50"
+              onClick={profileId ? () => router.push(profilePath(profileId)) : undefined}
+              className={cn("border-b border-border", profileId && "cursor-pointer hover:bg-accent/50")}
             >
               <td className="p-1 text-sm sm:p-3 sm:text-lg">{index + 1}</td>
               <td className="p-0.5 sm:p-2">
@@ -287,19 +285,22 @@ export function LeaderboardTable({
               </td>
               <td className="p-1 sm:p-2">
                 <div className="flex min-w-0 items-center gap-1 overflow-hidden sm:gap-2">
-                  {/* No prefetch: each would render that profile on our server and ask upstream (D-048). */}
-                  <Link
-                    href={profilePath(trader.id)}
-                    prefetch={false}
-                    onClick={keepInsideRow}
-                    title={trader.name}
-                    className={cn(
-                      "min-w-0 max-w-[60px] truncate text-sm text-foreground hover:underline sm:max-w-none sm:text-lg",
-                      INSET_FOCUS_RING,
-                    )}
-                  >
-                    {displayName}
-                  </Link>
+                  {profileId ? (
+                    // No prefetch: each would render that profile on our server and ask upstream (D-048).
+                    <Link
+                      href={profilePath(profileId)}
+                      prefetch={false}
+                      onClick={keepInsideRow}
+                      title={trader.name}
+                      className={cn(NAME_CLASS, "hover:underline", INSET_FOCUS_RING)}
+                    >
+                      {displayName}
+                    </Link>
+                  ) : (
+                    <span title={trader.name} className={NAME_CLASS}>
+                      {displayName}
+                    </span>
+                  )}
                   {/* 4 px apart on phones too: 20 px links need 24 px between centres (WCAG 2.5.8, BUG-060). */}
                   <div className="ml-0.5 flex shrink-0 gap-1 sm:ml-1.5">
                     {trader.xUrl ? (

@@ -11,7 +11,7 @@ const SECTIONS = [
   },
   {
     heading: "What your browser stores",
-    body: "If you switch between the dark and light theme, your choice is kept in your own browser's local storage under the name \"theme\". It never leaves your device. Clearing site data removes it.",
+    body: 'If you switch between the dark and light theme, your choice is kept in your own browser\'s local storage under the name "theme". It never leaves your device. Clearing site data removes it.',
   },
   {
     heading: "Pictures from other sites",
