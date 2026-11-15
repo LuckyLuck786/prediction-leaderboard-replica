@@ -1,6 +1,8 @@
 // Display formats for every page. Each rule mirrors a format observed on
 // the source site; the IDs refer to docs/SPEC.md, section 3.3.
 
+import { WALLET } from "./wallet";
+
 /** Shown wherever a value is missing. */
 export const MISSING = "–";
 
@@ -12,7 +14,6 @@ const MILLION = 1_000_000;
  * 349.8K was short, so the real switch lies between the two. Assumed.
  */
 const COMPACT_ROW_FROM = 100_000;
-const WALLET_PATTERN = /^0x[0-9a-fA-F]{40}$/;
 const WALLET_HEAD_LENGTH = 6;
 const WALLET_TAIL_LENGTH = 4;
 
@@ -219,7 +220,7 @@ export function formatDaysSince(joinedAt: string | null, asOf: string): string {
 
 /** FMT-07. A bare wallet address is shortened: `0xcf19…6402`. */
 export function formatTraderName(name: string): string {
-  if (!WALLET_PATTERN.test(name)) return name;
+  if (!WALLET.test(name)) return name;
   return `${name.slice(0, WALLET_HEAD_LENGTH)}…${name.slice(-WALLET_TAIL_LENGTH)}`;
 }
 

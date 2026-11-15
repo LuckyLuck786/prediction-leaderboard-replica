@@ -3,7 +3,8 @@
 import { z } from "zod";
 
 import { PLATFORMS } from "@/features/trader/platforms";
-import { WALLET, isProfileId } from "@/features/trader/profile-id";
+import { isProfileId } from "@/features/trader/profile-id";
+import { WALLET } from "@/lib/wallet";
 import { cleanLinkUrl, safeHttpsUrl } from "@/upstream/urls";
 
 import { PROFILE_PERIODS, type ProfilePeriod, type TraderProfile } from "./model";
