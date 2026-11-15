@@ -1,3 +1,5 @@
+import { SECURITY_HEADERS } from "../next.config";
+
 import { expect, test } from "./test";
 
 test.describe("simple pages", () => {
@@ -35,6 +37,16 @@ test.describe("simple pages", () => {
     await page.reload();
     await expect(page.locator("html")).not.toHaveClass(/dark/);
   });
+});
+
+test.describe("response headers (D-054)", () => {
+  for (const path of ["/", "/account/ProbabilityDuck", "/api/boards/1d"]) {
+    test(`${path} sends the security headers and hides the framework`, async ({ request }) => {
+      const headers = (await request.get(path)).headers();
+      for (const { key, value } of SECURITY_HEADERS) expect(headers[key.toLowerCase()], key).toBe(value);
+      expect(headers["x-powered-by"]).toBeUndefined();
+    });
+  }
 });
 
 test.describe("API routes", () => {
