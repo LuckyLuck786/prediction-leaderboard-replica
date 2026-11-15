@@ -66,9 +66,7 @@ const kalshiHistory = (username) => async () => {
 };
 
 const polymarketPnl = (wallet) => async () => {
-  const body = await getJson(
-    `${POLYMARKET_DATA_ORIGIN}/v2/user-pnl?user=${wallet}&interval=all&fidelity=1d`,
-  );
+  const body = await getJson(`${POLYMARKET_DATA_ORIGIN}/v2/user-pnl?user=${wallet}&interval=all&fidelity=1d`);
   return {
     data: {
       proxy_wallet: body.data.proxy_wallet,

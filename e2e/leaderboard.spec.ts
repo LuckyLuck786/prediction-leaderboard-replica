@@ -47,9 +47,9 @@ test.describe("home leaderboard (spec 4.1)", () => {
   });
 
   test("links only to pages that load (HOME-21)", async ({ page, request }) => {
-    const hrefs = await page.locator("footer nav a").evaluateAll((links) =>
-      links.map((link) => link.getAttribute("href")),
-    );
+    const hrefs = await page
+      .locator("footer nav a")
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
     expect(hrefs.length).toBeGreaterThan(0);
     for (const href of hrefs) {
       expect((await request.get(href ?? "")).status(), href ?? "").toBe(200);

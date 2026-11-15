@@ -88,11 +88,13 @@ export function LeaderboardView({
       </header>
 
       {payload?.source.kind === "snapshot" ? (
-        <p role="status" className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm">
+        <p
+          role="status"
+          className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm"
+        >
           Live data is unavailable right now. Showing a saved snapshot from{" "}
-          {formatStamp(payload.source.capturedAt, "UTC")} UTC: {payload.board.traders.length} of
-          the {payload.source.upstreamTotal} traders listed for this period, the best and the
-          worst by P&amp;L.
+          {formatStamp(payload.source.capturedAt, "UTC")} UTC: {payload.board.traders.length} of the{" "}
+          {payload.source.upstreamTotal} traders listed for this period, the best and the worst by P&amp;L.
         </p>
       ) : null}
 
@@ -132,9 +134,7 @@ export function LeaderboardView({
       ) : null}
 
       {payload && matching.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          No traders match these filters.
-        </p>
+        <p className="py-8 text-center text-sm text-muted-foreground">No traders match these filters.</p>
       ) : null}
 
       {visible.length < matching.length ? (

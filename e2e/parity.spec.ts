@@ -31,9 +31,10 @@ async function measure(page: Page, target: string | Locator): Promise<Box> {
 }
 
 function near(actual: number, expected: number, what: string) {
-  expect(Math.abs(actual - expected), `${what}: ${actual.toFixed(1)} against ${expected}`).toBeLessThanOrEqual(
-    TOLERANCE_PX,
-  );
+  expect(
+    Math.abs(actual - expected),
+    `${what}: ${actual.toFixed(1)} against ${expected}`,
+  ).toBeLessThanOrEqual(TOLERANCE_PX);
 }
 
 test.describe("measured parity with the source", () => {
@@ -50,16 +51,18 @@ test.describe("measured parity with the source", () => {
     await page.setViewportSize({ width: 1024, height: 900 });
     await page.goto("/");
     near((await measure(page, "main")).width, 896, "content column");
-    const columns = await page.locator("thead th").evaluateAll((cells) =>
-      cells.slice(0, 6).map((cell) => cell.getBoundingClientRect().width),
-    );
+    const columns = await page
+      .locator("thead th")
+      .evaluateAll((cells) => cells.slice(0, 6).map((cell) => cell.getBoundingClientRect().width));
     [48, 56, 243, 64, 243, 243].forEach((width, index) => near(columns[index], width, `column ${index + 1}`));
     near((await measure(page, "thead tr")).height, 53, "header row");
     near((await measure(page, "tbody tr:not([aria-hidden]) td:nth-child(2) > div")).width, 40, "avatar");
     near((await measure(page, "input[type=search]")).height, 30, "search height");
     near((await measure(page, "input[type=search]")).width, 192, "search width");
     near((await measure(page, "button:text-is('1D')")).height, 28, "period button height");
-    const footerGap = await page.locator("footer").evaluate((node) => parseFloat(getComputedStyle(node).marginTop));
+    const footerGap = await page
+      .locator("footer")
+      .evaluate((node) => parseFloat(getComputedStyle(node).marginTop));
     near(footerGap, 64, "gap above the footer");
   });
 
@@ -77,9 +80,13 @@ test.describe("measured parity with the source", () => {
   test("home at 390 px", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    const columns = await page.locator("thead th").evaluateAll((cells) =>
-      cells.filter((cell) => cell.getBoundingClientRect().width > 0).map((cell) => cell.getBoundingClientRect().width),
-    );
+    const columns = await page
+      .locator("thead th")
+      .evaluateAll((cells) =>
+        cells
+          .filter((cell) => cell.getBoundingClientRect().width > 0)
+          .map((cell) => cell.getBoundingClientRect().width),
+      );
     [24, 28, 105, 105, 105].forEach((width, index) => near(columns[index], width, `column ${index + 1}`));
     near((await measure(page, "button:text-is('1D')")).height, 24, "period button height");
     near((await measure(page, "h1")).fontSize, 20, "heading font size");
@@ -98,10 +105,26 @@ test.describe("measured parity with the source", () => {
     near((await measure(page, `${strip} [title^='Day']`)).height, 16, "day bar height");
     near((await measure(page, "section[aria-labelledby=history-heading]")).height, 262, "history card");
     await expect(page.getByRole("img", { name: /^Cumulative profit and loss/ })).toBeVisible();
-    near((await measure(page, "section[aria-labelledby=history-heading] svg[role=img]")).width, 830, "chart width");
-    near((await measure(page, "section[aria-labelledby=history-heading] svg[role=img]")).height, 192, "chart height");
-    near((await measure(page, "section[aria-labelledby=categories-heading] ul")).height, 323, "category list");
-    near((await measure(page, "section[aria-labelledby=categories-heading] li")).height, 17.5, "category row");
+    near(
+      (await measure(page, "section[aria-labelledby=history-heading] svg[role=img]")).width,
+      830,
+      "chart width",
+    );
+    near(
+      (await measure(page, "section[aria-labelledby=history-heading] svg[role=img]")).height,
+      192,
+      "chart height",
+    );
+    near(
+      (await measure(page, "section[aria-labelledby=categories-heading] ul")).height,
+      323,
+      "category list",
+    );
+    near(
+      (await measure(page, "section[aria-labelledby=categories-heading] li")).height,
+      17.5,
+      "category row",
+    );
 
     await page.getByRole("button", { name: "Show the calendar" }).click();
     near((await measure(page, `${strip} .aspect-square`)).width, 116.3, "day cell");

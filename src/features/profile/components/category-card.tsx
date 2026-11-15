@@ -16,7 +16,10 @@ export function CategoryCard({ rows }: { rows: readonly CategoryRow[] }) {
   const largest = Math.max(...rows.map((row) => Math.abs(row.pnl)), 1);
 
   return (
-    <section aria-labelledby="categories-heading" className="mb-6 rounded-lg border border-border bg-card p-4">
+    <section
+      aria-labelledby="categories-heading"
+      className="mb-6 rounded-lg border border-border bg-card p-4"
+    >
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 id="categories-heading" className="text-sm text-muted-foreground">
           P&amp;L by category

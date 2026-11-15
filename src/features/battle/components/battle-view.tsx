@@ -9,7 +9,10 @@ import { BattleFooter } from "./battle-footer";
 import { BattleChart, type ChartLine } from "./battle-chart";
 
 /** Platform colors for the ring, label, legend and line (BATTLE-02, BATTLE-03). */
-const PLATFORM_STYLE: Record<BattlePlatform, { ring: string; text: string; stroke: string; fill: string; dash: string }> = {
+const PLATFORM_STYLE: Record<
+  BattlePlatform,
+  { ring: string; text: string; stroke: string; fill: string; dash: string }
+> = {
   polymarket: {
     ring: "border-polymarket/50",
     text: "text-polymarket",
@@ -115,8 +118,8 @@ export function BattleView({ battle }: { battle: Battle }) {
           <>
             <BattleChart comparison={battle.comparison} lines={lines} />
             <p className="mt-3 text-center text-xs text-muted-foreground">
-              Profit or loss since {formatChartDate(battle.comparison.start)}, the first day both
-              traders were tracked.
+              Profit or loss since {formatChartDate(battle.comparison.start)}, the first day both traders were
+              tracked.
             </p>
           </>
         ) : (

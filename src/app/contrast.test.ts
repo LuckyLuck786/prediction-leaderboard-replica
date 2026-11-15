@@ -92,7 +92,9 @@ describe.each(["light", "dark"] as const)("%s theme contrast (WCAG AA)", (theme)
 
   it.each(TEXT_COLOURS)("%s text reads on every surface and on its own badge tint", (name) => {
     for (const surface of SURFACES) {
-      expect(ratio(colours[name], colours[surface]), `${name} on ${surface}`).toBeGreaterThanOrEqual(TEXT_RATIO);
+      expect(ratio(colours[name], colours[surface]), `${name} on ${surface}`).toBeGreaterThanOrEqual(
+        TEXT_RATIO,
+      );
     }
     const tint = over(colours[name], colours.background, BADGE_TINT);
     expect(ratio(colours[name], tint), `${name} on its tint`).toBeGreaterThanOrEqual(TEXT_RATIO);

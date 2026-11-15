@@ -49,9 +49,7 @@ describe("/account/[id]", () => {
 
   it("throws on any other failure, so the error boundary shows it and nothing is cached", async () => {
     vi.mocked(getProfile).mockResolvedValue({ kind: "unavailable" });
-    await expect(ProfilePage(params({ id: "busy" }))).rejects.toBeInstanceOf(
-      ProfileUnavailableError,
-    );
+    await expect(ProfilePage(params({ id: "busy" }))).rejects.toBeInstanceOf(ProfileUnavailableError);
   });
 });
 
@@ -59,7 +57,10 @@ describe("API routes", () => {
   it("/api/boards/{period} returns the board payload as JSON", async () => {
     const payload = { board: makeBoard("30d", []), source: { kind: "live" as const } };
     vi.mocked(getBoard).mockResolvedValue(payload);
-    const response = await getBoardRoute(new Request("http://test/api/boards/30d"), params({ period: "30d" }));
+    const response = await getBoardRoute(
+      new Request("http://test/api/boards/30d"),
+      params({ period: "30d" }),
+    );
     expect(getBoard).toHaveBeenCalledWith("30d");
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual(payload);
@@ -68,17 +69,25 @@ describe("API routes", () => {
   it.each([
     ["/api/boards", getBoardRoute],
     ["/api/kalshi", getKalshiRoute],
-  ] as const)("%s answers an unknown period with JSON, without asking upstream (BUG-085)", async (base, route) => {
-    const response = await route(new Request(`http://test${base}/2y`), params({ period: "2y" }));
-    expect(response.status).toBe(404);
-    expect(await response.json()).toMatchObject({ error: "Unknown period" });
-    expect(getBoard).not.toHaveBeenCalled();
-    expect(getKalshiBoard).not.toHaveBeenCalled();
-  });
+  ] as const)(
+    "%s answers an unknown period with JSON, without asking upstream (BUG-085)",
+    async (base, route) => {
+      const response = await route(new Request(`http://test${base}/2y`), params({ period: "2y" }));
+      expect(response.status).toBe(404);
+      expect(await response.json()).toMatchObject({ error: "Unknown period" });
+      expect(getBoard).not.toHaveBeenCalled();
+      expect(getKalshiBoard).not.toHaveBeenCalled();
+    },
+  );
 
   it("/api/kalshi/{period} returns the board payload as JSON", async () => {
     const payload = {
-      board: { period: "7d" as const, lastUpdated: "2026-11-14T00:00:00.000Z", traders: [], rejectedCount: 0 },
+      board: {
+        period: "7d" as const,
+        lastUpdated: "2026-11-14T00:00:00.000Z",
+        traders: [],
+        rejectedCount: 0,
+      },
       source: { kind: "live" as const },
     };
     vi.mocked(getKalshiBoard).mockResolvedValue(payload);

@@ -64,12 +64,7 @@ describe("parseKalshiBoard (DATA-03)", () => {
       "all",
     );
     if (!result.ok) throw new Error(result.error);
-    expect(result.board.traders.map((trader) => trader.profileId)).toEqual([
-      "dogname",
-      null,
-      null,
-      null,
-    ]);
+    expect(result.board.traders.map((trader) => trader.profileId)).toEqual(["dogname", null, null, null]);
   });
 
   it("keeps only plausible X handles", () => {

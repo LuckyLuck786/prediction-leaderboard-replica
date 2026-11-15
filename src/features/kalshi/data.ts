@@ -30,7 +30,9 @@ export function loadKalshiSnapshot(input: unknown = rawSnapshot) {
     const saved = file.data.kalshi[period];
     const parsed = parseKalshiBoard(saved, period);
     if (!saved || !parsed.ok) {
-      throw new Error(`Saved Kalshi snapshot for ${period} is invalid: ${parsed.ok ? "missing" : parsed.error}`);
+      throw new Error(
+        `Saved Kalshi snapshot for ${period} is invalid: ${parsed.ok ? "missing" : parsed.error}`,
+      );
     }
     boards[period] = {
       board: parsed.board,

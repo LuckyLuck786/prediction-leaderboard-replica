@@ -20,8 +20,7 @@ export const metadata: Metadata = {
 const QUESTIONS: readonly AboutQuestion[] = [
   {
     question: "What does this page show?",
-    answer:
-      "Kalshi's most profitable traders, a thousand of them, ranked by profit for the period you pick.",
+    answer: "Kalshi's most profitable traders, a thousand of them, ranked by profit for the period you pick.",
   },
   {
     question: "Do I need a Kalshi account to see it?",

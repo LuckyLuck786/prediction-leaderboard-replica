@@ -33,7 +33,4 @@ export function originFromEnv(
 /** Where the server reads the boards and trader records; a test can point it elsewhere. */
 export const UPSTREAM_ORIGIN = originFromEnv("UPSTREAM_ORIGIN", source.origin);
 /** Where the server reads Polymarket P&L series; a test can point it elsewhere. */
-export const POLYMARKET_DATA_ORIGIN = originFromEnv(
-  "POLYMARKET_DATA_ORIGIN",
-  POLYMARKET_DATA_DEFAULT_ORIGIN,
-);
+export const POLYMARKET_DATA_ORIGIN = originFromEnv("POLYMARKET_DATA_ORIGIN", POLYMARKET_DATA_DEFAULT_ORIGIN);

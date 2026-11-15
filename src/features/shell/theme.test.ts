@@ -2,13 +2,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import {
-  DARK_CLASS,
-  THEME_INIT_SCRIPT,
-  THEME_STORAGE_KEY,
-  applySavedTheme,
-  toggleTheme,
-} from "./theme";
+import { DARK_CLASS, THEME_INIT_SCRIPT, THEME_STORAGE_KEY, applySavedTheme, toggleTheme } from "./theme";
 
 const root = document.documentElement;
 const runInitScript = () => new Function(THEME_INIT_SCRIPT)();

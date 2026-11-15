@@ -263,12 +263,7 @@ export function LeaderboardTable({
               {EXTRA_COLUMN_DEFS[column].heading(period)}
             </SortableHeader>
           ))}
-          <SortableHeader
-            sortKey="pnl"
-            sort={sort}
-            onSort={onSort}
-            className="text-right text-sm sm:text-lg"
-          >
+          <SortableHeader sortKey="pnl" sort={sort} onSort={onSort} className="text-right text-sm sm:text-lg">
             P&amp;L
           </SortableHeader>
         </tr>

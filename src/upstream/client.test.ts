@@ -1,12 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import source from "./source.json";
-import {
-  UpstreamError,
-  fetchPolymarketJson,
-  fetchUpstreamJson,
-  isNotFound,
-} from "./client";
+import { UpstreamError, fetchPolymarketJson, fetchUpstreamJson, isNotFound } from "./client";
 import { POLYMARKET_DATA_DEFAULT_ORIGIN } from "./origins";
 
 afterEach(() => {
@@ -48,9 +43,7 @@ describe("fetchUpstreamJson", () => {
   it("keeps the query string", async () => {
     const fetchMock = stubFetch(async () => Response.json([]));
     await fetchUpstreamJson("/api/leaderboard?period=1d");
-    expect(fetchMock.mock.calls[0][0].toString()).toBe(
-      `${source.origin}/api/leaderboard?period=1d`,
-    );
+    expect(fetchMock.mock.calls[0][0].toString()).toBe(`${source.origin}/api/leaderboard?period=1d`);
   });
 
   it("reports a non-2xx answer with its status", async () => {

@@ -16,10 +16,7 @@ export function generateStaticParams() {
 }
 
 /** One period of the Kalshi board as JSON: live, or the labelled snapshot. */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ period: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ period: string }> }) {
   const { period } = await params;
   if (!isOneOf(KALSHI_PERIODS, period)) return unknownPeriod(KALSHI_PERIODS);
   return Response.json(await getKalshiBoard(period));

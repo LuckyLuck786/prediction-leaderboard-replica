@@ -73,9 +73,7 @@ export type HistoryResult =
   | { kind: "unavailable" };
 
 export type CategoriesResult =
-  | { kind: "ready"; rows: CategoryRow[] }
-  | { kind: "none" }
-  | { kind: "unavailable" };
+  { kind: "ready"; rows: CategoryRow[] } | { kind: "none" } | { kind: "unavailable" };
 
 const byTime = (a: SeriesPoint, b: SeriesPoint) => a.t - b.t;
 
@@ -120,9 +118,7 @@ export function parseCategories(input: unknown): CategoryRow[] {
 
 /** One Kalshi trader's cumulative P&L series. Throws on any failure. */
 export async function loadKalshiHistory(username: string): Promise<SeriesPoint[]> {
-  return parseKalshiHistory(
-    await fetchUpstreamJson(`/api/kalshi/${encodeURIComponent(username)}/history`),
-  );
+  return parseKalshiHistory(await fetchUpstreamJson(`/api/kalshi/${encodeURIComponent(username)}/history`));
 }
 
 /** One Polymarket wallet's cumulative P&L series. Throws on any failure. */
@@ -179,9 +175,6 @@ export interface ProfileExtras {
 
 /** Everything a profile page shows beyond the trader record, loaded together. */
 export async function getProfileExtras(profile: TraderProfile): Promise<ProfileExtras> {
-  const [history, categories] = await Promise.all([
-    getProfileHistory(profile),
-    getCategories(profile),
-  ]);
+  const [history, categories] = await Promise.all([getProfileHistory(profile), getCategories(profile)]);
   return { history, categories, today: dayKey(Date.now()) };
 }

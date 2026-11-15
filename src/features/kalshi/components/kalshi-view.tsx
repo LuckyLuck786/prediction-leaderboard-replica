@@ -128,10 +128,13 @@ export function KalshiView({
       </header>
 
       {payload?.source.kind === "snapshot" ? (
-        <p role="status" className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm">
+        <p
+          role="status"
+          className="mb-4 border border-border px-3 py-2 text-xs text-muted-foreground sm:text-sm"
+        >
           Live data is unavailable right now. Showing a saved snapshot from{" "}
-          {formatStamp(payload.source.capturedAt, "UTC")} UTC: the top {payload.board.traders.length}{" "}
-          of the {COUNT_FORMAT.format(payload.source.upstreamTotal)} traders listed for this period.
+          {formatStamp(payload.source.capturedAt, "UTC")} UTC: the top {payload.board.traders.length} of the{" "}
+          {COUNT_FORMAT.format(payload.source.upstreamTotal)} traders listed for this period.
         </p>
       ) : null}
 
@@ -258,9 +261,9 @@ export function KalshiView({
       ) : null}
 
       <p className="mt-4 text-xs text-muted-foreground">
-        The ranking follows Kalshi&apos;s public profiles. Day, week and month figures are the change
-        between snapshots the data source takes every two hours, so they fill in over a
-        trader&apos;s first days on the board.
+        The ranking follows Kalshi&apos;s public profiles. Day, week and month figures are the change between
+        snapshots the data source takes every two hours, so they fill in over a trader&apos;s first days on
+        the board.
       </p>
     </>
   );

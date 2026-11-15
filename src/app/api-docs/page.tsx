@@ -17,9 +17,8 @@ export default function ApiDocsPage() {
     <TopBarShell width="medium" backLabel="Back">
       <h1 className="mb-2 text-2xl font-bold">API</h1>
       <p className="mb-2 text-sm text-muted-foreground">
-        Read-only JSON for the boards on this site. No key needed. Each response is cached on
-        our server for {CACHE_MINUTES} minutes, and says whether it is live data or the saved
-        snapshot.
+        Read-only JSON for the boards on this site. No key needed. Each response is cached on our server for{" "}
+        {CACHE_MINUTES} minutes, and says whether it is live data or the saved snapshot.
       </p>
       <p className="mb-8 text-sm text-muted-foreground">
         These routes only reshape a public source. For anything serious, use{" "}

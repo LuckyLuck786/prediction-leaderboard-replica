@@ -33,8 +33,7 @@ const parseKey = (key: string) => {
 };
 
 function DayTile({ cell }: { cell: DayCell }) {
-  const title =
-    cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
+  const title = cell.future ? undefined : cell.change === null ? "No data" : formatSignedWhole(cell.change);
   return (
     <div
       title={title}
@@ -43,16 +42,16 @@ function DayTile({ cell }: { cell: DayCell }) {
         CELL_BACKGROUND[cell.tone],
       )}
     >
-      <span className={cn("text-xs font-medium", cell.future ? "text-muted-foreground" : cellTextClass(cell.tone))}>
+      <span
+        className={cn(
+          "text-xs font-medium",
+          cell.future ? "text-muted-foreground" : cellTextClass(cell.tone),
+        )}
+      >
         {cell.day}
       </span>
       {cell.future ? null : (
-        <span
-          className={cn(
-            "text-[10px] font-bold leading-none",
-            cellTextClass(cell.tone),
-          )}
-        >
+        <span className={cn("text-[10px] font-bold leading-none", cellTextClass(cell.tone))}>
           {cell.change === null ? MISSING : formatProfileMoney(cell.change)}
         </span>
       )}
@@ -79,7 +78,10 @@ export function MonthStrip({
   const changeMap = new Map(changes);
   const current = parseKey(today);
   // The earliest day with a result, wherever it sits in the list (BUG-082).
-  const earliest = changes.reduce<string | null>((min, [key]) => (min === null || key < min ? key : min), null);
+  const earliest = changes.reduce<string | null>(
+    (min, [key]) => (min === null || key < min ? key : min),
+    null,
+  );
   const first = earliest === null ? current : parseKey(earliest);
 
   const [cursor, setCursor] = useState(current);
@@ -117,9 +119,7 @@ export function MonthStrip({
           >
             <ChevronLeft aria-hidden className="h-4 w-4 text-muted-foreground" />
           </button>
-          <span className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">
-            {label}
-          </span>
+          <span className="min-w-[80px] text-center text-sm font-medium text-muted-foreground">{label}</span>
           <button
             type="button"
             onClick={step(1)}
@@ -132,7 +132,12 @@ export function MonthStrip({
         </div>
 
         <div className="flex items-center gap-3">
-          <span className={cn("text-sm font-bold", month.total === null ? "text-muted-foreground" : signedTextClass(month.total))}>
+          <span
+            className={cn(
+              "text-sm font-bold",
+              month.total === null ? "text-muted-foreground" : signedTextClass(month.total),
+            )}
+          >
             {month.total === null ? MISSING : formatSignedWhole(month.total)}
           </span>
           <span className="text-xs text-muted-foreground">
@@ -173,7 +178,11 @@ export function MonthStrip({
       {expanded ? (
         <div className="px-3 pb-3">
           <div className="mb-2 mt-3 flex items-center justify-between">
-            <div role="group" aria-label="Calendar view" className="inline-flex overflow-hidden rounded-md border border-border text-xs">
+            <div
+              role="group"
+              aria-label="Calendar view"
+              className="inline-flex overflow-hidden rounded-md border border-border text-xs"
+            >
               {(["daily", "monthly"] as const).map((option, index) => (
                 <button
                   key={option}

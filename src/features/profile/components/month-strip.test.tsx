@@ -64,7 +64,9 @@ describe("MonthStrip", () => {
     ]);
     fireEvent.click(previous());
     // The row itself toggles the calendar; the step button must not.
-    expect(strip().getByRole("button", { name: "Show the calendar" }).getAttribute("aria-expanded")).toBe("false");
+    expect(strip().getByRole("button", { name: "Show the calendar" }).getAttribute("aria-expanded")).toBe(
+      "false",
+    );
   });
 
   it("disables both steps when there is no history", () => {

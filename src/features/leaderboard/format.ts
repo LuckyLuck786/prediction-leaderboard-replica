@@ -61,10 +61,7 @@ export function formatMoneyWhole(value: number): string {
 export function formatMoneyCompact(value: number): string {
   const amount = Math.abs(value);
   if (amount < COMPACT_ROW_FROM) return formatMoney(value);
-  const short =
-    amount >= ROUNDS_TO_MILLION
-      ? millions(amount)
-      : `${Math.round(amount / THOUSAND)}k`;
+  const short = amount >= ROUNDS_TO_MILLION ? millions(amount) : `${Math.round(amount / THOUSAND)}k`;
   return value < 0 ? `$-${short}` : `+$${short}`;
 }
 
@@ -93,10 +90,7 @@ export function formatProfileTitleMoney(value: number): string {
   return profileAmount(value, 2);
 }
 
-function scaledAmount(
-  value: number,
-  decimals: { thousands: number; millions: number },
-): string {
+function scaledAmount(value: number, decimals: { thousands: number; millions: number }): string {
   const amount = Math.abs(value);
   const kText = (amount / THOUSAND).toFixed(decimals.thousands);
   let short: string;
@@ -215,8 +209,7 @@ export function formatTraderName(name: string): string {
 
 /** FMT-08. `14 Nov, 1:07` in the given time zone (the viewer's when omitted). */
 export function formatStamp(iso: string, timeZone?: string): string {
-  const parts = new Intl.DateTimeFormat("en-US", { ...STAMP_PARTS, timeZone })
-    .formatToParts(new Date(iso));
+  const parts = new Intl.DateTimeFormat("en-US", { ...STAMP_PARTS, timeZone }).formatToParts(new Date(iso));
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     parts.find((entry) => entry.type === type)?.value ?? "";
   return `${part("day")} ${part("month")}, ${Number(part("hour"))}:${part("minute")}`;
@@ -244,11 +237,16 @@ export function formatRoi(roi: number | null): string {
 
 /** Up to two initials for the avatar fallback. */
 export function initialsOf(name: string): string {
-  const cleaned = name.replace(/^0x/i, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  const cleaned = name
+    .replace(/^0x/i, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
   // Array.from splits by character, not by UTF-16 unit, so a letter outside
   // the basic plane is never cut in half.
-  const words = cleaned.split(" ").filter(Boolean).map((word) => Array.from(word));
-  const letters =
-    words.length > 1 ? [words[0][0], words[1][0]] : (words[0] ?? []).slice(0, 2);
+  const words = cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => Array.from(word));
+  const letters = words.length > 1 ? [words[0][0], words[1][0]] : (words[0] ?? []).slice(0, 2);
   return letters.join("").toUpperCase() || "?";
 }

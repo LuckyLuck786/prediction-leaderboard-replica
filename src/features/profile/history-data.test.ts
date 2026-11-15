@@ -142,11 +142,7 @@ describe("parseCategories (DATA-06)", () => {
         { category: "Elections", pnl: 271000, markets: 114 },
       ],
     };
-    expect(parseCategories(body).map((row) => row.category)).toEqual([
-      "Mentions",
-      "Elections",
-      "Sports",
-    ]);
+    expect(parseCategories(body).map((row) => row.category)).toEqual(["Mentions", "Elections", "Sports"]);
   });
 
   it.each([
@@ -192,9 +188,7 @@ describe("getProfileHistory", () => {
       // The second wallet starts on 2 Nov: its starting total is not a gain.
       changes: new Map([["2026-11-02", 30]]),
     });
-    expect(polymarket).toHaveBeenCalledWith(
-      `/v2/user-pnl?user=${WALLET_A}&interval=all&fidelity=1d`,
-    );
+    expect(polymarket).toHaveBeenCalledWith(`/v2/user-pnl?user=${WALLET_A}&interval=all&fidelity=1d`);
     expect(polymarket).toHaveBeenCalledTimes(2);
   });
 

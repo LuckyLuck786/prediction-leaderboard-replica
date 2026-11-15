@@ -128,7 +128,11 @@ describe("parseProfile (DATA-04)", () => {
           name: "elucidate",
           platform: "polymarket",
           wallet: main,
-          additional_wallets: [main.toUpperCase().replace("0X", "0x"), "0xnot-a-wallet", "0x" + "1".repeat(40)],
+          additional_wallets: [
+            main.toUpperCase().replace("0X", "0x"),
+            "0xnot-a-wallet",
+            "0x" + "1".repeat(40),
+          ],
         },
       },
       main,

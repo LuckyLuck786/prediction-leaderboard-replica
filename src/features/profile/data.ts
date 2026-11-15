@@ -17,9 +17,7 @@ export class ProfileUnavailableError extends Error {
 }
 
 export type ProfileResult =
-  | { kind: "found"; profile: TraderProfile }
-  | { kind: "not-found" }
-  | { kind: "unavailable" };
+  { kind: "found"; profile: TraderProfile } | { kind: "not-found" } | { kind: "unavailable" };
 
 /**
  * One trader record. Memoized for the length of one render, because a

@@ -19,8 +19,7 @@ const validTrader = {
   smart_score: { score: 75.2, winRate: 0.685, sharpeRatio: 1.15, sharpe1d: 0.37, sharpe1m: -0.12 },
   roi: 0.2,
   sports_share: 1,
-  polymarket_profile:
-    "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294?via=someone",
+  polymarket_profile: "https://polymarket.com/profile/0x6d3c5bd13984b2de47c3a88ddc455309aab3d294?via=someone",
 };
 
 const response = (traders: unknown[]) => ({

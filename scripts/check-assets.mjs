@@ -98,11 +98,9 @@ export function findViolations(files, sourceName) {
 
 /** Tracked files plus new files that are not ignored: what a commit could contain. */
 function candidatePaths() {
-  const listing = execFileSync(
-    "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-    { encoding: "utf8" },
-  );
+  const listing = execFileSync("git", ["ls-files", "-z", "--cached", "--others", "--exclude-standard"], {
+    encoding: "utf8",
+  });
   return [...new Set(listing.split("\0").filter(Boolean))];
 }
 
@@ -112,10 +110,12 @@ function candidatePaths() {
  * @param {string[]} paths
  */
 export function loadFiles(paths) {
-  return paths.filter((path) => existsSync(path)).map((path) => ({
-    path,
-    content: BINARY_EXTENSIONS.test(path) ? null : readFileSync(path, "utf8"),
-  }));
+  return paths
+    .filter((path) => existsSync(path))
+    .map((path) => ({
+      path,
+      content: BINARY_EXTENSIONS.test(path) ? null : readFileSync(path, "utf8"),
+    }));
 }
 
 function main() {

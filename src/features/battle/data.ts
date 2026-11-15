@@ -70,11 +70,7 @@ export class BattleUnavailableError extends Error {
  * on the next request, instead of caching a degraded one for five minutes.
  */
 export async function getBattle(): Promise<Battle> {
-  const [polymarket, kalshi, lines] = await Promise.all([
-    side("polymarket"),
-    side("kalshi"),
-    comparison(),
-  ]);
+  const [polymarket, kalshi, lines] = await Promise.all([side("polymarket"), side("kalshi"), comparison()]);
   const complete = polymarket.profile !== null && kalshi.profile !== null && lines !== null;
   if (!complete && process.env.NEXT_PHASE !== PHASE_PRODUCTION_BUILD) throw new BattleUnavailableError();
   return { sides: [polymarket, kalshi], comparison: lines };

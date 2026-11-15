@@ -133,9 +133,7 @@ describe("LeaderboardView", () => {
 
   it("can start with a platform preselected (POLY-01)", () => {
     renderView({ initialPlatform: "polymarket" });
-    expect(screen.getByRole("button", { name: "Polymarket" }).getAttribute("aria-pressed")).toBe(
-      "true",
-    );
+    expect(screen.getByRole("button", { name: "Polymarket" }).getAttribute("aria-pressed")).toBe("true");
     expect(firstNames(3)).toEqual(["p01", "p02", "p04"]);
   });
 

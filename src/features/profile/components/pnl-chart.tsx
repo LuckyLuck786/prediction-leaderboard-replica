@@ -133,9 +133,7 @@ export function PnlChart({ series }: { series: readonly SeriesPoint[] }) {
           }}
         >
           <p className="mb-1 text-xs text-muted-foreground">{formatChartDate(point.t)}</p>
-          <p className={cn("text-sm font-semibold", signedTextClass(point.v))}>
-            {formatChartMoney(point.v)}
-          </p>
+          <p className={cn("text-sm font-semibold", signedTextClass(point.v))}>{formatChartMoney(point.v)}</p>
         </div>
       ) : null}
     </div>

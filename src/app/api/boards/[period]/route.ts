@@ -17,10 +17,7 @@ export function generateStaticParams() {
 }
 
 /** One period of the home board as JSON: live, or the labelled snapshot (D-029). */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ period: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ period: string }> }) {
   const { period } = await params;
   if (!isOneOf(LEADERBOARD_PERIODS, period)) return unknownPeriod(LEADERBOARD_PERIODS);
   return Response.json(await getBoard(period));

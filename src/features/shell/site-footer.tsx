@@ -21,10 +21,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-border pt-8 text-sm text-muted-foreground">
       {FOOTER_LINKS.length > 0 ? (
-        <nav
-          aria-label="Site"
-          className="mb-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-2"
-        >
+        <nav aria-label="Site" className="mb-6 flex flex-wrap items-center justify-center gap-x-12 gap-y-2">
           {FOOTER_LINKS.map((link) => (
             <Link key={link.href} href={link.href} className="hover:text-foreground">
               {link.label}
