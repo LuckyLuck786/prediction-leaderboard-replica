@@ -11,6 +11,7 @@ import { readFile } from "node:fs/promises";
 
 const ROOT = new URL("../", import.meta.url);
 const PORT = Number(process.env.FIXTURE_PORT ?? 4010);
+const HOST = "127.0.0.1";
 const MS_PER_DAY = 86_400_000;
 
 /** A trader id the server always answers 429 for, to exercise error states. */
@@ -19,8 +20,17 @@ export const RATE_LIMITED_TRADER = "e2e-rate-limited";
 const snapshot = JSON.parse(
   await readFile(new URL("src/upstream/snapshot/leaderboard.json", ROOT), "utf8"),
 );
-const fixture = async (name) =>
-  JSON.parse(await readFile(new URL(`e2e/fixtures/${name}`, ROOT), "utf8"));
+/** A fixture file name: one plain name, no folders, no "..". */
+const FIXTURE_NAME = /^[A-Za-z0-9._-]+\.json$/;
+/** Thrown for a request that cannot name a fixture; answered as 404. */
+const NOT_A_FIXTURE = "ENOENT";
+
+async function fixture(name) {
+  if (!FIXTURE_NAME.test(name) || name.includes("..")) {
+    throw Object.assign(new Error(`Not a fixture name: ${name}`), { code: NOT_A_FIXTURE });
+  }
+  return JSON.parse(await readFile(new URL(`e2e/fixtures/${name}`, ROOT), "utf8"));
+}
 
 /** Whole days between a timestamp's UTC day and today's. */
 function daysToToday(lastMs) {
@@ -94,4 +104,5 @@ createServer(async (request, response) => {
   }
   response.writeHead(status, { "Content-Type": "application/json" });
   response.end(JSON.stringify(body));
-}).listen(PORT, () => console.log(`Fixture server on http://127.0.0.1:${PORT}`));
+  // This machine only: the server reads files from the repository.
+}).listen(PORT, HOST, () => console.log(`Fixture server on http://${HOST}:${PORT}`));
