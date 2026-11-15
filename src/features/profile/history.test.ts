@@ -4,6 +4,8 @@ import { formatChartMoney } from "@/features/leaderboard/format";
 
 import {
   combineSeries,
+  nearestIndex,
+  roomyTicks,
   dailyChanges,
   dayKey,
   summariseMonth,
@@ -235,6 +237,22 @@ describe("chart ticks (PROF-04)", () => {
 
   it("copes with a series that never leaves zero", () => {
     expect(valueAxis(0, 0).ticks.length).toBeGreaterThan(1);
+  });
+
+  it("keeps the profile chart's label that sits 21 px under the top one", () => {
+    const axis = valueAxis(89_600, 1_104_963);
+    const pixelsPerUnit = 147 / (axis.max - axis.min);
+    expect(roomyTicks(axis.ticks, pixelsPerUnit)).toHaveLength(5);
+  });
+
+  it("finds the point nearest in time for the pointer", () => {
+    const line = [
+      { t: 10, v: 1 },
+      { t: 20, v: 2 },
+      { t: 30, v: 3 },
+    ];
+    expect([5, 14, 16, 20, 26, 99].map((t) => nearestIndex(line, t))).toEqual([0, 0, 1, 1, 2, 2]);
+    expect(nearestIndex([{ t: 1, v: 0 }], 50)).toBe(0);
   });
 
   it("spaces time ticks evenly from first to last", () => {

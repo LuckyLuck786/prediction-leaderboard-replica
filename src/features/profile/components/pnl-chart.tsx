@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatChartDate, formatChartMoney, formatChartTick } from "@/features/leaderboard/format";
 import { cn } from "@/lib/utils";
 
-import { timeTicks, valueAxis, type SeriesPoint } from "../history";
+import { nearestIndex, roomyTicks, timeTicks, valueAxis, type SeriesPoint } from "../history";
 import { signedTextClass } from "./tone-styles";
 
 /** Plot geometry measured on the source's chart: 192 px high, labels outside. */
@@ -15,19 +15,6 @@ const MARGIN = { top: 10, right: 19, bottom: 35, left: 65 };
 const TICK_GAP = 8;
 /** Time labels sit this far below the plot, measured to their baseline. */
 const TIME_LABEL_OFFSET = 12;
-
-/** Index of the point closest in time to `t` (points sorted by time). */
-function nearest(points: readonly SeriesPoint[], t: number): number {
-  let low = 0;
-  let high = points.length - 1;
-  while (low < high) {
-    const middle = (low + high) >> 1;
-    if (points[middle].t < t) low = middle + 1;
-    else high = middle;
-  }
-  if (low > 0 && t - points[low - 1].t < points[low].t - t) return low - 1;
-  return low;
-}
 
 /**
  * PROF-04: cumulative profit and loss over the trader's whole history, with
@@ -72,7 +59,7 @@ export function PnlChart({ series }: { series: readonly SeriesPoint[] }) {
   const onPointerMove = (event: PointerEvent<SVGSVGElement>) => {
     const box = event.currentTarget.getBoundingClientRect();
     const t = first.t + ((event.clientX - box.left - MARGIN.left) / plotWidth) * span;
-    setHover(nearest(series, t));
+    setHover(nearestIndex(series, t));
   };
 
   const point = hover === null ? null : series[hover];
@@ -101,7 +88,7 @@ export function PnlChart({ series }: { series: readonly SeriesPoint[] }) {
               strokeDasharray="3 3"
             />
           ) : null}
-          {axis.ticks.map((tick) => (
+          {roomyTicks(axis.ticks, plotHeight / range).map((tick) => (
             <text
               key={`v-${tick}`}
               x={MARGIN.left - TICK_GAP}

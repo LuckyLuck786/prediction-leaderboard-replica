@@ -206,7 +206,10 @@ export function summariseYear(
   };
 }
 
-/** Space added above and below the data, as a share of its range. */
+/**
+ * Space added above and below the data, as a share of its range, on the
+ * profile chart. The head-to-head chart pads more (BATTLE_VALUE_PADDING).
+ */
 const VALUE_PADDING = 0.1;
 /** Ticks the step is sized for; the axis then ends on the padded maximum. */
 const VALUE_TICK_SPACES = 4;
@@ -238,16 +241,16 @@ export interface ValueAxis {
 }
 
 /**
- * The value axis as the source draws it, worked out from two recorded charts:
- * the data range padded by a tenth on each side, ticks from the padded minimum
- * at a round step, and a last tick on the padded maximum.
+ * The value axis as the source draws it, worked out from three recorded
+ * charts: the data range padded on each side (a tenth on profiles), ticks from
+ * the padded minimum at a round step, and a last tick on the padded maximum.
  */
-export function valueAxis(dataMin: number, dataMax: number): ValueAxis {
+export function valueAxis(dataMin: number, dataMax: number, padding = VALUE_PADDING): ValueAxis {
   const range = dataMax - dataMin;
   const flat = range <= Math.abs(dataMax) * FLAT_RANGE_SHARE;
   const spread = flat ? Math.abs(dataMax) || 1 : range;
-  const min = dataMin - spread * VALUE_PADDING;
-  const max = dataMax + spread * VALUE_PADDING;
+  const min = dataMin - spread * padding;
+  const max = dataMax + spread * padding;
   const step = roundStep((max - min) / VALUE_TICK_SPACES);
   const ticks: number[] = [];
   // The source keeps a step tick even when it lands close to the maximum.
@@ -256,6 +259,36 @@ export function valueAxis(dataMin: number, dataMax: number): ValueAxis {
   }
   ticks.push(max);
   return { min, max, ticks };
+}
+
+/**
+ * A value label closer than this to the top label is left out, as the
+ * source's charts do: one 17.9 px below it was dropped (head-to-head chart),
+ * one 21.3 px below it was kept (profile chart). The exact cut-off between
+ * the two is an assumption (docs/EVALS.md).
+ */
+const MIN_TICK_GAP_PX = 20;
+
+/** The axis ticks whose labels have room, given the plot's pixels per dollar. */
+export function roomyTicks(ticks: readonly number[], pixelsPerUnit: number): number[] {
+  const top = ticks.at(-1);
+  if (top === undefined) return [];
+  return ticks.filter(
+    (tick, index) => index === ticks.length - 1 || (top - tick) * pixelsPerUnit >= MIN_TICK_GAP_PX,
+  );
+}
+
+/** Index of the point closest in time to `t` (points sorted by time, at least one). */
+export function nearestIndex(points: readonly SeriesPoint[], t: number): number {
+  let low = 0;
+  let high = points.length - 1;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if (points[middle].t < t) low = middle + 1;
+    else high = middle;
+  }
+  if (low > 0 && t - points[low - 1].t < points[low].t - t) return low - 1;
+  return low;
 }
 
 /** Time-axis ticks: the first and last moment and evenly spaced ones between. */
