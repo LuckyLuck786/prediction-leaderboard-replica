@@ -31,7 +31,9 @@ const COUNT_FORMAT = new Intl.NumberFormat("en-US");
 function TraderName({ trader }: { trader: KalshiTrader }) {
   if (trader.profileId) {
     return (
-      <Link href={profilePath(trader.profileId)} className="hover:underline">
+      // No prefetch: a board shows dozens of profile links, and each prefetch
+      // would render that profile on our server and ask upstream (D-048).
+      <Link href={profilePath(trader.profileId)} prefetch={false} className="hover:underline">
         {trader.name}
       </Link>
     );

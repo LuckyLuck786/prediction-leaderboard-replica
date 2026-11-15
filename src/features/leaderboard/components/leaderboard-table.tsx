@@ -126,6 +126,7 @@ function PlatformLink({ trader, platform }: { trader: Trader; platform: Filterab
     return (
       <Link
         href={profilePath(trader.kalshiUsername)}
+        prefetch={false}
         onClick={keepInsideRow}
         title={label}
         aria-label={label}
@@ -277,8 +278,10 @@ export function LeaderboardTable({
               </td>
               <td className="p-1 sm:p-2">
                 <div className="flex min-w-0 items-center gap-1 overflow-hidden sm:gap-2">
+                  {/* No prefetch: each would render that profile on our server and ask upstream (D-048). */}
                   <Link
                     href={profilePath(trader.id)}
+                    prefetch={false}
                     onClick={keepInsideRow}
                     title={trader.name}
                     className="min-w-0 max-w-[60px] truncate text-sm text-foreground hover:underline sm:max-w-none sm:text-lg"
