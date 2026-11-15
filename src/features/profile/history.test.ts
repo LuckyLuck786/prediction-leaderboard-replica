@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { formatChartMoney } from "@/features/leaderboard/format";
 
 import {
+  valueRange,
   combineSeries,
   nearestIndex,
   roomyTicks,
@@ -256,6 +257,13 @@ describe("chart ticks (PROF-04)", () => {
     const axis = valueAxis(89_600, 1_104_963);
     const pixelsPerUnit = 147 / (axis.max - axis.min);
     expect(roomyTicks(axis.ticks, pixelsPerUnit)).toHaveLength(5);
+  });
+
+  it("finds the range of any number of series, however long (BUG-084)", () => {
+    const LONG = 300_000;
+    const long = Array.from({ length: LONG }, (_, index) => ({ t: index, v: index % 1000 }));
+    expect(valueRange(long, [{ t: 0, v: -5 }])).toEqual({ min: -5, max: 999 });
+    expect(valueRange()).toEqual({ min: 0, max: 0 });
   });
 
   it("finds the point nearest in time for the pointer", () => {

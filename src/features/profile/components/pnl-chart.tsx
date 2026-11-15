@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { formatChartDate, formatChartMoney, formatChartTick } from "@/features/leaderboard/format";
 import { cn } from "@/lib/utils";
 
-import { nearestIndex, roomyTicks, timeTicks, valueAxis, type SeriesPoint } from "../history";
+import { nearestIndex, roomyTicks, timeTicks, valueAxis, valueRange, type SeriesPoint } from "../history";
 import { signedTextClass } from "./tone-styles";
 
 /** Plot geometry measured on the source's chart: 192 px high, labels outside. */
@@ -35,10 +35,8 @@ export function PnlChart({ series }: { series: readonly SeriesPoint[] }) {
 
   const first = series[0];
   const last = series.at(-1);
-  const values = series.map((point) => point.v);
-  const dataMin = Math.min(...values);
-  const dataMax = Math.max(...values);
-  const axis = valueAxis(dataMin, dataMax);
+  const dataRange = valueRange(series);
+  const axis = valueAxis(dataRange.min, dataRange.max);
   const label =
     first && last
       ? `Cumulative profit and loss from ${formatChartDate(first.t)} to ${formatChartDate(last.t)}, ending at ${formatChartMoney(last.v)}`

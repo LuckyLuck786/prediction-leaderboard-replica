@@ -210,6 +210,23 @@ export function summariseYear(
 }
 
 /**
+ * Lowest and highest value over any number of series, in one pass. Spreading
+ * a long series into Math.min would pass every value as an argument, which
+ * engines refuse past some hundred thousand (BUG-084). Empty input: 0 and 0.
+ */
+export function valueRange(...series: ReadonlyArray<readonly SeriesPoint[]>): { min: number; max: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const points of series) {
+    for (const { v } of points) {
+      if (v < min) min = v;
+      if (v > max) max = v;
+    }
+  }
+  return min === Infinity ? { min: 0, max: 0 } : { min, max };
+}
+
+/**
  * Space added above and below the data, as a share of its range, on the
  * profile chart. The head-to-head chart pads more (BATTLE_VALUE_PADDING).
  */

@@ -7,7 +7,7 @@
 // daily point after that. These are the source's own figures, so this
 // rebuilds its comparison from the documented histories alone.
 
-import { valueAxis, type SeriesPoint, type ValueAxis } from "@/features/profile/history";
+import { valueAxis, valueRange, type SeriesPoint, type ValueAxis } from "@/features/profile/history";
 
 /**
  * The head-to-head chart pads its value range by 15% on each side, where the
@@ -51,6 +51,6 @@ export function compare(
 
 /** The chart's value axis, over both lines. */
 export function comparisonAxis(comparison: Comparison): ValueAxis {
-  const values = [...comparison.polymarket, ...comparison.kalshi].map((point) => point.v);
-  return valueAxis(Math.min(...values), Math.max(...values), BATTLE_VALUE_PADDING);
+  const { min, max } = valueRange(comparison.polymarket, comparison.kalshi);
+  return valueAxis(min, max, BATTLE_VALUE_PADDING);
 }
