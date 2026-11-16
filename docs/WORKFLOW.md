@@ -276,9 +276,10 @@ work happens. It describes what was done, not what was planned.
 6. **Merged and deployed**: every route answers on the live site, the API
    page lists the seven requests, and CI passed both jobs.
 
-### The owner's code review and the fix pass (2026-11-15 to 16)
+### The independent AI code review and the fix pass (2026-11-15 to 16)
 
-The owner reviewed the whole repository (scored 8 of 10) and listed bugs,
+The owner ran an AI code review in a separate Claude session, with no
+knowledge of the build. It read the whole repository (scored 8 of 10) and listed bugs,
 performance, architecture, testing, security, tooling and repository items.
 The instruction: fix all of them, and say at the end which ones should not
 be fixed because they would make the site a less faithful copy.

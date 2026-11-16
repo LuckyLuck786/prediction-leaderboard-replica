@@ -585,19 +585,20 @@ number, and added tests for four acceptance items that had none. The
 review of the audit caught four evidence claims in the spec that said more
 than their tests show; they were narrowed.
 
-## Owner's code review (2026-11-15, fixed 2026-11-15 and 16)
+## Independent AI code review (2026-11-15, fixed 2026-11-15 and 16)
 
-The owner reviewed the whole repository and listed five bugs among other
-findings. Each was reproduced first: the new test failed on the old code,
+The owner ran an AI code review in a separate Claude session, with no
+knowledge of how the site was built. It read the whole repository and
+listed five bugs among other findings. Each was reproduced first: the new test failed on the old code,
 then passed on the fix.
 
 | ID | File | Defect | How caught | Fix commit |
 |---|---|---|---|---|
-| BUG-082 | `month-strip.tsx`, `history.ts` | The month strip took its earliest month from the first entry of the summed daily changes, which kept the order of the series rather than of the days. For a trader on both platforms, or with several wallets, it could not step back before the first series began, while the chart showed earlier months | owner's review; two unit tests failed on the old code; an end-to-end test with a trader whose Polymarket history starts two years before the Kalshi one now guards it | `bf4dfb3` |
-| BUG-083 | `leaderboard-table.tsx`, `schema.ts` | A board row linked to `/account/{id}` even when our routes refuse that id, so the link led to a 404 | owner's review; unit and component tests | `4ea36d6` |
-| BUG-084 | `pnl-chart.tsx`, `comparison.ts` | The value range came from spreading a whole series into `Math.min` and `Math.max`, which engines refuse past some hundred thousand arguments | owner's review; a test of the new one-pass helper with 300,000 points. The independent review noted that this test only failed on the old code because the helper did not exist yet, so a test of the head-to-head axis with 300,000 points was added: it throws `RangeError` on the old code | `dd69c9c` |
-| BUG-085 | `api/boards/[period]`, `api/kalshi/[period]` | An unknown period answered with the HTML 404 page, not JSON, because the routes refused unknown parameters before our handler ran | owner's review; route tests and an end-to-end check. The fix lets each unknown period be cached like any other path, which the independent review pointed out (accepted, D-064) | `97dd715` |
-| BUG-086 | `copy-button.tsx` | Each click started a new reset timer without clearing the last, and none was cleared when the button went away | owner's review; a fake-timer test | `7bee3a2` |
+| BUG-082 | `month-strip.tsx`, `history.ts` | The month strip took its earliest month from the first entry of the summed daily changes, which kept the order of the series rather than of the days. For a trader on both platforms, or with several wallets, it could not step back before the first series began, while the chart showed earlier months | independent AI review; two unit tests failed on the old code; an end-to-end test with a trader whose Polymarket history starts two years before the Kalshi one now guards it | `bf4dfb3` |
+| BUG-083 | `leaderboard-table.tsx`, `schema.ts` | A board row linked to `/account/{id}` even when our routes refuse that id, so the link led to a 404 | independent AI review; unit and component tests | `4ea36d6` |
+| BUG-084 | `pnl-chart.tsx`, `comparison.ts` | The value range came from spreading a whole series into `Math.min` and `Math.max`, which engines refuse past some hundred thousand arguments | independent AI review; a test of the new one-pass helper with 300,000 points. The independent review noted that this test only failed on the old code because the helper did not exist yet, so a test of the head-to-head axis with 300,000 points was added: it throws `RangeError` on the old code | `dd69c9c` |
+| BUG-085 | `api/boards/[period]`, `api/kalshi/[period]` | An unknown period answered with the HTML 404 page, not JSON, because the routes refused unknown parameters before our handler ran | independent AI review; route tests and an end-to-end check. The fix lets each unknown period be cached like any other path, which the independent review pointed out (accepted, D-064) | `97dd715` |
+| BUG-086 | `copy-button.tsx` | Each click started a new reset timer without clearing the last, and none was cleared when the button went away | independent AI review; a fake-timer test | `7bee3a2` |
 
 ## Found while fixing the review (2026-11-16)
 

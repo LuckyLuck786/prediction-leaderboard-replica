@@ -53,7 +53,8 @@ bug, with how it was caught and the commit that fixed it. Examples:
 - **BUG-082: the calendar stopped too early.** For a trader on both
   platforms, the month strip could not step back before the second
   platform's history began, while the chart showed two more years. Caught
-  in the owner's code review. Two unit tests failed on the old code, and an
+  in an independent AI code review the owner ran in a separate Claude
+  session. Two unit tests failed on the old code, and an
   end-to-end test with a real two-platform trader now guards it. Checked on
   production: it reaches January 2024.
 - **BUG-085: an API error that was not JSON.** An unknown period on our API

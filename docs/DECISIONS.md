@@ -532,7 +532,7 @@ that stays the owner's call in the Vercel dashboard (D-056).
 
 ### D-059 The template's clone-website skill and agent guide removed
 
-The owner's code review asked for them to go, and they no longer earned
+The independent AI code review the owner ran asked for them to go, and they no longer earned
 their place: the skill's instructions to copy the source's assets and text
 were overridden by CLAUDE.md, so they only confused a reader. Removed:
 `.agents/skills/clone-website/`, `.claude/commands/clone-website.md` and the

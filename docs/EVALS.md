@@ -268,7 +268,7 @@ Two checks were also run by hand to make sure the suite can fail:
 - **Mutations.** Making the first sort click descending failed 6 tests; letting
   a click on a trader's name also trigger the row failed 1. Both were reverted.
 
-The owner's code review pass (2026-11-16) added checks, each shown to fail
+The fix pass after the independent AI code review (2026-11-16) added checks, each shown to fail
 on the defect it is for before it was trusted:
 
 - **Content security policy.** With `connect-src 'none'`, the new test that
